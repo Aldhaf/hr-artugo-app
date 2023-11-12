@@ -24,8 +24,23 @@ class ProfileView extends StatefulWidget {
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(10.0),
+          width: MediaQuery.of(context).size.width,
           child: Column(
-            children: [],
+            children: [
+              Text(
+                "${OdooApi.session?.userName}",
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "${OdooApi.session?.dbName}",
+                style: TextStyle(
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -1,6 +1,5 @@
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/state_util.dart';
 import '../view/dashboard_view.dart';
 
 class DashboardController extends State<DashboardView> {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/state_util.dart';
 import '../view/location_detail_view.dart';
 
 class LocationDetailController extends State<LocationDetailView> {

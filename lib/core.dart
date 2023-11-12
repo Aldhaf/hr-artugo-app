@@ -35,7 +35,6 @@ export 'package:hyper_ui/module/time_off_form/controller/time_off_form_controlle
 export 'package:hyper_ui/module/time_off_form/view/time_off_form_view.dart';
 export 'package:hyper_ui/module/time_off_history_list/controller/time_off_history_list_controller.dart';
 export 'package:hyper_ui/module/time_off_history_list/view/time_off_history_list_view.dart';
-export 'package:hyper_ui/service/attendance_service/attendance_service.baru.dart';
 export 'package:hyper_ui/service/attendance_service/attendance_service.dart';
 export 'package:hyper_ui/service/auth_service/auth_service.dart';
 export 'package:hyper_ui/service/time_off_service/time_off_service.dart';

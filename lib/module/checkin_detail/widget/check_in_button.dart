@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:hyper_ui/core.dart';
-import 'package:hyper_ui/module/checkin_detail/widget/check_out_button.dart';
 
 class CheckInButton extends StatefulWidget {
   const CheckInButton({Key? key}) : super(key: key);

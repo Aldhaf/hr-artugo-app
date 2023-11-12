@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:hyper_ui/shared/util/odoo_api/odoo_api.dart';
 import 'package:intl/intl.dart';
 

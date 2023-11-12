@@ -1,10 +1,7 @@
-import 'package:hyper_ui/module/checkin_detail/widget/check_out_button.dart';
-import 'package:hyper_ui/module/checkin_detail/widget/time_widget.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:hyper_ui/core.dart';
 
-import '../widget/check_in_button.dart';
 
 class CheckinDetailView extends StatefulWidget {
   const CheckinDetailView({Key? key}) : super(key: key);

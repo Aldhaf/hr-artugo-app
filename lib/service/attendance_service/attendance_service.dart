@@ -1,6 +1,5 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:hyper_ui/core.dart';
-import 'package:intl/intl.dart';
 
 class AttendanceService {
   static getLocation() async {

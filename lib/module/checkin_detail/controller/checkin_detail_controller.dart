@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:hyper_ui/state_util.dart';
 import '../view/checkin_detail_view.dart';
 
 class CheckinDetailController extends State<CheckinDetailView> {
