@@ -15,8 +15,8 @@ class MainNavigationView extends StatefulWidget {
           index: controller.selectedIndex,
           children: [
             DashboardView(),
-            OrderView(),
-            FavoriteView(),
+            AttendanceHistoryListView(),
+            TimeOffHistoryListView(),
             ProfileView(),
           ],
         ),
@@ -40,7 +40,7 @@ class MainNavigationView extends StatefulWidget {
                 ),
                 child: Icon(MdiIcons.table),
               ),
-              label: "Order",
+              label: "Attendance",
             ),
             BottomNavigationBarItem(
               icon: Badge(
@@ -50,9 +50,9 @@ class MainNavigationView extends StatefulWidget {
                     color: Colors.white,
                   ),
                 ),
-                child: Icon(Icons.favorite),
+                child: Icon(MdiIcons.table),
               ),
-              label: "Favorite",
+              label: "Time Off",
             ),
             BottomNavigationBarItem(
               icon: Icon(

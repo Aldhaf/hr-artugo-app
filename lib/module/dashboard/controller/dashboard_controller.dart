@@ -1,5 +1,6 @@
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/service/attendance_service/attendance_service.dart';
+import 'package:hyper_ui/state_util.dart';
 import '../view/dashboard_view.dart';
 
 class DashboardController extends State<DashboardView> {
@@ -18,11 +19,6 @@ class DashboardController extends State<DashboardView> {
   @override
   Widget build(BuildContext context) => widget.build(context, this);
 
-  doCheckIn() async {
-    AttendanceService().checkin();
-  }
-
-  doCheckOut() async {
-    AttendanceService().checkout();
-  }
+  int currentIndex = 0;
+  final CarouselController carouselController = CarouselController();
 }

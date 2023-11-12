@@ -1,6 +1,8 @@
 {
     "modules": [
-        "login"
+        "login",
+        "time_off_history_list",
+        "time_off_form"
     ],
     "module_directory_name": "module",
     "experimental_mode": false,

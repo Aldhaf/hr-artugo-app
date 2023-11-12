@@ -61,6 +61,10 @@ class OdooApi {
     required Map data,
   }) async {
     try {
+      print("----");
+      print("data:");
+      print(data);
+      print("----");
       var partnerId = await client.callKw({
         'model': model,
         'method': 'create',
@@ -68,8 +72,9 @@ class OdooApi {
         'kwargs': {},
       });
       return partnerId != null;
-    } on Exception {
-      return false;
+    } on Exception catch (e) {
+      print(e);
+      throw Exception(e);
     }
   }
 
