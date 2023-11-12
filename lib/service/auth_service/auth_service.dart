@@ -11,7 +11,8 @@ class AuthService {
         password: password,
       );
       return true;
-    } on Exception {
+    } on Exception catch (e) {
+      print(e);
       return false;
     }
   }

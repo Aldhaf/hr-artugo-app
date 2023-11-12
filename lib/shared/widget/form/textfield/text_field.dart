@@ -42,6 +42,7 @@ class _QTextFieldState extends State<QTextField> {
   @override
   void initState() {
     textEditingController.text = widget.value ?? "";
+    obscureState = widget.obscure;
     super.initState();
   }
 
@@ -63,6 +64,14 @@ class _QTextFieldState extends State<QTextField> {
 
   FocusNode focusNode = FocusNode();
 
+  bool obscureState = false;
+
+  updateObscureState() {
+    if (widget.obscure == false) return;
+    obscureState = !obscureState;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -75,11 +84,14 @@ class _QTextFieldState extends State<QTextField> {
         focusNode: focusNode,
         validator: widget.validator,
         maxLength: widget.maxLength,
-        obscureText: widget.obscure,
+        obscureText: obscureState,
         decoration: InputDecoration(
           labelText: widget.label,
-          suffixIcon: Icon(
-            widget.suffixIcon ?? Icons.abc,
+          suffixIcon: InkWell(
+            onTap: () => updateObscureState(),
+            child: Icon(
+              widget.suffixIcon ?? Icons.abc,
+            ),
           ),
           helperText: widget.helper,
           hintText: widget.hint,

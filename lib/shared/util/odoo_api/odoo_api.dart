@@ -20,8 +20,8 @@ class OdooApi {
       if (session == null) return false;
       await getEmployeeId();
       return true;
-    } on Exception {
-      return false;
+    } on Exception catch (e) {
+      throw Exception(e);
     }
   }
 

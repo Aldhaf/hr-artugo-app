@@ -19,12 +19,16 @@ class LoginController extends State<LoginView> {
   Widget build(BuildContext context) => widget.build(context, this);
 
   String username = "admin";
-  String password = "admin";
+  String password = "joko@123";
   doLogin() async {
     var isSuccess = await AuthService().login(
       username: username,
       password: password,
     );
+
+    print("username: $username");
+    print("password: $password");
+    print("isSuccess: $isSuccess");
 
     if (!isSuccess) {
       showInfoDialog("Wrong username or password!");
