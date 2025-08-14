@@ -12,8 +12,6 @@ Aplikasi ini dibangun menggunakan Flutter, memungkinkan *codebase* tunggal untuk
 
 ## 🖼️ Tampilan Aplikasi (Screenshots)
 
-*Catatan: Ganti path `assets/readme_images/` dengan path tempat Anda menyimpan screenshot.*
-
 | Login | Dashboard | Absensi |
 | :---: | :---: | :---: |
 | <img src="assets/readme_images/login.png" width="250"> | <img src="assets/readme_images/dashboard.png" width="250"> | <img src="assets/readme_images/attendance.png" width="250"> |
@@ -103,7 +101,7 @@ Pastikan Anda telah menginstal perangkat lunak berikut di komputer Anda:
 ## 📂 Struktur Folder
 
 Project ini menggunakan arsitektur modular untuk memisahkan setiap fitur, membuatnya lebih mudah untuk dikelola dan dikembangkan.
-
+```bash
 lib
 ├── core               # Core utilities, themes, etc.
 ├── main.dart          # Entry point aplikasi
@@ -114,6 +112,7 @@ lib
 │   └── time_off_detail  # Fitur Detail Cuti
 ├── service            # Service layer (e.g., LocalNotificationService)
 └── shared             # Widget, utility, atau kode yang digunakan bersama
+```
 
 ---
 
