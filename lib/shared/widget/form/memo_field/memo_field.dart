@@ -22,6 +22,7 @@ class QMemoField extends StatefulWidget {
     this.maxLines,
   }) : super(key: key);
 
+  @override
   State<QMemoField> createState() => _QMemoFieldState();
 }
 
@@ -29,35 +30,30 @@ class _QMemoFieldState extends State<QMemoField> {
   FocusNode focusNode = FocusNode();
   GlobalKey key = GlobalKey();
 
+  @override
   void initState() {
+    super.initState();
     focusNode.addListener(() {
-      print("focusNodeListener");
       if (focusNode.hasFocus) {
-        Future.delayed(const Duration(milliseconds: 300), () {
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => Scrollable.ensureVisible(
-                    key.currentContext!,
-                    alignmentPolicy:
-                        ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-                  ));
+        // PERBAIKAN: Pindahkan logika auto-scroll ke dalam listener
+        // untuk memastikan dieksekusi pada waktu yang tepat.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Tambahkan pemeriksaan null yang aman di sini
+          if (key.currentContext != null) {
+            Scrollable.ensureVisible(
+              key.currentContext!,
+              alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+              duration: const Duration(milliseconds: 300),
+            );
+          }
         });
       }
     });
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (focusNode.hasFocus) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => Scrollable.ensureVisible(
-                  key.currentContext!,
-                  alignmentPolicy:
-                      ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-                ));
-      });
-    }
+    // Hapus logika auto-scroll dari build method untuk mencegah panggilan berulang
     return Container(
       margin: const EdgeInsets.only(
         bottom: 12.0,

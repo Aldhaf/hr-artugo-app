@@ -1,26 +1,33 @@
-import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
-import '../view/main_navigation_view.dart';
+// lib/module/main_navigation/controller/main_navigation_controller.dart
 
-class MainNavigationController extends State<MainNavigationView> {
-  static late MainNavigationController instance;
-  late MainNavigationView view;
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class MainNavigationController extends GetxController {
+  // Variabel untuk menyimpan index tab yang aktif, dibuat reaktif.
+  var selectedIndex = 0.obs;
+
+  //Tambah PageController
+  late PageController pageController;
 
   @override
-  void initState() {
-    instance = this;
-    super.initState();
+  void onInit() {
+    super.onInit();
+    // Inisialisasi PageController saat controller dibuat
+    pageController = PageController();
   }
 
   @override
-  void dispose() => super.dispose();
+  void onClose() {
+    // Hancurkan PageController saat controller ditutup untuk mencegah memory leak
+    pageController.dispose();
+    super.onClose();
+  }
 
-  @override
-  Widget build(BuildContext context) => widget.build(context, this);
-
-  int selectedIndex = 0;
-  updateIndex(int newIndex) {
-    selectedIndex = newIndex;
-    setState(() {});
+  // Fungsi ini akan dipanggil saat tab di navigation bar ditekan
+  void onTabTapped(int index) {
+    selectedIndex.value = index;
+    // Perintahkan PageView untuk pindah halaman tanpa animasi
+    pageController.jumpToPage(index);
   }
 }

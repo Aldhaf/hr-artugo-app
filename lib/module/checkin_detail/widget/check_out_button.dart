@@ -1,114 +1,37 @@
-// ignore_for_file: camel_case_types, prefer_typing_uninitialized_variables
+// lib/module/checkin_detail/widget/check_out_button.dart
 
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:get/get.dart';
+import 'package:hyper_ui/core.dart' hide Get;
 
-class CheckOutButton extends StatefulWidget {
-  const CheckOutButton({Key? key}) : super(key: key);
-
-  @override
-  State<CheckOutButton> createState() => CheckOutButtonState();
-}
-
-class CheckOutButtonState extends State<CheckOutButton> {
-  static late CheckOutButtonState instance;
-
-  bool? isCheckedOut;
-  bool? isCheckedIn;
-  String time = "";
-  @override
-  void initState() {
-    loadData();
-    instance = this;
-    super.initState();
-  }
-
-  loadData() async {
-    isCheckedIn = await AttendanceService.isCheckedInToday();
-    isCheckedOut = await AttendanceService.isCheckedOutToday();
-    setState(() {});
-
-    var histories = await AttendanceService.getHistory();
-    if (histories.length > 0) {
-      if (histories.first["check_out"] == false) return;
-      DateTime date = DateTime.parse(histories.first["check_out"]);
-      time = DateFormat("kk:mm:ss").format(date);
-      setState(() {});
-    }
-  }
-
-  doCheckOut() async {
-    showLoading();
-    await AttendanceService.checkOut();
-    await loadData();
-    hideLoading();
-
-    AttendanceHistoryListController.instance.getAttendanceList();
-  }
+class CheckOutButton extends StatelessWidget {
+  const CheckOutButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isCheckedOut == null) {
-      return Expanded(
-        child: SizedBox(
-          height: 40,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
-            ),
-            onPressed: () {},
-            child: const Text("Loading..."),
-          ),
-        ),
-      );
-    }
+    final controller = Get.find<CheckinDetailController>();
 
-    if (isCheckedOut == true) {
-      return Expanded(
-        child: SizedBox(
-          height: 40,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
-            ),
-            onPressed: () {},
-            child: Text(
-              time,
-              style: TextStyle(
-                color: Colors.blueGrey[900],
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
+    return Obx(() {
+      // Tombol Check Out dinonaktifkan jika belum check-in atau sudah check-out
+      bool enabled = controller.isCheckedIn.value == true &&
+          controller.isCheckedOut.value == false;
 
-    if (isCheckedIn == false) {
+      // Menampilkan waktu jika sudah check-out
+      if (controller.isCheckedOut.value == true) {
+        return Expanded(
+          child: QButton(
+              label: controller.checkOutTime.value,
+              onPressed: () {}), // <-- Gunakan fungsi kosong
+        );
+      }
+
       return Expanded(
-        child: SizedBox(
-          height: 40,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
-            ),
-            onPressed: () {},
-            child: const Text("Check Out"),
-          ),
+        child: QButton(
+          label: "Check Out",
+          color: enabled ? Colors.red : Colors.grey,
+          onPressed: enabled ? () => controller.doCheckOut() : () {},
         ),
       );
-    }
-    return Expanded(
-      child: SizedBox(
-        height: 40,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-          ),
-          onPressed: () => doCheckOut(),
-          child: const Text("Check Out"),
-        ),
-      ),
-    );
+    });
   }
 }

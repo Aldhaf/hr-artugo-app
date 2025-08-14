@@ -1,85 +1,70 @@
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hyper_ui/shared/theme/theme_config.dart';
 import 'package:flutter/material.dart';
 
 ThemeData getDefaultTheme() {
-  return ThemeData().copyWith(
+  // Ganti warna utama menjadi warna ungu yang Anda inginkan
+  const primaryColor = Color(0xFF9027E9); // <-- PERUBAHAN DI SINI
+
+  return ThemeData(
+    // --- Warna Dasar ---
     primaryColor: primaryColor,
-    scaffoldBackgroundColor: Colors.grey[300],
+    scaffoldBackgroundColor: const Color(0xfff5f5f5),
     colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
+
+    // --- Font / Tipografi ---
+    textTheme: GoogleFonts.poppinsTextTheme(),
+
+    // --- AppBar ---
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.white,
-      elevation: 0.6,
-      titleTextStyle: GoogleFonts.lato(
-        color: Colors.blueGrey[700],
+      backgroundColor: const Color(0xfff5f5f5),
+      elevation: 0,
+      titleTextStyle: GoogleFonts.poppins(
+        color: Colors.black87,
         fontWeight: FontWeight.bold,
+        fontSize: 18.0,
       ),
-      iconTheme: IconThemeData(
-        color: Colors.blueGrey[700],
-      ),
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      unselectedItemColor: Colors.grey,
-      selectedItemColor: Colors.blueGrey[900]!,
-    ),
-    tabBarTheme: TabBarTheme(
-      unselectedLabelColor: Colors.grey,
-      labelColor: Colors.blueGrey[900]!,
-    ),
-    textTheme: TextTheme(
-      titleSmall: GoogleFonts.lato(
-        color: Colors.blueGrey[900],
-      ),
-      titleMedium: GoogleFonts.lato(
-        color: Colors.blueGrey[900],
-      ),
-      titleLarge: GoogleFonts.lato(
-        color: Colors.blueGrey[900],
-      ),
-      bodyLarge: GoogleFonts.lato(
-        color: Colors.blueGrey[900],
-      ),
-      bodySmall: GoogleFonts.lato(
-        color: Colors.blueGrey[900],
-      ),
-      bodyMedium: GoogleFonts.lato(
-        color: Colors.blueGrey[900],
+      iconTheme: const IconThemeData(
+        color: Colors.black87,
       ),
     ),
-    inputDecorationTheme: InputDecorationTheme(
-      hoverColor: Colors.transparent,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(
-          color: Colors.grey[300]!,
+
+    // --- Tombol ---
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
+        padding: const EdgeInsets.symmetric(vertical: 14.0),
+      ),
+    ),
+
+    // --- Text Field ---
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(
-          color: Colors.transparent,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(
-          color: Colors.red,
-        ),
-      ),
-      disabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(
-          color: Colors.grey[300]!,
-        ),
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: const BorderSide(
           color: primaryColor,
         ),
       ),
-      filled: true,
-      fillColor: Color(0xfffbfbfb),
+    ),
+
+    // --- Bottom Navigation Bar ---
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      unselectedItemColor: Colors.grey,
+      selectedItemColor: primaryColor,
     ),
   );
 }

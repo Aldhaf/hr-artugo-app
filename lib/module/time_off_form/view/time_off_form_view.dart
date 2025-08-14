@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:get/get.dart';
+import 'package:hyper_ui/core.dart' hide Get;
 
-class TimeOffFormView extends StatefulWidget {
-  TimeOffFormView({Key? key}) : super(key: key);
+class TimeOffFormView extends StatelessWidget {
+  const TimeOffFormView({Key? key}) : super(key: key);
 
-  Widget build(context, TimeOffFormController controller) {
-    controller.view = this;
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(TimeOffFormController());
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("TimeOffForm"),
-        actions: [],
+        title: const Text("Time Off Form"),
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Form(
             key: controller.formKey,
             child: Column(
               children: [
-                if (controller.leaveTypes.isNotEmpty)
-                  QDropdownField(
+                // Obx digunakan agar Dropdown hanya muncul setelah datanya siap
+                Obx(() {
+                  if (controller.leaveTypes.isEmpty) {
+                    return const Text("Loading leave types...");
+                  }
+                  return QDropdownField(
                     label: "Type",
                     validator: Validator.required,
                     items: controller.leaveTypes
@@ -29,33 +34,32 @@ class TimeOffFormView extends StatefulWidget {
                               "value": e["id"],
                             })
                         .toList(),
-                    value: "Admin",
+                    // Value sekarang terikat dengan state di controller
+                    value: controller.leaveTypeId.value,
                     onChanged: (value, label) {
-                      controller.leaveTypeId = value;
+                      controller.leaveTypeId.value = value;
                     },
-                  ),
+                  );
+                }),
                 QDatePicker(
                   label: "Date From",
                   validator: Validator.required,
-                  value: null,
                   onChanged: (value) {
-                    controller.dateFrom = value;
+                    controller.dateFrom.value = value;
                   },
                 ),
                 QDatePicker(
                   label: "Date To",
                   validator: Validator.required,
-                  value: null,
                   onChanged: (value) {
-                    controller.dateTo = value;
+                    controller.dateTo.value = value;
                   },
                 ),
                 QMemoField(
                   label: "Description",
                   validator: Validator.required,
-                  value: null,
                   onChanged: (value) {
-                    controller.name = value;
+                    controller.name.value = value;
                   },
                 ),
               ],
@@ -69,7 +73,4 @@ class TimeOffFormView extends StatefulWidget {
       ),
     );
   }
-
-  @override
-  State<TimeOffFormView> createState() => TimeOffFormController();
 }

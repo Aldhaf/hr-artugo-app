@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-var primaryColor = Color(0xff59b58d);
-var secondaryColor = Color(0xffef9920);
+var primaryColor = Color(0xFF9027E9);
+var secondaryColor = Color.fromARGB(255, 255, 255, 255);
 var disabledColor = Color(0xffcdcdcd);
 var textColor = Color(0xff010F07);
 var secondaryTextColor = Color(0xff868686);

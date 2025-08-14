@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "403491183941",
+    "project_id": "hr-artugo",
+    "storage_bucket": "hr-artugo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:403491183941:android:7fbb3ce919fbcfffe4b22c",
+        "android_client_info": {
+          "package_name": "com.example.hyper_ui"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRifgj2LygTRd_vPy92ri7GQfKyGg1ONo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

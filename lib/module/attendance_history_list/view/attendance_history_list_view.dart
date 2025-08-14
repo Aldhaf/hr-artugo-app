@@ -1,164 +1,159 @@
-import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+// lib/module/attendance_history_list/view/attendance_history_list_view.dart
 
-class AttendanceHistoryListView extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hyper_ui/core.dart' hide Get;
+
+class AttendanceHistoryListView extends StatelessWidget {
   const AttendanceHistoryListView({Key? key}) : super(key: key);
 
-  Widget build(context, AttendanceHistoryListController controller) {
-    controller.view = this;
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(AttendanceHistoryListController());
+    final primaryColor = Theme.of(context).primaryColor;
+
+    // Fungsi untuk memformat waktu sesuai desain baru (AM/PM)
+    String formatTime(dynamic timeValue) {
+      if (timeValue == null || timeValue == false) return "--:-- --";
+      DateTime date = DateTime.parse(timeValue.toString() + "Z").toLocal();
+      return DateFormat("hh:mm:ss").format(date);
+    }
+
+    // Fungsi untuk memformat tanggal sesuai desain baru
+    String formatDate(dynamic timeValue) {
+      if (timeValue == null || timeValue == false) return "No Date";
+      DateTime date = DateTime.parse(timeValue.toString() + "Z").toLocal();
+      return DateFormat("MMMM d, yyyy").format(date);
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AttendanceHistoryList"),
-        actions: const [],
+        //Memposisikan judul di tengah
+        centerTitle: true,
+        title: const Text("Attendance History"),
+        elevation: 0.6, // Menambahkan sedikit bayangan agar terlihat
       ),
-      body: Container(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: controller.items.length,
-                itemBuilder: (context, index) {
-                  var item = controller.items[index];
-                  var date = item["check_in"].toString().dMMMy;
-                  var checkIn = item["check_in"].toString().kkmmss;
-                  var checkOut = item["check_out"].toString().kkmmss;
-                  double hour = item["worked_hours"];
-                  int jamInt = hour.toInt();
-                  double menit = (hour - jamInt) * 60;
-                  String wh =
-                      "${jamInt.floor().toString().padLeft(2, "0")}:${menit.floor().toString().padLeft(2, "0")}";
+      body: Obx(() {
+        if (controller.loading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.items.isEmpty) {
+          return const Center(child: Text("No attendance history."));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: controller.items.length,
+          itemBuilder: (context, index) {
+            var item = controller.items[index];
 
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            date,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          const Divider(),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("Check In:\n$checkIn"),
-                                    const SizedBox(
-                                      height: 12.0,
-                                    ),
-                                    Text("Check Out:\n$checkOut"),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    "Working hours",
-                                    style: TextStyle(
-                                      fontSize: 10.0,
-                                    ),
-                                  ),
-                                  Text(wh),
-                                ],
-                              )
-                            ],
-                          ),
-                          const Divider(),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                ),
-                                onPressed: () => Get.to(
-                                  LocationDetailView(
-                                    latitude: item["check_in_latitude"],
-                                    longitude: item["check_in_longitude"],
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Check In Location",
-                                  style: TextStyle(
-                                    fontSize: 10.0,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 12.0,
-                              ),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                ),
-                                onPressed: () => Get.to(
-                                  LocationDetailView(
-                                    latitude: item["check_out_latitude"],
-                                    longitude: item["check_out_longitude"],
-                                  ),
-                                ),
-                                child: const Text(
-                                  "Check Out Location",
-                                  style: TextStyle(
-                                    fontSize: 10.0,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                  return Card(
-                    child: ListTile(
-                      title: Text(date),
-                      subtitle: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Check In:\n$checkIn"),
-                          const SizedBox(
-                            width: 4.0,
-                          ),
-                          Text("Check Out:\n$checkOut"),
-                        ],
-                      ),
-                      trailing: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Working hours",
-                            style: TextStyle(
-                              fontSize: 10.0,
-                            ),
-                          ),
-                          Text(wh),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+            var date = formatDate(item["check_in"]);
+            var checkIn = formatTime(item["check_in"]);
+            var checkOut = formatTime(item["check_out"]);
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
+              child: IntrinsicHeight(
+                // Membuat semua anak Row memiliki tinggi yang sama
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // --- AKSEN WARNA DI SINI ---
+                    Container(
+                      width: 8, // Lebar garis aksen
+                      decoration: BoxDecoration(
+                        color: primaryColor, // Mengambil warna dari tema
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          bottomLeft: Radius.circular(16),
+                        ),
+                      ),
+                    ),
+                    // -------------------------
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Bagian Tanggal
+                            Text(
+                              date,
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Divider(height: 24.0),
+                            // Bagian Waktu Check In & Check Out
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildTimeInfo(
+                                  label: "Check In",
+                                  time: checkIn,
+                                  icon: Icons.arrow_forward,
+                                  color: Colors.green,
+                                ),
+                                _buildTimeInfo(
+                                  label: "Check Out",
+                                  time: checkOut,
+                                  icon: Icons.arrow_back,
+                                  color: Colors.red,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 
-  @override
-  State<AttendanceHistoryListView> createState() =>
-      AttendanceHistoryListController();
+  // Widget helper untuk membuat tampilan jam
+  Widget _buildTimeInfo({
+    required String label,
+    required String time,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              time,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }

@@ -17,7 +17,7 @@ ThemeData getDarkTheme() {
       unselectedItemColor: Colors.grey,
       selectedItemColor: Colors.white,
     ),
-    tabBarTheme: const TabBarTheme(
+    tabBarTheme: const TabBarThemeData(
       unselectedLabelColor: Colors.grey,
       labelColor: Colors.white,
     ),

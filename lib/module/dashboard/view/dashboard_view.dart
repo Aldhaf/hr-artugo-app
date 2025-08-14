@@ -1,325 +1,329 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:get/get.dart';
+import 'package:hyper_ui/core.dart' hide Get;
+import '../controller/dashboard_controller.dart'; // Pastikan controller dashboard diimpor
+import '../widget/info_card.dart';
+import '../widget/summary_card.dart';
+import '../widget/clock_widget.dart';
+import '../widget/animated_checkin_button.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:hyper_ui/core/data_state.dart';
+import 'package:hyper_ui/module/notification/controller/notification_controller.dart';
 
-class DashboardView extends StatefulWidget {
-  const DashboardView({Key? key}) : super(key: key);
+class DashboardView extends StatelessWidget {
+  const DashboardView({super.key});
 
-  Widget build(context, DashboardController controller) {
-    controller.view = this;
+  @override
+  Widget build(BuildContext context) {
+    final dashboardC = Get.put(DashboardController());
+    final notificationC = Get.find<NotificationController>();
+    final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard"),
-        actions: [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Center(
-              child: Badge(
-                label: Text(
-                  "6",
-                  style: TextStyle(
-                    color: Colors.white,
+        // Kita tidak lagi menggunakan Stack, tapi Column biasa
+        // dengan background AppBar yang diwarnai.
+        // Di dalam DashboardView
+        appBar: AppBar(
+          backgroundColor: primaryColor,
+          elevation: 0,
+          title: Obx(() {
+            // Pantau locationState, bukan location.value lagi
+            final state = dashboardC.locationState.value;
+
+            // Tampilkan UI berdasarkan state-nya
+            if (state is DataSuccess<String>) {
+              // Jika sukses, tampilkan alamat
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Location",
+                      style: TextStyle(color: Colors.white70, fontSize: 12.0)),
+                  Text(
+                    state.data,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                ),
-                child: Icon(MdiIcons.chatQuestion),
+                ],
+              );
+            }
+
+            if (state is DataError<String>) {
+              // Jika error, tampilkan pesan error dan tombol refresh
+              return Row(
+                children: [
+                  Expanded(
+                    child: Text(state.message,
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 14.0)),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    onPressed: () => dashboardC.refreshLocation(),
+                  )
+                ],
+              );
+            }
+
+            // Default: Tampilkan saat loading
+            return const Text("Mencari lokasi...",
+                style: TextStyle(color: Colors.white70, fontSize: 14.0));
+          }),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                // Arahkan ke halaman notifikasi saat ditekan
+                onPressed: () => Get.toNamed('/notifications'),
+
+                // Bungkus Badge dengan Obx untuk membuatnya reaktif
+                icon: Obx(() => Badge(
+                      // Tampilkan badge hanya jika ada notifikasi belum dibaca
+                      isLabelVisible: notificationC.unreadCount.value > 0,
+                      label: Text(
+                        // Ambil jumlah notifikasi dari controller
+                        "${notificationC.unreadCount.value}",
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      child: const Icon(Icons.notifications_outlined,
+                          color: Colors.white),
+                    )),
               ),
             ),
+          ],
+        ),
+        body: Obx(() {
+          // Jika sedang loading, tampilkan spinner
+          if (dashboardC.isLoading.value) {
+            // Ganti spinner dengan Shimmer
+            return Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: const DashboardSkeleton(), // Panggil widget kerangka
+            );
+          }
+
+          return RefreshIndicator(
+              onRefresh: () => dashboardC.refreshData(),
+              child: Container(
+                  color: const Color(0xfff5f5f5),
+                  child: Column(
+                    children: [
+                      // --- BAGIAN HEADER BIRU ---
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 32.0),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(25),
+                            bottomRight: Radius.circular(25),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // <-- Hapus 'const' dari sini
+                            Obx(() => Text(
+                                  // Gunakan Obx untuk teks yang dinamis
+                                  "Welcome, ${dashboardC.userName.value}",
+                                  style: const TextStyle(
+                                    fontSize: 24.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                )),
+                            const SizedBox(height: 8),
+                            const ClockWidget(),
+                          ],
+                        ),
+                      ),
+
+                      // --- KONTEN UTAMA ---
+                      Expanded(
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // --- KARTU CHECK IN, CHECK OUT, DAN WORKING HOURS ---
+                              // Dibuat seragam menggunakan InfoCard
+                              Obx(() => Row(
+                                    children: [
+                                      Expanded(
+                                        child: InfoCard(
+                                          title: "Check In",
+                                          time: dashboardC.checkInTime.value,
+                                          icon: Icons.login,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: InfoCard(
+                                          title: "Check Out",
+                                          time: dashboardC.checkOutTime.value,
+                                          icon: Icons.logout,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: InfoCard(
+                                          title: "Duration",
+                                          time: dashboardC.workingHours.value,
+                                          icon: Icons.timer_outlined,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                              const SizedBox(height: 24.0),
+
+                              // --- RINGKASAN BULANAN ---
+                              const Text(
+                                "Attendance for this Month",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 12.0),
+                              Obx(() => Row(
+                                    children: [
+                                      Expanded(
+                                          child: SummaryCard(
+                                              title: "Present",
+                                              value:
+                                                  "${dashboardC.presentDays.value}",
+                                              color: Colors.green.shade100,
+                                              textColor:
+                                                  Colors.green.shade800)),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                          child: SummaryCard(
+                                              title: "Absents",
+                                              value:
+                                                  "${dashboardC.absentDays.value}",
+                                              color: Colors.red.shade100,
+                                              textColor: Colors.red.shade800)),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                          child: SummaryCard(
+                                              title: "Late In",
+                                              value:
+                                                  "${dashboardC.lateInDays.value}",
+                                              color: Colors.orange.shade100,
+                                              textColor:
+                                                  Colors.orange.shade800)),
+                                    ],
+                                  )),
+                              const SizedBox(height: 24.0),
+
+                              SizedBox(
+                                width: double.infinity,
+                                child: Obx(() {
+                                  // Gunakan state boolean yang lebih bersih
+                                  bool hasCheckedOut = dashboardC.checkOutTime.value != "N/A";
+
+                                  if (hasCheckedOut) {
+                                    return Card(
+                                      elevation: 0,
+                                      color: Colors.grey[200],
+                                      child: const ListTile(
+                                        leading: Icon(Icons.check_circle, color: Colors.green),
+                                        title: Text("Absensi hari ini selesai"),
+                                      ),
+                                    );
+                                  }
+
+                                  // Gunakan hasCheckedInToday dari controller
+                                  if (dashboardC.hasCheckedInToday.value) {
+                                    // --- GANTI TOMBOL CHECK OUT DENGAN INI ---
+                                    return AnimatedCheckinButton(
+                                      title: "Check Out",
+                                      icon: Icons.logout,
+                                      color: Colors.red.shade400,
+                                      onPressed: () => dashboardC.doCheckOut(), // Pastikan doCheckOut juga diubah seperti doCheckIn
+                                    );
+                                  }
+
+                                  // --- GANTI TOMBOL CHECK IN DENGAN INI ---
+                                  return AnimatedCheckinButton(
+                                    title: "Check In",
+                                    icon: Icons.login,
+                                    color: primaryColor, // atau Theme.of(context).primaryColor
+                                    onPressed: () => dashboardC.doCheckIn(),
+                                  );
+                                }),
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  )));
+        }));
+  }
+}
+
+// BUAT WIDGET BARU UNTUK TAMPILAN SKELETON
+class DashboardSkeleton extends StatelessWidget {
+  const DashboardSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Tiru tata letak asli Anda dengan Container abu-abu
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      physics:
+          const NeverScrollableScrollPhysics(), // Non-aktifkan scroll saat loading
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Kerangka untuk Info Cards
+          Row(
+            children: List.generate(
+                3,
+                (index) => Expanded(
+                      child: Card(
+                        elevation: 0,
+                        child: Container(height: 80, color: Colors.white),
+                      ),
+                    )).expand((w) => [w, const SizedBox(width: 12)]).toList()
+              ..removeLast(),
           ),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Center(
-              child: Badge(
-                label: Text(
-                  "3",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                child: Icon(Icons.notifications),
-              ),
+          const SizedBox(height: 24),
+          // Kerangka untuk Judul
+          Container(width: 200, height: 20, color: Colors.white),
+          const SizedBox(height: 12),
+          // Kerangka untuk Summary Cards
+          Row(
+            children: List.generate(
+                3,
+                (index) => Expanded(
+                      child: Card(
+                        elevation: 0,
+                        child: Container(height: 80, color: Colors.white),
+                      ),
+                    )).expand((w) => [w, const SizedBox(width: 12)]).toList()
+              ..removeLast(),
+          ),
+          const SizedBox(height: 24),
+          // Kerangka untuk Tombol Swipe
+          Container(
+            width: double.infinity,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              /*
-              TODO: Implement this @ controller
-              int currentIndex = 0;
-              final CarouselController carouselController = CarouselController();
-              */
-              Builder(builder: (context) {
-                List images = [
-                  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-                  "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-                  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=781&q=80",
-                  "https://images.unsplash.com/photo-1565958011703-44f9829ba187?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
-                  "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=710&q=80",
-                ];
-
-                return Column(
-                  children: [
-                    CarouselSlider(
-                      carouselController: controller.carouselController,
-                      options: CarouselOptions(
-                        height: 160.0,
-                        autoPlay: true,
-                        enlargeCenterPage: false,
-                        viewportFraction: 1.0,
-                        onPageChanged: (index, reason) {
-                          controller.currentIndex = index;
-                          controller.setState(() {});
-                        },
-                      ),
-                      items: images.map((imageUrl) {
-                        return Builder(
-                          builder: (BuildContext context) {
-                            return Container(
-                              width: MediaQuery.of(context).size.width,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 5.0),
-                              decoration: BoxDecoration(
-                                color: Colors.amber,
-                                borderRadius: const BorderRadius.all(
-                                  Radius.circular(6.0),
-                                ),
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                    imageUrl,
-                                  ),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: images.asMap().entries.map((entry) {
-                        bool isSelected = controller.currentIndex == entry.key;
-                        return GestureDetector(
-                          onTap: () => controller.carouselController
-                              .animateToPage(entry.key),
-                          child: Container(
-                            width: isSelected ? 40 : 6.0,
-                            height: 6.0,
-                            margin: const EdgeInsets.only(
-                              right: 6.0,
-                              top: 12.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xff3c3e40),
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(12.0),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                );
-              }),
-              const SizedBox(
-                height: 20.0,
-              ),
-              Container(
-                height: 200.0,
-                clipBehavior: Clip.antiAlias,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      "https://images.unsplash.com/photo-1519501025264-65ba15a82390?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80",
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(
-                      16.0,
-                    ),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  "Sebelum bekerja,\njangan lupa absen ya!",
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    color: Colors.yellow,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 12.0,
-                                ),
-                                SizedBox(
-                                  height: 40.0,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
-                                    ),
-                                    onPressed: () =>
-                                        Get.to(const CheckinDetailView()),
-                                    child: const Text("Check In Sekarang"),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 12.0,
-                                ),
-                                InkWell(
-                                  onTap: () =>
-                                      Get.to(const AttendanceHistoryListView()),
-                                  child: const Text(
-                                    "Lihat selengkapnya",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 20.0,
-              ),
-              LayoutBuilder(
-                builder: (context, constraint) {
-                  List menus = [
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/878/878052.png",
-                      "label": "Expense",
-                      "onTap": () {}
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/3595/3595455.png",
-                      "label": "Pizza",
-                      "onTap": () {},
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/2718/2718224.png",
-                      "label": "Noodles",
-                      "onTap": () {},
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/8060/8060549.png",
-                      "label": "Meat",
-                      "onTap": () {},
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/454/454570.png",
-                      "label": "Soup",
-                      "onTap": () {},
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/2965/2965567.png",
-                      "label": "Dessert",
-                      "onTap": () {},
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/2769/2769608.png",
-                      "label": "Drink",
-                      "onTap": () {},
-                    },
-                    {
-                      "icon":
-                          "https://cdn-icons-png.flaticon.com/128/1037/1037855.png",
-                      "label": "Others",
-                      "onTap": () {},
-                    },
-                  ];
-
-                  return Wrap(
-                    children: List.generate(
-                      menus.length,
-                      (index) {
-                        var item = menus[index];
-
-                        var size = constraint.biggest.width / 4;
-
-                        return SizedBox(
-                          width: size,
-                          height: size,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.blueGrey,
-                              animationDuration:
-                                  const Duration(milliseconds: 1000),
-                              backgroundColor: Colors.transparent,
-                              splashFactory: InkSplash.splashFactory,
-                              shadowColor: Colors.transparent,
-                              elevation: 0.0,
-                            ),
-                            onPressed: () => item["onTap"](),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.network(
-                                  item["icon"],
-                                  width: 30.0,
-                                ),
-                                const SizedBox(
-                                  height: 6.0,
-                                ),
-                                Text(
-                                  "${item["label"]}",
-                                  textAlign: TextAlign.center,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 11.0,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
-
-  @override
-  State<DashboardView> createState() => DashboardController();
 }

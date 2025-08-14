@@ -1,28 +1,23 @@
-import 'package:flutter/material.dart';
+// lib/module/attendance_history_list/controller/attendance_history_list_controller.dart
+
+import 'package:get/get.dart';
 import 'package:hyper_ui/core.dart';
 
-class AttendanceHistoryListController extends State<AttendanceHistoryListView> {
-  static late AttendanceHistoryListController instance;
-  late AttendanceHistoryListView view;
+class AttendanceHistoryListController extends GetxController {
+  // Gunakan List<Map> yang reaktif untuk menampung data absensi
+  var items = <Map>[].obs;
+  var loading = true.obs;
 
   @override
-  void initState() {
-    instance = this;
+  void onInit() {
+    super.onInit();
     getAttendanceList();
-    super.initState();
   }
 
-  @override
-  void dispose() => super.dispose();
-
-  @override
-  Widget build(BuildContext context) => widget.build(context, this);
-
-  List items = [];
   getAttendanceList() async {
-    var response = await AttendanceService.getHistory();
-    print(response);
-    items = response;
-    setState(() {});
+    loading.value = true;
+    var history = await AttendanceService.getHistory();
+    items.value = List<Map>.from(history);
+    loading.value = false;
   }
 }

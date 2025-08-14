@@ -1,95 +1,37 @@
-// ignore_for_file: camel_case_types, prefer_typing_uninitialized_variables
+// lib/module/checkin_detail/widget/check_in_button.dart
 
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:get/get.dart';
+import 'package:hyper_ui/core.dart' hide Get;
 
-class CheckInButton extends StatefulWidget {
-  const CheckInButton({Key? key}) : super(key: key);
-
-  @override
-  State<CheckInButton> createState() => _CheckInButtonState();
-}
-
-class _CheckInButtonState extends State<CheckInButton> {
-  bool? isCheckedIn;
-  String time = "";
-  @override
-  void initState() {
-    loadData();
-    super.initState();
-  }
-
-  loadData() async {
-    isCheckedIn = await AttendanceService.isCheckedInToday();
-    setState(() {});
-
-    var histories = await AttendanceService.getHistory();
-    if (histories.length > 0) {
-      DateTime date = DateTime.parse(histories.first["check_in"]);
-      time = DateFormat("kk:mm:ss").format(date);
-      setState(() {});
-    }
-
-    await CheckOutButtonState.instance.loadData();
-  }
-
-  doCheckIn() async {
-    showLoading();
-    await AttendanceService.checkin();
-    await loadData();
-    hideLoading();
-
-    AttendanceHistoryListController.instance.getAttendanceList();
-  }
+class CheckInButton extends StatelessWidget {
+  const CheckInButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isCheckedIn == null) {
-      return Expanded(
-        child: SizedBox(
-          height: 40,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
-            ),
-            onPressed: () {},
-            child: const Text("Loading..."),
-          ),
-        ),
-      );
-    }
+    // Ambil controller yang sudah ada
+    final controller = Get.find<CheckinDetailController>();
 
-    if (isCheckedIn == true) {
+    return Obx(() {
+      if (controller.isCheckedIn.value == null) {
+        return Expanded(
+          child: QButton(label: "Loading...", onPressed: () {}), // <-- Gunakan fungsi kosong
+        );
+      }
+      if (controller.isCheckedIn.value == true) {
+        // Tambahkan onPressed
+        return Expanded(
+          child: QButton(
+            label: controller.checkInTime.value, onPressed: () {}), // <-- Gunakan fungsi kosong
+          );
+      }
       return Expanded(
-        child: SizedBox(
-          height: 40,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
-            ),
-            onPressed: () {},
-            child: Text(
-              time,
-              style: TextStyle(
-                color: Colors.blueGrey[900],
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+        child: QButton(
+          label: "Check In",
+          onPressed: () => controller.doCheckIn(),
+          color: Colors.green,
         ),
       );
-    }
-    return Expanded(
-      child: SizedBox(
-        height: 40,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-          ),
-          onPressed: () => doCheckIn(),
-          child: const Text("Check In"),
-        ),
-      ),
-    );
+    });
   }
 }
