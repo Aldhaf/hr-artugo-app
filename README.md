@@ -1,87 +1,105 @@
-![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+# HR Artugo Mobile
 
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-Join%20Kelas%20Online-brightgreen.svg?logo=whatsapp&style=social)](https://wa.me/6282146727409?text=Hallo,%20saya%20ingin%20join%20kelas%20Online%20/w%20DenyOcr)
+![Versi Aplikasi](https://img.shields.io/badge/version-1.0.0-blue)
+![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-green)
+![Framework](https://img.shields.io/badge/framework-Flutter-blue)
 
+Aplikasi mobile internal **Human Resources (HR)** untuk PT Artugo, dirancang untuk menyederhanakan dan mengotomatisasi berbagai proses HR bagi karyawan. Aplikasi ini terintegrasi langsung dengan backend Odoo, menyediakan data *real-time* dan fungsionalitas yang terpusat.
 
-# Hyper UI
-Hyper UI adalah kumpulan sampel ReuseableWidget Flutter yang bisa kamu gunakan untuk projectmu.
-Pada dasar-nya, Hyper UI dibuat dengan tujuan untuk edukasi.
-So, project ini dibuat sesederhana mungkin dan semudah mungkin untuk digunakan.
+Aplikasi ini dibangun menggunakan Flutter, memungkinkan *codebase* tunggal untuk berjalan di platform Android dan iOS secara *native*.
 
-## Architecture
-Architecture yang digunakan adalah MVC.
-Dimana state management-nya menggunakan StatefulWidget. 
+---
 
-Kami juga mengadopsi fitur contextless di Flutter.
-Dimana, kita akan meng-cache context kita di sebuah variabel.
-Kamu bisa mengakses-nya dimana saja:
+## 🖼️ Tampilan Aplikasi (Screenshots)
 
-```
-Get.currentContext
-```
+*Catatan: Ganti path `assets/readme_images/` dengan path tempat Anda menyimpan screenshot.*
 
-Mungkin terkait contextless ini masih sangat jarang yang menggunakannya. Padahal dengan menerapkan fitur contextless,
-Kita bisa mengurangi penggunaan context pada Aplikasi kita.
-Dan bisa menghindari keharusan untuk menambahkan BuildContext pada sebuah method.
+| Login | Dashboard | Absensi |
+| :---: | :---: | :---: |
+| <img src="assets/readme_images/login.png" width="250"> | <img src="assets/readme_images/dashboard.png" width="250"> | <img src="assets/readme_images/attendance.png" width="250"> |
 
-Contoh:
-```
-onButtonSaveClicK(BuildContext context) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardView()),
-    );
-}
-```
+---
 
-Kita cukup mengambil context dengan `Get.currentContext`:
-```
-onButtonSaveClicK() {
-    Navigator.push(
-        Get.currentContext,
-        MaterialPageRoute(builder: (context) => DashboardView()),
-    );
-}
-```
+## ✨ Fitur Utama (Key Features)
 
-Lebih baik lagi, kita bisa membuat custom navigation kita sendiri.
-```
-onButtonSaveClicK() {
-    Get.to(DashboardView());
-}
-```
+- **Otentikasi Pengguna**: Proses login dan manajemen sesi yang aman terhubung langsung ke database pengguna Odoo.
+- **Absensi (Check-in & Check-out)**:
+    - Fitur absensi dengan validasi **geolokasi (GPS)** untuk memastikan karyawan berada di lokasi yang tepat.
+    - Kewajiban mengunggah **foto selfie** saat absensi sebagai bukti kehadiran.
+    - Data absensi dikirim dan disimpan secara *real-time* ke modul `hr_attendance` di Odoo.
+- **Manajemen Cuti (Time Off)**:
+    - Melihat riwayat dan detail pengajuan cuti.
+    - Informasi detail seperti tipe cuti, durasi, dan status persetujuan.
+- **Sistem Notifikasi Terpusat**:
+    - Menerima notifikasi *push* secara *real-time* dari server Odoo menggunakan **Firebase Cloud Messaging (FCM)**.
+    - Melihat daftar riwayat notifikasi (persetujuan cuti, pengumuman, dll).
+    - Fitur untuk menandai notifikasi sebagai "sudah dibaca" dan menghapus notifikasi.
+- **Pengaturan Aplikasi**:
+    - Halaman "Tentang Aplikasi" yang berisi informasi versi.
+    - Pengaturan notifikasi (akan dikembangkan).
 
+---
 
-## Reuseable Widget
-Saat ini fokus utama kami adalah membuat Reuseable Widget terkait Form. Intinya kami ingin mempermudah pembuatan Form di Flutter, yang terkadang itu terlalu rumit jika dibandingkan dengan pembuatan Form di HTML misalnya.
+## 🛠️ Teknologi yang Digunakan (Tech Stack)
 
-Dengan Hyper UI, kamu bisa membuat Form dengan lebih cepat dan mudah.
-Saat ini sudah tersedia:
-```
-QTextField
-QNumberField
-QMemoField
-QDatePicker
-QTimePicker
-QImagePicker
+- **Framework**: [Flutter](https://flutter.dev/)
+- **Manajemen State**: [GetX](https://pub.dev/packages/get)
+- **Komunikasi Backend**:
+    - [odoo_rpc](https://pub.dev/packages/odoo_rpc) untuk komunikasi RPC dengan Odoo.
+    - [Dio](https://pub.dev/packages/dio) untuk unggah file (Multipart/Form-Data) pada fitur absensi.
+- **Push Notifications**: [Firebase Cloud Messaging](https://pub.dev/packages/firebase_messaging)
+- **Notifikasi Lokal**: [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
+- **Splash Screen**: [flutter_native_splash](https://pub.dev/packages/flutter_native_splash)
+- **Lokasi**: [geolocator](https://pub.dev/packages/geolocator)
+- **Backend**: Odoo 14
 
-QDropdown
-QCheckField
-QRadioField
-QSwitch
-QAutoComplete
+---
 
-QImagePicker
-QRatingField
-QLocationPicker
-```
-<hr/>
+## 🚀 Prasyarat (Prerequisites)
 
-## Screenshots
+Pastikan Anda telah menginstal perangkat lunak berikut di komputer Anda:
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (versi 3.x atau lebih tinggi)
+- [Git](https://git-scm.com/downloads)
+- IDE (Visual Studio Code atau Android Studio)
 
-<img src="https://i.ibb.co/8m30PWv/1.png" style="width: 240px;"/><br/>
-<img src="https://i.ibb.co/NjqM6Cd/2.png" style="width: 240px;"/><br/>
-<img src="https://i.ibb.co/VmWGt9J/3.png" style="width: 240px;"/><br/>
-<hr/>
+---
 
-* snippet update
+## ⚙️ Instalasi dan Konfigurasi
+
+1.  **Clone repository ini:**
+    ```bash
+    git clone [https://github.com/Aldhaf/hr-artugo-app.git](https://github.com/Aldhaf/hr-artugo-app.git)
+    cd hr-artugo-app
+    ```
+
+2.  **Konfigurasi Environment**:
+    Aplikasi ini memerlukan koneksi ke server Odoo. Buat file `.env` di direktori utama project dan isi sesuai dengan konfigurasi server Anda.
+    
+    *Buat file `.env` dari contoh ini:*
+    ```
+    # Odoo Server Configuration
+    ODOO_HOST=[https://sys.artugo.co.id](https://sys.artugo.co.id)
+    ODOO_DATABASE=nama_database_produksi
+    ```
+    **File ini sudah termasuk dalam `.gitignore` untuk keamanan.**
+
+3.  **Konfigurasi Firebase**:
+    Pastikan Anda sudah menyiapkan project Firebase.
+    - **Untuk Android**: Letakkan file `google-services.json` Anda di dalam folder `android/app/`.
+    - **Untuk iOS**: Letakkan file `GoogleService-Info.plist` Anda di dalam folder `ios/Runner/`.
+
+4.  **Install dependensi**:
+    ```bash
+    flutter pub get
+    ```
+
+5.  **Jalankan aplikasi**:
+    ```bash
+    flutter run
+    ```
+
+---
+
+## 📂 Struktur Folder
+
+Project ini menggunakan arsitektur modular untuk memisahkan setiap fitur, membuatnya lebih mudah untuk dikelola dan dikembangkan.
