@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -111,8 +111,10 @@ class CheckinMapView extends StatelessWidget {
           position.longitude,
         ),
         initialZoom: 16,
-        interactionOptions: InteractionOptions( // <-- TAMBAHKAN PEMBUNGKUS INI
-          flags: InteractiveFlag.all - InteractiveFlag.rotate, // <-- PINDAHKAN KE DALAM 'flags'
+        interactionOptions: InteractionOptions(
+          // <-- TAMBAHKAN PEMBUNGKUS INI
+          flags: InteractiveFlag.all -
+              InteractiveFlag.rotate, // <-- PINDAHKAN KE DALAM 'flags'
         ),
       ),
       children: [

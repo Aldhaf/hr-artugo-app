@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 
 class TimeOffFormView extends StatelessWidget {
   const TimeOffFormView({Key? key}) : super(key: key);

@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import '../../../shared/util/odoo_api/odoo_api.dart'; // Impor OdooApi Anda
 
 class TimeOffDetailController extends GetxController {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:hr_artugo_app/core.dart';
 
 ThemeData getDarkTheme() {
   return ThemeData.dark().copyWith(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
-import 'package:hyper_ui/service/leave_type_service/leave_type_service.dart';
+import 'package:hr_artugo_app/core.dart' hide Get;
+import 'package:hr_artugo_app/service/leave_type_service/leave_type_service.dart';
 
 class TimeOffFormController extends GetxController {
   // --- State Variables ---

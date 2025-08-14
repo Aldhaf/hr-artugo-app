@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:hr_artugo_app/core.dart';
 import 'dart:async';
 import 'dart:io'; // Pastikan import ini ada
 import 'package:image_picker/image_picker.dart'; // Pastikan import ini ada
@@ -14,7 +14,8 @@ class AttendanceService {
       position = await _validateAndGetPosition();
       // Cek apakah mock location aktif
       if (position.isMocked) {
-        throw Exception("Lokasi Palsu Terdeteksi. Harap nonaktifkan fitur 'Mock Location' di Pengaturan Developer.");
+        throw Exception(
+            "Lokasi Palsu Terdeteksi. Harap nonaktifkan fitur 'Mock Location' di Pengaturan Developer.");
       }
     } catch (e) {
       // Lempar kembali error agar bisa ditangkap oleh UI Controller
@@ -26,7 +27,8 @@ class AttendanceService {
       source: ImageSource.camera,
       imageQuality: 50, // Kompres ukuran file agar upload lebih efisien
       maxWidth: 1080, // Ubah ukuran lebar gambar maksimal menjadi 1080 piksel
-      preferredCameraDevice: CameraDevice.front, // Utamakan kamera depan untuk selfie
+      preferredCameraDevice:
+          CameraDevice.front, // Utamakan kamera depan untuk selfie
     );
 
     // Jika pengguna membatalkan pengambilan foto, gagalkan proses
@@ -58,7 +60,8 @@ class AttendanceService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Izin lokasi diblokir permanen. Aktifkan dari pengaturan.');
+      throw Exception(
+          'Izin lokasi diblokir permanen. Aktifkan dari pengaturan.');
     }
 
     // Ambil posisi saat ini

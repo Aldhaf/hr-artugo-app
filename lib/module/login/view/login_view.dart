@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Import GetX
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 
 class LoginView extends StatelessWidget {
   // <-- Ubah menjadi StatelessWidget
@@ -15,15 +15,16 @@ class LoginView extends StatelessWidget {
 
     return Scaffold(
       // Kita hapus AppBar agar lebih bersih sesuai desain
-      // appBar: AppBar(title: const Text("Login")), 
-      body: SingleChildScrollView( // Gunakan SafeArea agar tidak tertimpa status bar
+      // appBar: AppBar(title: const Text("Login")),
+      body: SingleChildScrollView(
+        // Gunakan SafeArea agar tidak tertimpa status bar
         child: Container(
           padding: const EdgeInsets.all(30.0),
           width: double.infinity,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Ratakan teks ke kiri
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Ratakan teks ke kiri
             children: [
-              
               const SizedBox(height: 50.0),
 
               // --- Bagian Header ---
@@ -44,7 +45,8 @@ class LoginView extends StatelessWidget {
                     TextSpan(
                       text: 'ARTTEND',
                       style: TextStyle(
-                        color: Theme.of(context).primaryColor, // Ambil warna aksen dari theme
+                        color: Theme.of(context)
+                            .primaryColor, // Ambil warna aksen dari theme
                       ),
                     ),
                   ],

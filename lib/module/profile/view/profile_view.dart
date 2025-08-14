@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:shimmer/shimmer.dart';
 import '../model/profile_model.dart';
 import '/core/data_state.dart';
@@ -101,7 +101,9 @@ class ProfileView extends StatelessWidget {
 
   Widget _buildProfileAvatar(Profile profile) {
     // Cek jika imageUrl ada dan tidak kosong
-    if (profile.imageUrl != null && profile.imageUrl!.isNotEmpty && profile.imageUrl!.length > 100) {
+    if (profile.imageUrl != null &&
+        profile.imageUrl!.isNotEmpty &&
+        profile.imageUrl!.length > 100) {
       try {
         final imageBytes = base64Decode(profile.imageUrl!);
         return CircleAvatar(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import '../../../service/cache_service/cache_service.dart';
-import 'package:hyper_ui/core/data_state.dart';
+import 'package:hr_artugo_app/core/data_state.dart';
 
 // Tambahkan 'with WidgetsBindingObserver'
 class DashboardController extends GetxController with WidgetsBindingObserver {
@@ -172,13 +172,14 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
-
     } catch (e) {
       // Jika ada error apapun dari service, tangkap di sini
       Get.back(); // Tutup dialog loading
       Get.snackbar(
         "Gagal",
-        e.toString().replaceAll("Exception: ", ""), // Tampilkan pesan error yang bersih
+        e
+            .toString()
+            .replaceAll("Exception: ", ""), // Tampilkan pesan error yang bersih
         backgroundColor: Colors.red.shade600,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,

@@ -1,7 +1,7 @@
 // lib/module/login/controller/login_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Import GetX
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import '../../../service/storage_service/storage_service.dart';
 import '../../../service/firebase_service/firebase_service.dart';
 import '../../../module/notification/controller/notification_controller.dart';

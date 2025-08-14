@@ -1,4 +1,4 @@
-import 'package:hyper_ui/shared/util/odoo_api/odoo_api.dart';
+import 'package:hr_artugo_app/shared/util/odoo_api/odoo_api.dart';
 
 class LeaveTypeService {
   Future get() async {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart'
+import 'package:hr_artugo_app/core.dart'
     hide Get; // Pastikan import ini ada untuk AttendanceService
 
 class CheckinDetailController extends GetxController {

@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 // Impor yang diperlukan
 import '../../../core/data_state.dart';
 import '../../../service/cache_service/cache_service.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:hr_artugo_app/core.dart';
 
 Future showSlideableBottomSheet() async {
   await showModalBottomSheet<void>(

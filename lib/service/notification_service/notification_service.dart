@@ -1,6 +1,6 @@
 // lib/service/notification_service.dart
 
-import 'package:hyper_ui/core.dart'; // Sesuaikan dengan path OdooApi Anda
+import 'package:hr_artugo_app/core.dart'; // Sesuaikan dengan path OdooApi Anda
 import '../../module/notification/model/notification_model.dart'; // Impor model notifikasi
 
 class NotificationService {

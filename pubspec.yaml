@@ -1,7 +1,8 @@
-name: hyper_ui
-description: A new Flutter project.
+name: hr_artugo_app
+description: Aplikasi mobile HR internal untuk PT Artugo berbasis Flutter, terintegrasi dengan backend Odoo.
 publish_to: 'none' 
 version: 1.0.0+1
+license: MIT
 environment:
   sdk: '>=3.0.0 <4.0.0'
 dependencies:

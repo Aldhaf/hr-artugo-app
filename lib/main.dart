@@ -1,28 +1,28 @@
 // lib/main.dart
 
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hyper_ui/module/about_app/bindings/about_app_binding.dart';
-import 'package:hyper_ui/module/about_app/view/about_app_view.dart';
-import 'package:hyper_ui/module/notification_settings/view/notification_settings_view.dart';
+import 'package:hr_artugo_app/module/about_app/bindings/about_app_binding.dart';
+import 'package:hr_artugo_app/module/about_app/view/about_app_view.dart';
+import 'package:hr_artugo_app/module/notification_settings/view/notification_settings_view.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'firebase_options.dart';
 
 // Import semua halaman dan binding yang diperlukan
-import 'package:hyper_ui/module/notification/bindings/notification_binding.dart';
-import 'package:hyper_ui/module/notification/controller/notification_controller.dart';
-import 'package:hyper_ui/module/notification/view/notification_view.dart';
-import 'package:hyper_ui/module/main_navigation/bindings/main_navigation_binding.dart';
-import 'package:hyper_ui/service/local_notification_service/local_notification_service.dart';
-import 'package:hyper_ui/module/time_off_detail/bindings/time_off_detail_binding.dart';
-import 'package:hyper_ui/module/time_off_detail/view/time_off_detail_view.dart';
-import 'package:hyper_ui/module/login/binding/login_binding.dart';
+import 'package:hr_artugo_app/module/notification/bindings/notification_binding.dart';
+import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
+import 'package:hr_artugo_app/module/notification/view/notification_view.dart';
+import 'package:hr_artugo_app/module/main_navigation/bindings/main_navigation_binding.dart';
+import 'package:hr_artugo_app/service/local_notification_service/local_notification_service.dart';
+import 'package:hr_artugo_app/module/time_off_detail/bindings/time_off_detail_binding.dart';
+import 'package:hr_artugo_app/module/time_off_detail/view/time_off_detail_view.dart';
+import 'package:hr_artugo_app/module/login/binding/login_binding.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 3. Perintahkan splash screen native untuk TETAP TAMPIL
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
@@ -30,7 +30,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   // Anda bisa menambahkan await lain di sini jika perlu
   // await OdooApi.someInitialSetup();
   // await someOtherService.init();
@@ -44,7 +44,7 @@ void main() async {
   // 5. SETELAH SEMUANYA SIAP, hapus splash screen
   // Tambahkan sedikit delay untuk memastikan frame pertama sudah ter-render
   Future.delayed(Duration(milliseconds: 200), () {
-     FlutterNativeSplash.remove();
+    FlutterNativeSplash.remove();
   });
 }
 

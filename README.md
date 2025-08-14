@@ -103,3 +103,26 @@ Pastikan Anda telah menginstal perangkat lunak berikut di komputer Anda:
 ## 📂 Struktur Folder
 
 Project ini menggunakan arsitektur modular untuk memisahkan setiap fitur, membuatnya lebih mudah untuk dikelola dan dikembangkan.
+
+lib
+├── core               # Core utilities, themes, etc.
+├── main.dart          # Entry point aplikasi
+├── module
+│   ├── login          # Fitur Login
+│   ├── main_navigation  # Navigasi utama (Dashboard, Profile, etc.)
+│   ├── notification   # Fitur Notifikasi
+│   └── time_off_detail  # Fitur Detail Cuti
+├── service            # Service layer (e.g., LocalNotificationService)
+└── shared             # Widget, utility, atau kode yang digunakan bersama
+
+---
+
+## 🤝 Kontribusi
+
+Saat ini, project ini dikelola secara internal. Namun, jika Anda memiliki saran atau menemukan bug, silakan buat *Issue* di repository ini.
+
+---
+
+## 📄 Lisensi
+
+Project ini dilisensikan di bawah [MIT License](LICENSE).

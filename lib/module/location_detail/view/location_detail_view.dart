@@ -1,6 +1,6 @@
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
-import 'package:hyper_ui/core.dart';
+import 'package:hr_artugo_app/core.dart';
 
 // 1. Ubah menjadi StatelessWidget yang lebih ringan
 class LocationDetailView extends StatelessWidget {
@@ -24,7 +24,7 @@ class LocationDetailView extends StatelessWidget {
         options: MapOptions(
           initialCenter: LatLng(latitude, longitude),
           initialZoom: 16,
-          interactionOptions: InteractionOptions (
+          interactionOptions: InteractionOptions(
             flags: InteractiveFlag.all - InteractiveFlag.rotate,
           ),
         ),

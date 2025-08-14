@@ -3,10 +3,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get; // Untuk OdooApi
-import 'package:hyper_ui/module/notification/controller/notification_controller.dart';
-import 'package:hyper_ui/service/local_notification_service/local_notification_service.dart';
-import 'package:hyper_ui/service/notification_preference_service/notification_preference_service.dart';
+import 'package:hr_artugo_app/core.dart' hide Get; // Untuk OdooApi
+import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
+import 'package:hr_artugo_app/service/local_notification_service/local_notification_service.dart';
+import 'package:hr_artugo_app/service/notification_preference_service/notification_preference_service.dart';
 
 // Fungsi ini HARUS berada di luar kelas (top-level function)
 @pragma('vm:entry-point')
@@ -48,18 +48,22 @@ class FirebaseService {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     // --- PENYESUAIAN UTAMA ADA DI SINI ---
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async { // <-- Tambahkan async
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      // <-- Tambahkan async
       print('Got a message whilst in the foreground!');
-      
+
       if (message.notification != null) {
         final String notificationType = message.data['type'] ?? 'unknown';
 
         // 1. Cek apakah pengguna mengizinkan tipe notifikasi ini
-        final bool isEnabled = await NotificationPreferenceService.isNotificationTypeEnabled(notificationType);
+        final bool isEnabled =
+            await NotificationPreferenceService.isNotificationTypeEnabled(
+                notificationType);
 
         // 2. Jika tidak diizinkan, hentikan semua proses selanjutnya
         if (!isEnabled) {
-          print("Notifikasi tipe '$notificationType' diblokir oleh pengaturan pengguna.");
+          print(
+              "Notifikasi tipe '$notificationType' diblokir oleh pengaturan pengguna.");
           return;
         }
 
@@ -78,7 +82,8 @@ class FirebaseService {
 
         // Auto-refresh halaman Time Off jika relevan
         if (notificationType == 'leave_approval') {
-          print("Notifikasi persetujuan cuti diterima, memuat ulang riwayat Time Off...");
+          print(
+              "Notifikasi persetujuan cuti diterima, memuat ulang riwayat Time Off...");
           if (Get.isRegistered<TimeOffHistoryListController>()) {
             Get.find<TimeOffHistoryListController>().getTimeOffHistories();
           }

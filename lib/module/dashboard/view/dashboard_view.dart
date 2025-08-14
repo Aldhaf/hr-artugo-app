@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hyper_ui/core.dart' hide Get;
+import 'package:hr_artugo_app/core.dart' hide Get;
 import '../controller/dashboard_controller.dart'; // Pastikan controller dashboard diimpor
 import '../widget/info_card.dart';
 import '../widget/summary_card.dart';
 import '../widget/clock_widget.dart';
 import '../widget/animated_checkin_button.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:hyper_ui/core/data_state.dart';
-import 'package:hyper_ui/module/notification/controller/notification_controller.dart';
+import 'package:hr_artugo_app/core/data_state.dart';
+import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -227,14 +227,16 @@ class DashboardView extends StatelessWidget {
                                 width: double.infinity,
                                 child: Obx(() {
                                   // Gunakan state boolean yang lebih bersih
-                                  bool hasCheckedOut = dashboardC.checkOutTime.value != "N/A";
+                                  bool hasCheckedOut =
+                                      dashboardC.checkOutTime.value != "N/A";
 
                                   if (hasCheckedOut) {
                                     return Card(
                                       elevation: 0,
                                       color: Colors.grey[200],
                                       child: const ListTile(
-                                        leading: Icon(Icons.check_circle, color: Colors.green),
+                                        leading: Icon(Icons.check_circle,
+                                            color: Colors.green),
                                         title: Text("Absensi hari ini selesai"),
                                       ),
                                     );
@@ -247,7 +249,8 @@ class DashboardView extends StatelessWidget {
                                       title: "Check Out",
                                       icon: Icons.logout,
                                       color: Colors.red.shade400,
-                                      onPressed: () => dashboardC.doCheckOut(), // Pastikan doCheckOut juga diubah seperti doCheckIn
+                                      onPressed: () => dashboardC
+                                          .doCheckOut(), // Pastikan doCheckOut juga diubah seperti doCheckIn
                                     );
                                   }
 
@@ -255,7 +258,8 @@ class DashboardView extends StatelessWidget {
                                   return AnimatedCheckinButton(
                                     title: "Check In",
                                     icon: Icons.login,
-                                    color: primaryColor, // atau Theme.of(context).primaryColor
+                                    color:
+                                        primaryColor, // atau Theme.of(context).primaryColor
                                     onPressed: () => dashboardC.doCheckIn(),
                                   );
                                 }),

@@ -1,4 +1,4 @@
-import 'package:hyper_ui/core.dart';
+import 'package:hr_artugo_app/core.dart';
 import 'package:flutter/material.dart';
 
 showLoading({
