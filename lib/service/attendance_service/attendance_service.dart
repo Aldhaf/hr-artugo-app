@@ -5,6 +5,10 @@ import 'dart:io'; // Pastikan import ini ada
 import 'package:image_picker/image_picker.dart'; // Pastikan import ini ada
 
 class AttendanceService {
+
+  /*
+  // --- FITUR CHECK-IN DENGAN KAMERA & MOCK LOCATION DETECTION DINONAKTIFKAN SEMENTARA ---
+
   // Fungsi ini akan menjadi metode check-in yang baru dan aman.
   Future<void> executeSecureCheckIn() async {
     // Langkah 1: Validasi dan Ambil Posisi GPS
@@ -70,6 +74,7 @@ class AttendanceService {
       timeLimit: const Duration(seconds: 20),
     );
   }
+  */
 
   // Fungsi getLocation() tidak diubah, mungkin masih berguna untuk fitur lain.
   static getLocation() async {

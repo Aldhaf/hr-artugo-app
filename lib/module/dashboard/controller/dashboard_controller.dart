@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
 import '../../../service/cache_service/cache_service.dart';
 import 'package:hr_artugo_app/core/data_state.dart';
+import 'package:hr_artugo_app/module/attendance_history_list/controller/attendance_history_list_controller.dart';
 
 // Tambahkan 'with WidgetsBindingObserver'
 class DashboardController extends GetxController with WidgetsBindingObserver {
@@ -159,7 +160,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
     try {
       // Panggil satu fungsi utama yang aman dari service
-      await AttendanceService().executeSecureCheckIn();
+      await AttendanceService.checkin();
 
       // Jika berhasil, tutup dialog dan refresh data dari server
       Get.back(); // Tutup dialog loading
@@ -172,6 +173,12 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
+
+      // Cek apakah halaman history sedang aktif, jika iya, refresh datanya.
+      if (Get.isRegistered<AttendanceHistoryListController>()) {
+        final historyController = Get.find<AttendanceHistoryListController>();
+        historyController.getAttendanceList();
+      }
     } catch (e) {
       // Jika ada error apapun dari service, tangkap di sini
       Get.back(); // Tutup dialog loading
@@ -199,6 +206,12 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     } finally {
       await refreshData();
       Get.back();
+
+      // Cek apakah halaman history sedang aktif, jika iya, refresh datanya.
+      if (Get.isRegistered<AttendanceHistoryListController>()) {
+        final historyController = Get.find<AttendanceHistoryListController>();
+        historyController.getAttendanceList();
+      }
     }
   }
 }

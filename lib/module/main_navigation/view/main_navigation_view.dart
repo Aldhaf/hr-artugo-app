@@ -11,22 +11,22 @@ class MainNavigationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(MainNavigationController());
+    // --- PERUBAHAN 1: Hapus halaman TimeOffHistoryListView dari daftar ---
     final List<Widget> pages = [
       DashboardView(),
       const AttendanceHistoryListView(),
-      const TimeOffHistoryListView(),
+      // const TimeOffHistoryListView(), // Dinonaktifkan sementara
       ProfileView(),
     ];
 
     return WillPopScope(
       onWillPop: () async {
-        // Jika tidak sedang di tab Dashboard, kembali ke Dashboard
+        // Logika WillPopScope tidak perlu diubah
         if (controller.selectedIndex.value != 0) {
           controller.onTabTapped(0);
-          return false; // Mencegah aplikasi keluar
+          return false; 
         }
 
-        // Jika sudah di tab Dashboard, tampilkan dialog konfirmasi
         bool exit = await Get.dialog(
           AlertDialog(
             title: const Text('Konfirmasi'),
@@ -35,20 +35,18 @@ class MainNavigationView extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () =>
-                    Get.back(result: false), // Tutup dialog, jangan keluar
+                    Get.back(result: false),
                 child: const Text('Tidak'),
               ),
               TextButton(
                 onPressed: () =>
-                    Get.back(result: true), // Tutup dialog, izinkan keluar
+                    Get.back(result: true), 
                 child: const Text('Ya'),
               ),
             ],
           ),
         );
-
-        // Kembalikan hasil dari dialog. Jika dialog ditutup (misal: menekan di luar),
-        // anggap sebagai 'false' agar tidak keluar.
+        
         return exit ?? false;
       },
       child: Scaffold(
@@ -76,10 +74,11 @@ class MainNavigationView extends StatelessWidget {
                       fontSize: 12,
                       color: Colors.white,
                       fontWeight: FontWeight.w600),
+                  // --- PERUBAHAN 2: Hapus GButton untuk Time Off dari daftar ---
                   tabs: const [
                     GButton(icon: Icons.dashboard, text: 'Dashboard'),
                     GButton(icon: Icons.calendar_month, text: 'Attendance'),
-                    GButton(icon: Icons.access_time_filled, text: 'Time Off'),
+                    // GButton(icon: Icons.access_time_filled, text: 'Time Off'), // Dinonaktifkan sementara
                     GButton(icon: Icons.person, text: 'User'),
                   ],
                   selectedIndex: controller.selectedIndex.value,
