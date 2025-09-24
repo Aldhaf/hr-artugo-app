@@ -1,11 +1,12 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:hr_artugo_app/core.dart';
+import 'package:hr_artugo_app/core.dart' hide Get;
 import 'dart:async';
 import 'dart:io'; // Pastikan import ini ada
 import 'package:image_picker/image_picker.dart'; // Pastikan import ini ada
+import 'package:get/get.dart';
+import 'package:hr_artugo_app/service/work_profile_service/work_profile_service.dart';
 
 class AttendanceService {
-
   /*
   // --- FITUR CHECK-IN DENGAN KAMERA & MOCK LOCATION DETECTION DINONAKTIFKAN SEMENTARA ---
 
@@ -272,6 +273,10 @@ class AttendanceService {
     DateTime startOfMonth = DateTime(now.year, now.month, 1);
     DateTime endOfMonth = DateTime(now.year, now.month + 1, 0);
 
+    // Ambil profil kerja dari service
+    final workProfileService = Get.find<WorkProfileService>();
+    final workPattern = workProfileService.workProfile?.workPattern;
+
     var records = await OdooApi.get(
       model: "hr.attendance",
       where: [
@@ -308,13 +313,23 @@ class AttendanceService {
     }
 
     dailyAttendances.forEach((day, attendances) {
-      attendances.sort(); // Urutkan untuk menemukan check-in pertama
+      attendances.sort();
       DateTime firstCheckIn = attendances.first;
-      // Asumsi jam masuk adalah 08:15
-      if (firstCheckIn.hour > 8 ||
-          (firstCheckIn.hour == 8 && firstCheckIn.minute > 15)) {
-        lateInCount++;
+
+      // --- PERUBAHAN LOGIKA DI SINI ---
+      if (workPattern != null) {
+        // Ambil jam masuk dari Odoo
+        int entryHour = workPattern.workFrom.toInt();
+        int entryMinute = ((workPattern.workFrom - entryHour) * 60).round();
+
+        // Bandingkan
+        if (firstCheckIn.hour > entryHour ||
+            (firstCheckIn.hour == entryHour &&
+                firstCheckIn.minute > entryMinute)) {
+          lateInCount++;
+        }
       }
+      // Jika tidak ada work pattern (fallback), mungkin jangan hitung telat
     });
 
     // 3. Hitung hari absen

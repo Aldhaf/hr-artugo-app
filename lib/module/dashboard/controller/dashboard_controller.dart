@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hr_artugo_app/core/data_state.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
 import '../../../service/cache_service/cache_service.dart';
-import 'package:hr_artugo_app/core/data_state.dart';
-import 'package:hr_artugo_app/module/attendance_history_list/controller/attendance_history_list_controller.dart';
+import '../../../service/work_profile_service/work_profile_service.dart';
+import '../../../model/work_profile_model.dart';
 
 // Tambahkan 'with WidgetsBindingObserver'
 class DashboardController extends GetxController with WidgetsBindingObserver {
   final _cacheService = CacheService();
 
-  // --- Variabel State (tidak berubah) ---
+  // --- Variabel State ---
   var userName = "".obs;
   var locationState = Rx<DataState<String>>(const DataLoading());
-
   var checkInTime = "N/A".obs;
   var checkOutTime = "N/A".obs;
   var workingHours = "00:00:00".obs;
-
   var presentDays = 0.obs;
   var absentDays = 0.obs;
   var lateInDays = 0.obs;
-
   var isLoading = true.obs;
-
-  // --- PERUBAHAN 1: Tambahkan state boolean untuk status check-in ---
   var hasCheckedInToday = false.obs;
+  var workPatternInfo = "".obs;
+  var storeLocationInfo = "".obs;
+  var jobTitle = "".obs;
+  var dailyHours = <DailyWorkHour>[].obs;
 
   @override
   void onInit() {
@@ -34,6 +34,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     // Panggil refresh data pertama kali
     loadData();
     refreshLocation();
+    fetchWorkingHoursChart();
   }
 
   @override
@@ -41,6 +42,39 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     // Hapus observer saat controller ditutup
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
+  }
+
+  Future<void> fetchWorkingHoursChart() async {
+    try {
+      // Tentukan rentang tanggal, misalnya 7 hari terakhir
+      final endDate = DateTime.now();
+      final startDate = endDate.subtract(const Duration(days: 6));
+      final formatter = DateFormat('yyyy-MM-dd');
+      final String startDateStr = formatter.format(startDate);
+      final String endDateStr = formatter.format(endDate);
+
+      // Panggil API untuk mendapatkan data live
+      final List<dynamic> results =
+          await OdooApi.getDailyWorkedHours(startDateStr, endDateStr);
+
+      print("[DEBUG-CHART] Flutter menerima RAW DATA dari Odoo: $results");
+
+      // Ubah data JSON dari API menjadi List<DailyWorkHour>
+      final List<DailyWorkHour> liveData = results.map((item) {
+        return DailyWorkHour(
+          date: DateTime.parse(item['date']),
+          hours: (item['hours'] as num).toDouble(),
+        );
+      }).toList();
+
+      print(
+          "[DEBUG-CHART] Data setelah di-parsing di Flutter: ${liveData.map((d) => '${d.date}: ${d.hours} jam').toList()}");
+
+      dailyHours.assignAll(liveData);
+    } catch (e) {
+      print("Gagal memuat data chart: $e");
+      dailyHours.clear(); // Kosongkan data jika error
+    }
   }
 
   // Fungsi ini akan dipanggil setiap kali state aplikasi berubah
@@ -68,6 +102,18 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     // Jika tidak ada cache, UI akan menampilkan loading sampai ini selesai.
     // Jika ada cache, ini berjalan di latar belakang.
     await refreshData();
+  }
+
+  // --- FUNGSI BARU UNTUK REFRESH RINGAN ---
+  Future<void> _updateMonthlySummary() async {
+    try {
+      final summary = await AttendanceService.getMonthSummary();
+      presentDays.value = summary['present'] ?? 0;
+      absentDays.value = summary['absent'] ?? 0;
+      lateInDays.value = summary['late'] ?? 0;
+    } catch (e) {
+      print("Gagal memperbarui ringkasan bulanan: $e");
+    }
   }
 
   // --- Fungsi Utama untuk Memuat Semua Data ---
@@ -128,43 +174,72 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
   // Buat helper method untuk mencegah duplikasi kode
   void _updateStateFromMap(Map<String, dynamic> data) {
-    // Helper method ini menjadi "satu-satunya sumber kebenaran"
-    // untuk memperbarui semua state dashboard.
-
     userName.value = data['userName'] as String? ?? "User";
-
     checkInTime.value = data['check_in_time'] as String? ?? "N/A";
     checkOutTime.value = data['check_out_time'] as String? ?? "N/A";
     workingHours.value = data['worked_hours'] as String? ?? "00:00:00";
     hasCheckedInToday.value = checkInTime.value != "N/A";
-
     presentDays.value = data['present'] as int? ?? 0;
     absentDays.value = data['absent'] as int? ?? 0;
     lateInDays.value = data['late'] as int? ?? 0;
+
+    final workProfileService = Get.find<WorkProfileService>();
+    final WorkProfile? profile = workProfileService.workProfile;
+
+    print(
+        "[DEBUG-DASHBOARD] Mengambil profil dari service. Jabatan: ${profile?.jobTitle}");
+
+    /*
+    print("======================================");
+    print("DATA DI DALAM DASHBOARD CONTROLLER:");
+    print(
+        "Nama Toko dari Service: ${workProfileService.workProfile?.storeLocation?.name}");
+    print(
+        "Pola Kerja dari Service: ${workProfileService.workProfile?.workPattern?.name}");
+    print("======================================");
+    */
+
+    if (profile != null) {
+      jobTitle.value = profile.jobTitle ?? ""; // Ambil jobTitle dari service
+    }
+
+    final WorkPattern? pattern = profile?.workPattern;
+    final StoreLocation? location = profile?.storeLocation;
+
+    // Format teks untuk ditampilkan di UI
+    if (pattern != null) {
+      // Ubah jam dari float (misal 8.5) menjadi format jam (08:30)
+      int startHour = pattern.workFrom.toInt();
+      int startMinute = ((pattern.workFrom - startHour) * 60).round();
+      int endHour = pattern.workTo.toInt();
+      int endMinute = ((pattern.workTo - endHour) * 60).round();
+
+      String startTime =
+          "${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')}";
+      String endTime =
+          "${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}";
+
+      workPatternInfo.value = "Jam Kerja: $startTime - $endTime";
+    }
+
+    if (location != null && location.name.isNotEmpty) {
+      storeLocationInfo.value = "Lokasi: ${location.name}";
+    }
   }
 
-  doCheckIn() async {
-    // Tampilkan dialog loading yang tidak bisa ditutup oleh user
-    Get.dialog(
-      const Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        ),
-      ),
-      barrierDismissible: false,
-    );
+  // --- doCheckIn() VERSI OPTIMAL ---
+  void doCheckIn() async {
+    // 1. UI Optimistis: Langsung perbarui state UI
+    final currentTime = DateTime.now();
+    checkInTime.value = DateFormat("HH:mm:ss").format(currentTime);
+    hasCheckedInToday.value = true;
 
     try {
-      // Panggil satu fungsi utama yang aman dari service
+      // 2. Kirim permintaan ke server di latar belakang
       await AttendanceService.checkin();
 
-      // Jika berhasil, tutup dialog dan refresh data dari server
-      Get.back(); // Tutup dialog loading
-      await refreshData(); // Sinkronkan UI dengan data terbaru
+      // 3. Setelah sukses, panggil refresh ringan untuk data bulanan
+      await _updateMonthlySummary();
 
       Get.snackbar(
         "Berhasil",
@@ -174,19 +249,17 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      // Cek apakah halaman history sedang aktif, jika iya, refresh datanya.
+      // Refresh halaman riwayat jika sedang dibuka
       if (Get.isRegistered<AttendanceHistoryListController>()) {
-        final historyController = Get.find<AttendanceHistoryListController>();
-        historyController.getAttendanceList();
+        Get.find<AttendanceHistoryListController>().getAttendanceList();
       }
     } catch (e) {
-      // Jika ada error apapun dari service, tangkap di sini
-      Get.back(); // Tutup dialog loading
+      // 4. Rollback: Jika gagal, kembalikan UI ke state semula
+      checkInTime.value = "N/A";
+      hasCheckedInToday.value = false;
       Get.snackbar(
         "Gagal",
-        e
-            .toString()
-            .replaceAll("Exception: ", ""), // Tampilkan pesan error yang bersih
+        "Gagal melakukan check-in. Periksa koneksi Anda.",
         backgroundColor: Colors.red.shade600,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -194,24 +267,41 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  doCheckOut() async {
-    Get.dialog(
-      const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false,
-    );
-    try {
-      await AttendanceService.checkOut();
-    } catch (e) {
-      Get.snackbar("Error", "Gagal melakukan check-out.");
-    } finally {
-      await refreshData();
-      Get.back();
+  // --- doCheckOut() VERSI OPTIMAL ---
+  void doCheckOut() async {
+    // 1. UI Optimistis: Simpan state lama dan perbarui UI
+    final oldCheckOutTime = checkOutTime.value;
+    final currentTime = DateTime.now();
+    checkOutTime.value = DateFormat("HH:mm:ss").format(currentTime);
 
-      // Cek apakah halaman history sedang aktif, jika iya, refresh datanya.
+    try {
+      // 2. Kirim permintaan ke server
+      await AttendanceService.checkOut();
+
+      // 3. Panggil refresh ringan (opsional, karena checkout tidak mengubah summary)
+      // await _updateMonthlySummary(); // Bisa di-uncomment jika ada logika yang berubah
+
+      Get.snackbar(
+        "Berhasil",
+        "Check-out telah berhasil dicatat.",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
       if (Get.isRegistered<AttendanceHistoryListController>()) {
-        final historyController = Get.find<AttendanceHistoryListController>();
-        historyController.getAttendanceList();
+        Get.find<AttendanceHistoryListController>().getAttendanceList();
       }
+    } catch (e) {
+      // 4. Rollback: Kembalikan UI jika gagal
+      checkOutTime.value = oldCheckOutTime;
+      Get.snackbar(
+        "Gagal",
+        "Gagal melakukan check-out.",
+        backgroundColor: Colors.red.shade600,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 }

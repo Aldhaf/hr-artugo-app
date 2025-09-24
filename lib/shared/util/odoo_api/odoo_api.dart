@@ -9,6 +9,56 @@ class OdooApi {
   static OdooSession? session;
   static int? employeeId;
 
+  static Future<List<dynamic>> getDailyWorkedHours(
+      String startDate, String endDate) async {
+    final url = "${config['host']!}/api/get_daily_hours";
+    final dio = Dio();
+    final String? sessionId = OdooApi.session?.id;
+
+    if (sessionId == null || sessionId.isEmpty) {
+      throw Exception("Sesi tidak ditemukan.");
+    }
+    dio.options.headers['Cookie'] = 'session_id=$sessionId';
+
+    try {
+      // Bungkus data Anda di dalam sebuah map dengan key 'params'
+      final response = await dio.post(url, data: {
+        'params': {
+          'start_date': startDate,
+          'end_date': endDate,
+        }
+      });
+      // API Odoo kita mengembalikan list di dalam 'result'
+      return response.data['result'];
+    } on DioException catch (e) {
+      print("Error fetching daily hours: ${e.response?.data}");
+      throw Exception("Gagal mengambil data jam kerja harian.");
+    }
+  }
+
+  static Future<Map<String, dynamic>> getWorkProfile() async {
+    final url = "${config['host']!}/api/get_work_profile";
+    final dio = Dio();
+    final String? sessionId = OdooApi.session?.id;
+
+    if (sessionId == null || sessionId.isEmpty) {
+      throw Exception("Sesi tidak ditemukan. Silakan login ulang.");
+    }
+
+    dio.options.headers['Cookie'] = 'session_id=$sessionId';
+
+    try {
+      final response = await dio.post(url, data: {});
+      // --- PERUBAHAN UTAMA DI SINI ---
+      // Kembalikan hanya bagian 'result' dari respons
+      return response.data['result'];
+      // -----------------------------
+    } on DioException catch (e) {
+      print("Error fetching work profile: ${e.response?.data}");
+      throw Exception("Gagal mengambil profil kerja dari server.");
+    }
+  }
+
   // Fungsi baru untuk upload absensi dengan foto menggunakan Dio
   static Future<void> createAttendanceWithPhoto({
     required Position position,
