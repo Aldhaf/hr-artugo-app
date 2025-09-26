@@ -49,5 +49,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Aplikasi ini membutuhkan akses lokasi untuk mencatat kehadiran Anda di tempat yang benar.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Aplikasi ini membutuhkan akses lokasi untuk mencatat kehadiran Anda di tempat yang benar.</string>
 	</dict>
 </plist>

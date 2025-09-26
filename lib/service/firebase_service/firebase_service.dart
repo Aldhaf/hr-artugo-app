@@ -2,8 +2,9 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart'; // Import untuk kDebugMode
 import 'package:get/get.dart';
-import 'package:hr_artugo_app/core.dart' hide Get; // Untuk OdooApi
+import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
 import 'package:hr_artugo_app/service/local_notification_service/local_notification_service.dart';
 import 'package:hr_artugo_app/service/notification_preference_service/notification_preference_service.dart';
@@ -19,27 +20,56 @@ class FirebaseService {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> initialize() async {
-    // 1. Minta izin dari pengguna (iOS & Android 13+)
+    // 1. Minta izin dari pengguna
     await _firebaseMessaging.requestPermission();
 
-    // 2. Dapatkan FCM Token dan kirim ke server
-    final fcmToken = await _firebaseMessaging.getToken();
+    String? fcmToken;
+
+    // --- PERUBAHAN UTAMA DI SINI ---
+    // Gunakan try-catch untuk menangani error APNS di simulator
+    try {
+      // Hanya coba dapatkan APNS token jika BUKAN di simulator
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+        // Meminta token APNS secara eksplisit
+        await _firebaseMessaging.getAPNSToken();
+      }
+      // Dapatkan FCM token universal
+      fcmToken = await _firebaseMessaging.getToken();
+    } on FirebaseException catch (e) {
+      // Jika error adalah 'apns-token-not-set' (kasus simulator),
+      // kita tangkap, cetak peringatan, dan biarkan fcmToken tetap null.
+      if (e.code == 'apns-token-not-set') {
+        print(
+            "⚠️ APNS token tidak tersedia. Ini wajar terjadi di Simulator iOS.");
+        print(
+            "⚠️ Fitur notifikasi tidak akan berfungsi, proses login dilanjutkan.");
+      } else {
+        // Jika ada error Firebase lain, kita lempar kembali
+        rethrow;
+      }
+    }
+    // --------------------------------
+
+    // Jika setelah semua proses fcmToken masih null, hentikan proses notifikasi
+    if (fcmToken == null) {
+      _setupListeners(); // Tetap setup listener agar tidak crash di tempat lain
+      return;
+    }
+
     print("====================================");
-    print("FCM Token: $fcmToken"); // Anda akan butuh ini untuk tes
+    print("FCM Token: $fcmToken");
     print("====================================");
 
-    if (fcmToken != null && OdooApi.session != null) {
+    if (OdooApi.session != null) {
       await OdooApi.saveFcmToken(fcmToken);
     }
 
-    // Dengarkan jika token diperbarui oleh Firebase
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
       if (OdooApi.session != null) {
         OdooApi.saveFcmToken(newToken);
       }
     });
 
-    // 3. Setup listener untuk notifikasi
     _setupListeners();
   }
 
