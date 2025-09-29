@@ -70,6 +70,16 @@ class ProfileView extends StatelessWidget {
                     label: "About App",
                     onTap: () => Get.toNamed('/about_app'),
                   ),
+                  _buildProfileMenuItem(
+                    icon: Icons.gavel_outlined,
+                    label: "Terms & Conditions",
+                    onTap: () => Get.toNamed('/terms_and_conditions'),
+                  ),
+                  _buildProfileMenuItem(
+                    icon: Icons.shield_outlined,
+                    label: "Privacy Policy",
+                    onTap: () => Get.toNamed('/privacy_policy'),
+                  ),
                   const Divider(),
                   _buildProfileMenuItem(
                     icon: Icons.logout,

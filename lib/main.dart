@@ -19,6 +19,8 @@ import 'package:hr_artugo_app/service/local_notification_service/local_notificat
 import 'package:hr_artugo_app/module/time_off_detail/bindings/time_off_detail_binding.dart';
 import 'package:hr_artugo_app/module/time_off_detail/view/time_off_detail_view.dart';
 import 'package:hr_artugo_app/module/login/binding/login_binding.dart';
+import 'package:hr_artugo_app/module/terms_and_conditions/view/terms_view.dart';
+import 'package:hr_artugo_app/module/privacy_policy/view/privacy_policy_view.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -87,6 +89,14 @@ class MainApp extends StatelessWidget {
         GetPage(
           name: '/notification_settings', // Nama route baru
           page: () => const NotificationSettingsView(),
+        ),
+        GetPage(
+          name: '/terms_and_conditions',
+          page: () => const TermsView(),
+        ),
+        GetPage(
+          name: '/privacy_policy',
+          page: () => const PrivacyPolicyView(),
         ),
       ],
     );
