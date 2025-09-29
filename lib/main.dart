@@ -9,6 +9,8 @@ import 'package:hr_artugo_app/module/about_app/view/about_app_view.dart';
 import 'package:hr_artugo_app/module/notification_settings/view/notification_settings_view.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'firebase_options.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 
 // Import semua halaman dan binding yang diperlukan
 import 'package:hr_artugo_app/module/notification/bindings/notification_binding.dart';
@@ -24,18 +26,21 @@ import 'package:hr_artugo_app/module/privacy_policy/view/privacy_policy_view.dar
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-  // 3. Perintahkan splash screen native untuk TETAP TAMPIL
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // 4. Lakukan semua proses inisialisasi yang butuh waktu di sini
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Anda bisa menambahkan await lain di sini jika perlu
-  // await OdooApi.someInitialSetup();
-  // await someOtherService.init();
+  if (kDebugMode) {
+    // Nonaktifkan Crashlytics saat dalam mode debug
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+  } else {
+    // Aktifkan Crashlytics untuk mode release
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+    // Atur handler untuk menangkap error Flutter
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  }
 
   LocalNotificationService.initialize();
   Get.put(NotificationController(), permanent: true);
@@ -43,8 +48,6 @@ void main() async {
   // Jalankan aplikasi
   runApp(const MainApp());
 
-  // 5. SETELAH SEMUANYA SIAP, hapus splash screen
-  // Tambahkan sedikit delay untuk memastikan frame pertama sudah ter-render
   Future.delayed(Duration(milliseconds: 200), () {
     FlutterNativeSplash.remove();
   });

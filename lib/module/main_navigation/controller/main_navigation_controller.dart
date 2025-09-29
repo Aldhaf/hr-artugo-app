@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class MainNavigationController extends GetxController {
   // Variabel untuk menyimpan index tab yang aktif, dibuat reaktif.
@@ -9,6 +10,8 @@ class MainNavigationController extends GetxController {
 
   //Tambah PageController
   late PageController pageController;
+  
+  final screenNames = ['Dashboard', 'AttendanceHistory', 'Profile'];
 
   @override
   void onInit() {
@@ -29,5 +32,9 @@ class MainNavigationController extends GetxController {
     selectedIndex.value = index;
     // Perintahkan PageView untuk pindah halaman tanpa animasi
     pageController.jumpToPage(index);
+
+    if (index < screenNames.length) {
+      FirebaseAnalytics.instance.logScreenView(screenName: screenNames[index]);
+    }
   }
 }

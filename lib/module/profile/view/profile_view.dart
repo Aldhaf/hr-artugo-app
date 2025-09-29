@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import '../model/profile_model.dart';
 import '/core/data_state.dart';
 import '../controller/profile_controller.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({Key? key}) : super(key: key);
@@ -40,54 +41,66 @@ class ProfileView extends StatelessWidget {
           // Tampilkan konten jika sukses
           if (state is DataSuccess<Profile>) {
             final profile = state.data;
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20),
-                  _buildProfileAvatar(profile),
-                  const SizedBox(height: 16),
-                  Text(
-                    profile.userName,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    profile.jobTitle,
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 32),
-                  const Divider(),
-                  _buildProfileMenuItem(
-                    icon: Icons.notifications_outlined,
-                    label: "Notification Settings",
-                    onTap: () => Get.toNamed('/notification_settings'),
-                  ),
-                  _buildProfileMenuItem(
-                    icon: Icons.info_outline,
-                    label: "About App",
-                    onTap: () => Get.toNamed('/about_app'),
-                  ),
-                  _buildProfileMenuItem(
-                    icon: Icons.gavel_outlined,
-                    label: "Terms & Conditions",
-                    onTap: () => Get.toNamed('/terms_and_conditions'),
-                  ),
-                  _buildProfileMenuItem(
-                    icon: Icons.shield_outlined,
-                    label: "Privacy Policy",
-                    onTap: () => Get.toNamed('/privacy_policy'),
-                  ),
-                  const Divider(),
-                  _buildProfileMenuItem(
-                    icon: Icons.logout,
-                    label: "Logout",
-                    color: Colors.red,
-                    onTap: () => controller.logout(),
-                  ),
-                ],
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildProfileAvatar(profile),
+                    const SizedBox(height: 16),
+                    Text(
+                      profile.userName,
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      profile.jobTitle,
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 32),
+                    const Divider(),
+                    _buildProfileMenuItem(
+                      icon: Icons.notifications_outlined,
+                      label: "Notification Settings",
+                      onTap: () => Get.toNamed('/notification_settings'),
+                    ),
+                    _buildProfileMenuItem(
+                      icon: Icons.info_outline,
+                      label: "About App",
+                      onTap: () => Get.toNamed('/about_app'),
+                    ),
+                    _buildProfileMenuItem(
+                      icon: Icons.gavel_outlined,
+                      label: "Terms & Conditions",
+                      onTap: () => Get.toNamed('/terms_and_conditions'),
+                    ),
+                    _buildProfileMenuItem(
+                      icon: Icons.shield_outlined,
+                      label: "Privacy Policy",
+                      onTap: () => Get.toNamed('/privacy_policy'),
+                    ),
+                    const Divider(),
+                    _buildProfileMenuItem(
+                      icon: Icons.bug_report,
+                      label: "Test Crashlytics",
+                      color: Colors.orange,
+                      onTap: () {
+                        print(
+                            "Tombol Test Crashlytics ditekan. Aplikasi akan crash.");
+                        FirebaseCrashlytics.instance.crash();
+                      },
+                    ),
+                    _buildProfileMenuItem(
+                      icon: Icons.logout,
+                      label: "Logout",
+                      color: Colors.red,
+                      onTap: () => controller.logout(),
+                    ),
+                  ],
+                ),
               ),
             );
           }

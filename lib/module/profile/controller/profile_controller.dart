@@ -4,8 +4,8 @@ import '../../../core/data_state.dart';
 import '../../../service/cache_service/cache_service.dart';
 import '../../../service/storage_service/storage_service.dart';
 import '../model/profile_model.dart';
-// Import yang kita butuhkan
-import '../../../service/work_profile_service/work_profile_service.dart'; 
+import '../../../service/work_profile_service/work_profile_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class ProfileController extends GetxController {
   // Gunakan satu state untuk mengelola semua kondisi (loading, success, error)
@@ -27,22 +27,30 @@ class ProfileController extends GetxController {
     // Ambil data dari service terpusat
     final profile = Get.find<WorkProfileService>().workProfile;
 
-    print("[DEBUG-PROFILE] Mengambil profil dari service. Jabatan: ${profile?.jobTitle}");
+    print(
+        "[DEBUG-PROFILE] Mengambil profil dari service. Jabatan: ${profile?.jobTitle}");
 
     if (profile != null) {
       final uiProfile = Profile(
         userName: profile.employeeName,
         jobTitle: profile.jobTitle ?? 'No Job Title',
-        imageUrl: OdooApi.session != null ? OdooApi.getUserImageUrl(OdooApi.session!.userId) : null,
+        imageUrl: OdooApi.session != null
+            ? OdooApi.getUserImageUrl(OdooApi.session!.userId)
+            : null,
       );
       profileState.value = DataSuccess(uiProfile);
     } else {
-      profileState.value = const DataError("Gagal memuat profil. Silakan coba login ulang.");
+      profileState.value =
+          const DataError("Gagal memuat profil. Silakan coba login ulang.");
     }
   }
 
   // FUNGSI LOGOUT YANG SUDAH DIPERBAIKI DAN BENAR
   Future<void> logout() async {
+    FirebaseAnalytics.instance.logEvent(name: 'logout');
+    // Hapus User ID saat logout
+    FirebaseAnalytics.instance.setUserId(id: null);
+
     Get.find<WorkProfileService>().clearProfile();
 
     // 1. Bersihkan cache dan kredensial (Langkah ini sudah benar)

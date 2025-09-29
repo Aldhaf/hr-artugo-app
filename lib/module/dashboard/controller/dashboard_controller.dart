@@ -6,6 +6,8 @@ import '../../../service/cache_service/cache_service.dart';
 import '../../../service/work_profile_service/work_profile_service.dart';
 import '../../../model/work_profile_model.dart';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
+
 // Tambahkan 'with WidgetsBindingObserver'
 class DashboardController extends GetxController with WidgetsBindingObserver {
   final _cacheService = CacheService();
@@ -107,7 +109,9 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
   // --- FUNGSI BARU UNTUK REFRESH RINGAN ---
   Future<void> _updateMonthlySummary() async {
     try {
+      // Panggil getMonthSummary dari instance tersebut
       final summary = await AttendanceService.getMonthSummary();
+
       presentDays.value = summary['present'] ?? 0;
       absentDays.value = summary['absent'] ?? 0;
       lateInDays.value = summary['late'] ?? 0;
@@ -118,7 +122,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
   // --- Fungsi Utama untuk Memuat Semua Data ---
   Future<void> refreshData() async {
-    // Hanya tampilkan loading jika tidak ada cache sama sekali
     if (await _cacheService.getDashboardCache() == null) {
       isLoading.value = true;
     }
@@ -238,6 +241,15 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       // 2. Kirim permintaan ke server di latar belakang
       await AttendanceService.checkin();
 
+      // Catat peristiwa 'check_in' ke Firebase Analytics
+      FirebaseAnalytics.instance.logEvent(
+        name: 'attendance_check_in',
+        parameters: {
+          'employee_name': userName.value,
+          'check_in_time': checkInTime.value,
+        },
+      );
+
       // 3. Setelah sukses, panggil refresh ringan untuk data bulanan
       await _updateMonthlySummary();
 
@@ -280,6 +292,13 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
       // 3. Panggil refresh ringan (opsional, karena checkout tidak mengubah summary)
       // await _updateMonthlySummary(); // Bisa di-uncomment jika ada logika yang berubah
+      FirebaseAnalytics.instance.logEvent(
+        name: 'attendance_check_out',
+        parameters: {
+          'employee_name': userName.value,
+          'check_out_time': checkOutTime.value,
+        },
+      );
 
       Get.snackbar(
         "Berhasil",

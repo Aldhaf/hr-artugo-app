@@ -7,6 +7,7 @@ import '../../../service/firebase_service/firebase_service.dart';
 import '../../../module/notification/controller/notification_controller.dart';
 import '../../../service/work_profile_service/work_profile_service.dart';
 import '../../../model/work_profile_model.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class LoginController extends GetxController {
   final _storageService = StorageService();
@@ -85,6 +86,12 @@ class LoginController extends GetxController {
         await _storageService.clearCredentials();
       }
 
+      // Catat peristiwa login setelah berhasil
+      FirebaseAnalytics.instance.logLogin(loginMethod: 'email');
+      // Set User ID agar semua event berikutnya terhubung ke pengguna ini
+      FirebaseAnalytics.instance
+          .setUserId(id: OdooApi.session?.userId.toString());
+
       print(
           "Login berhasil, menjalankan tugas-tugas post-login secara berurutan...");
 
@@ -112,7 +119,7 @@ class LoginController extends GetxController {
       print("   -> Nama Karyawan: ${workProfile.employeeName}");
       print("   -> Jabatan: ${workProfile.jobTitle}");
       print("=========================================================");
-      
+
       final workProfileService = Get.find<WorkProfileService>();
       workProfileService.setProfile(workProfile);
       print("[DEBUG] Profil kerja telah disimpan di WorkProfileService.");
