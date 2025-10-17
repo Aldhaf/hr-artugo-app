@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 
 ThemeData getDefaultTheme() {
   // Ganti warna utama menjadi warna ungu yang Anda inginkan
-  const primaryColor = Color(0xFF9027E9); // <-- PERUBAHAN DI SINI
+  const primaryColor = Color(0xFFA27BFF);
 
   return ThemeData(
     // --- Warna Dasar ---
     primaryColor: primaryColor,
     scaffoldBackgroundColor: const Color(0xfff5f5f5),
-    colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: primaryColor,
+      brightness: Brightness.light, // Tentukan ini untuk tema terang
+    ),
 
     // --- Font / Tipografi ---
     textTheme: GoogleFonts.poppinsTextTheme(),

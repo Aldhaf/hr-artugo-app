@@ -1,11 +1,10 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CacheService {
-
+class CacheService extends GetxService {
   static const _keyDashboardCache = 'dashboard_cache';
 
-  // --- TAMBAHKAN DUA FUNGSI BARU INI ---
   Future<void> saveMap(String key, Map<String, dynamic> value) async {
     final prefs = await SharedPreferences.getInstance();
     // Ubah map menjadi string JSON sebelum disimpan
@@ -40,7 +39,6 @@ class CacheService {
     return null;
   }
   
-  // --- METHOD BARU DI SINI ---
   /// Menghapus semua cache yang dikelola oleh service ini.
   Future<void> clearAllCache() async {
     final prefs = await SharedPreferences.getInstance();

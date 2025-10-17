@@ -18,6 +18,7 @@ class DataSuccess<T> extends DataState<T> {
 // State yang merepresentasikan kondisi saat terjadi error.
 // Berisi pesan error.
 class DataError<T> extends DataState<T> {
-  final String message;
-  const DataError(this.message);
+  // Kita sepakat menggunakan 'error'
+  final String? error;
+  const DataError(this.error);
 }

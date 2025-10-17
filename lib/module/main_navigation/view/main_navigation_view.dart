@@ -4,6 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
+import 'package:hr_artugo_app/module/my_schedule/view/my_schedule_view.dart';
 
 class MainNavigationView extends StatelessWidget {
   const MainNavigationView({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class MainNavigationView extends StatelessWidget {
       DashboardView(),
       const AttendanceHistoryListView(),
       // const TimeOffHistoryListView(), // Dinonaktifkan sementara
+      const MyScheduleView(),
       ProfileView(),
     ];
 
@@ -24,7 +26,7 @@ class MainNavigationView extends StatelessWidget {
         // Logika WillPopScope tidak perlu diubah
         if (controller.selectedIndex.value != 0) {
           controller.onTabTapped(0);
-          return false; 
+          return false;
         }
 
         bool exit = await Get.dialog(
@@ -34,19 +36,17 @@ class MainNavigationView extends StatelessWidget {
                 const Text('Apakah Anda yakin ingin keluar dari aplikasi?'),
             actions: [
               TextButton(
-                onPressed: () =>
-                    Get.back(result: false),
+                onPressed: () => Get.back(result: false),
                 child: const Text('Tidak'),
               ),
               TextButton(
-                onPressed: () =>
-                    Get.back(result: true), 
+                onPressed: () => Get.back(result: true),
                 child: const Text('Ya'),
               ),
             ],
           ),
         );
-        
+
         return exit ?? false;
       },
       child: Scaffold(
@@ -74,11 +74,11 @@ class MainNavigationView extends StatelessWidget {
                       fontSize: 12,
                       color: Colors.white,
                       fontWeight: FontWeight.w600),
-                  // --- PERUBAHAN 2: Hapus GButton untuk Time Off dari daftar ---
                   tabs: const [
                     GButton(icon: Icons.dashboard, text: 'Dashboard'),
                     GButton(icon: Icons.calendar_month, text: 'Attendance'),
                     // GButton(icon: Icons.access_time_filled, text: 'Time Off'), // Dinonaktifkan sementara
+                    GButton(icon: Icons.edit_calendar_outlined, text: 'Jadwal'),
                     GButton(icon: Icons.person, text: 'User'),
                   ],
                   selectedIndex: controller.selectedIndex.value,

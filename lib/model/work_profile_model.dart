@@ -3,12 +3,14 @@ class WorkProfile {
   final String? jobTitle;
   final WorkPattern? workPattern;
   final StoreLocation? storeLocation;
+  final String? imageUrl;
 
   WorkProfile({
     required this.employeeName,
     this.jobTitle,
     this.workPattern,
     this.storeLocation,
+    this.imageUrl,
   });
 
   factory WorkProfile.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class WorkProfile {
               storeLocationData['name'] != false)
           ? StoreLocation.fromJson(storeLocationData)
           : null,
+      imageUrl: json['imageUrl'],
     );
   }
 
@@ -91,11 +94,4 @@ class StoreLocation {
       'longitude': longitude,
     };
   }
-}
-
-class DailyWorkHour {
-  final DateTime date;
-  final double hours;
-
-  DailyWorkHour({required this.date, required this.hours});
 }

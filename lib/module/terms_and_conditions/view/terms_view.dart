@@ -24,7 +24,7 @@ class TermsView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              "Harap baca Syarat dan Ketentuan Layanan (\"Ketentuan\") ini dengan saksama sebelum menggunakan aplikasi Arttend (\"Layanan\") yang dioperasikan oleh PT Artugo (\"Kami\").\n\nAkses Anda ke dan penggunaan Layanan ini mengkondisikan penerimaan dan kepatuhan Anda terhadap Ketentuan ini. Ketentuan ini berlaku untuk semua karyawan, pengguna, dan pihak lain yang mengakses atau menggunakan Layanan.\n\nDengan mengakses atau menggunakan Layanan, Anda setuju untuk terikat oleh Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari ketentuan ini, maka Anda tidak dapat mengakses Layanan.",
+              "Harap baca Syarat dan Ketentuan Layanan (\"Ketentuan\") ini dengan saksama sebelum menggunakan aplikasi ArtuGo (\"Layanan\") yang dioperasikan oleh PT Artugo (\"Kami\").\n\nAkses Anda ke dan penggunaan Layanan ini mengkondisikan penerimaan dan kepatuhan Anda terhadap Ketentuan ini. Ketentuan ini berlaku untuk semua karyawan, pengguna, dan pihak lain yang mengakses atau menggunakan Layanan.\n\nDengan mengakses atau menggunakan Layanan, Anda setuju untuk terikat oleh Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari ketentuan ini, maka Anda tidak dapat mengakses Layanan.",
               style: GoogleFonts.poppins(fontSize: 15, height: 1.5),
             ),
             const SizedBox(height: 24),
@@ -32,7 +32,7 @@ class TermsView extends StatelessWidget {
             _buildSection(
               title: "1. Deskripsi Layanan",
               content:
-                  "Arttend adalah aplikasi Sistem Informasi Sumber Daya Manusia (HRIS) internal yang dirancang untuk memfasilitasi dan menyederhanakan proses administrasi karyawan, termasuk namun tidak terbatas pada:\n- Pencatatan kehadiran (check-in dan check-out).\n- Manajemen pengajuan cuti (time off).\n- Melihat riwayat absensi.\n- Menerima notifikasi dan pengumuman internal perusahaan.",
+                  "ArtuGo adalah aplikasi Sistem Informasi Sumber Daya Manusia (HRIS) internal yang dirancang untuk memfasilitasi dan menyederhanakan proses administrasi karyawan, termasuk namun tidak terbatas pada:\n- Pencatatan kehadiran (check-in dan check-out).\n- Manajemen pengajuan cuti (time off).\n- Melihat riwayat absensi.\n- Menerima notifikasi dan pengumuman internal perusahaan.",
               titleColor: primaryColor,
             ),
             

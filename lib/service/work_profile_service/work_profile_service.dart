@@ -1,33 +1,64 @@
 import 'package:get/get.dart';
-import 'package:hr_artugo_app/model/work_profile_model.dart'; 
+import 'package:hr_artugo_app/model/work_profile_model.dart';
+import 'package:hr_artugo_app/shared/util/odoo_api/odoo_api.dart';
 import 'package:hr_artugo_app/service/cache_service/cache_service.dart';
 
 class WorkProfileService extends GetxService {
   final _cacheService = CacheService();
   static const _cacheKey = 'work_profile';
+  final _odooApi = Get.find<OdooApiService>();
 
-  WorkProfile? workProfile;
+  // 2. Deklarasikan variabel reaktif untuk menampung profil
+  final Rxn<WorkProfile> _workProfile = Rxn<WorkProfile>();
+
+  // Buat getter publik agar controller lain bisa mengakses nilainya
+  WorkProfile? get workProfile => _workProfile.value;
 
   Future<WorkProfileService> init() async {
-    // Saat service diinisialisasi, coba muat dari cache
-    final cachedData = await _cacheService.getMap(_cacheKey);
-    if (cachedData != null) {
-      workProfile = WorkProfile.fromJson(cachedData);
-      print("Profil kerja dimuat dari cache.");
-    }
+    // Panggil fungsi fetchProfile yang sudah ada untuk memuat data awal
+    await fetchProfile();
+    // Kembalikan 'this' (instance dari service ini) sesuai yang diharapkan oleh Get.putAsync
     return this;
   }
 
-  void setProfile(WorkProfile profile) {
-    workProfile = profile;
-    // Simpan juga ke cache setiap kali ada data baru
-    _cacheService.saveMap(_cacheKey, profile.toJson());
-    print("Profil kerja disimpan ke service dan cache.");
+  Future<WorkProfile?> fetchProfile() async {
+    try {
+      final profileData = await _odooApi.getWorkProfile();
+      final Map<String, dynamic> data = await _odooApi.getWorkProfile();
+      
+      print("[DEBUG-SERVICE] Raw data dari OdooApi: $data");  // Debug log
+
+      if (data.isNotEmpty && data['error'] == null) {
+
+        // --- LOGIKA IMAGE URL ---
+        if (_odooApi.session != null) {
+          profileData['imageUrl'] = _odooApi.getUserImageUrl(_odooApi.session!.userId);
+        }
+
+        final newProfile = WorkProfile.fromJson(profileData);
+        
+        // Simpan profil baru ke dalam variabel reaktif
+        _workProfile.value = newProfile;
+        return newProfile;
+      } else {
+        clearProfile();
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching work profile: $e");
+      clearProfile();
+      return null;
+    }
   }
-  
+
+  void setProfile(WorkProfile profile) {
+    print("Profil kerja disimpan ke service.");
+    _workProfile.value = profile;
+  }
+
   void clearProfile() {
-    workProfile = null;
+    _workProfile.value = null;
     _cacheService.clearAllCache();
-    print("Profil kerja dan semua cache telah dibersihkan.");
+    print("Profil kerja telah dibersihkan.");
   }
 }

@@ -1,9 +1,9 @@
-// lib/module/attendance_history_list/controller/attendance_history_list_controller.dart
-
 import 'package:get/get.dart';
-import 'package:hr_artugo_app/core.dart';
+import 'package:hr_artugo_app/core.dart' hide Get;
 
 class AttendanceHistoryListController extends GetxController {
+  final _attendanceService = Get.find<AttendanceService>();
+
   // Gunakan List<Map> yang reaktif untuk menampung data absensi
   var items = <Map>[].obs;
   var loading = true.obs;
@@ -16,7 +16,7 @@ class AttendanceHistoryListController extends GetxController {
 
   getAttendanceList() async {
     loading.value = true;
-    var history = await AttendanceService.getHistory();
+    var history = await _attendanceService.getHistory();
     items.value = List<Map>.from(history);
     loading.value = false;
   }

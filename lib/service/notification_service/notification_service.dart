@@ -1,14 +1,23 @@
-// lib/service/notification_service.dart
+import 'package:get/get.dart';
+import 'package:hr_artugo_app/shared/util/odoo_api/odoo_api.dart';
+import '../../module/notification/model/notification_model.dart';
 
-import 'package:hr_artugo_app/core.dart'; // Sesuaikan dengan path OdooApi Anda
-import '../../module/notification/model/notification_model.dart'; // Impor model notifikasi
+class NotificationService extends GetxService {
+  final _odooApi = Get.find<OdooApiService>();
 
-class NotificationService {
+  Future<void> markAllAsRead(List<int> ids) async {
+    return await _odooApi.markNotificationsAsRead(ids);
+  }
+
+  Future<bool> deleteNotification(int id) async {
+    return await _odooApi.deleteNotification(id);
+  }
+
   /// Mengambil daftar notifikasi untuk pengguna yang sedang login.
-  static Future<List<NotificationModel>> getNotifications() async {
+  Future<List<NotificationModel>> getNotifications() async {
     try {
       // 1. Ambil UID dari sesi dan cek apakah ada
-      final int? userId = OdooApi.session?.userId;
+      final int? userId = _odooApi.session?.userId;
 
       // Jika tidak ada user yang login, kembalikan list kosong
       if (userId == null) {
@@ -17,7 +26,7 @@ class NotificationService {
       }
 
       // Panggil API Odoo
-      var response = await OdooApi.get(
+      var response = await _odooApi.get(
         model: "hr.notification",
         fields: [
           "id",
@@ -40,7 +49,7 @@ class NotificationService {
       List<NotificationModel> notifications = [];
       for (var item in response) {
         notifications.add(NotificationModel(
-          id: item['id'].toString(""),
+          id: item['id'] as int,
           title: item['name'] ?? 'Tanpa Judul',
           body: item['body'] ?? 'Tanpa deskripsi',
           // Odoo mengembalikan tanggal dalam format UTC, kita parse
@@ -60,7 +69,7 @@ class NotificationService {
   }
 
   /// Helper untuk mengubah string dari Odoo menjadi Enum
-  static NotificationType _parseNotificationType(String? typeString) {
+  NotificationType _parseNotificationType(String? typeString) {
     switch (typeString) {
       case 'leave_approval':
         return NotificationType.leaveApproval;

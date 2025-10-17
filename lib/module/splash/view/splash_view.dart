@@ -20,8 +20,10 @@ class _SplashViewState extends State<SplashView> {
   Future<void> _initializeApp() async {
     // Jeda agar animasi sempat terlihat
     await Future.delayed(const Duration(seconds: 3));
+    
+    final authService = Get.find<AuthService>();
 
-    bool isLoggedIn = await AuthService.isLoggedIn();
+    bool isLoggedIn = await authService.isLoggedIn();
 
     if (isLoggedIn) {
       Get.offAllNamed('/dashboard');

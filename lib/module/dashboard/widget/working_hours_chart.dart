@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hr_artugo_app/model/work_profile_model.dart';
 import 'package:hr_artugo_app/module/dashboard/controller/dashboard_controller.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
-
-// Import model yang kita butuhkan
-import 'package:hr_artugo_app/model/work_profile_model.dart'; 
+import '../model/daily_work_hour_model.dart';
 
 class WorkingHoursChart extends StatelessWidget {
   const WorkingHoursChart({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Ambil instance controller
     final controller = Get.find<DashboardController>();
 
     return Card(
@@ -24,46 +22,134 @@ class WorkingHoursChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Judul Kartu
-            const Text(
-              "Working Hours", 
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
+            // --- Header Section ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Working Hours",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Obx(() => OutlinedButton.icon(
+                      onPressed: () => controller.selectDateRange(
+                          context), // Panggil fungsi dari controller
+                      icon: const Icon(Icons.calendar_today_outlined, size: 16),
+                      label: Text(controller
+                          .chartDateRangeText.value), // Gunakan teks dinamis
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                    )),
+              ],
             ),
             const SizedBox(height: 16),
 
-            // Widget Chart
+            // --- Summary Section ---
+            Obx(() => _buildSummaryRow(
+                  icon: Icons.timer_outlined,
+                  label: "Total Hours",
+                  value: controller.totalHoursSummary.value,
+                  color: Colors.blue.shade700,
+                )),
+            const SizedBox(height: 8),
+            Obx(() => _buildSummaryRow(
+                  icon: Icons.more_time_outlined,
+                  label: "Overtime",
+                  value: controller.overtimeSummary.value,
+                  color: Colors.purple.shade700,
+                )),
+            const SizedBox(height: 16),
+
+            // --- Chart Section (FIXED) ---
             Obx(() {
-              // Jika data chart masih kosong, tampilkan pesan
               if (controller.dailyHours.isEmpty) {
                 return const SizedBox(
-                  height: 150,
-                  child: Center(child: Text("No working hour data for this period.")),
-                );
+                    height: 200, child: Center(child: Text("No data")));
               }
-
-              // Jika data ada, tampilkan chart
               return SizedBox(
-                height: 150,
+                height: 200,
                 child: SfCartesianChart(
-                  // Sembunyikan garis grid untuk tampilan yang lebih bersih
                   primaryXAxis: CategoryAxis(
                     majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
                   ),
                   primaryYAxis: NumericAxis(
-                    isVisible: false, // Sembunyikan sumbu Y (angka jam)
+                    minimum: 0,
+                    maximum: 10,
+                    interval: 2,
+                    labelFormat: '{value}h',
+                    majorGridLines:
+                        const MajorGridLines(dashArray: <double>[5, 5]),
+                    axisLine: const AxisLine(width: 0),
                   ),
-                  // Aktifkan tooltip saat bar di-tap
-                  tooltipBehavior: TooltipBehavior(enable: true),
+                  plotAreaBorderWidth: 0,
                   series: <CartesianSeries<DailyWorkHour, String>>[
-                  // -----------------------------
                     ColumnSeries<DailyWorkHour, String>(
                       dataSource: controller.dailyHours,
-                      xValueMapper: (DailyWorkHour data, _) => DateFormat('d MMM').format(data.date),
-                      yValueMapper: (DailyWorkHour data, _) => data.hours,
+                      width: 0.6,
+                      xValueMapper: (DailyWorkHour data, _) =>
+                          DateFormat('E').format(data.date),
+
+                      // Fixed bar height logic
+                      yValueMapper: (DailyWorkHour data, _) {
+                        if (data.status == WorkDayStatus.worked) {
+                          return data.hours;
+                        }
+                        // Use a reasonable height for absent/holiday bars
+                        return 9.0;
+                      },
+
+                      // Bar coloring logic
+                      pointColorMapper: (DailyWorkHour data, _) {
+                        switch (data.status) {
+                          case WorkDayStatus.worked:
+                            return Colors.blue.shade600;
+                          case WorkDayStatus.absent:
+                            return Colors.pink.shade100;
+                          case WorkDayStatus.holiday:
+                            return Colors.grey.shade200;
+                        }
+                      },
                       borderRadius: BorderRadius.circular(8),
-                      dataLabelSettings: const DataLabelSettings(
+
+                      // Fixed label positioning
+                      dataLabelSettings: DataLabelSettings(
                         isVisible: true,
-                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        labelAlignment: ChartDataLabelAlignment.middle,
+                        builder: (dynamic data, dynamic point, dynamic series,
+                            int pointIndex, int seriesIndex) {
+                          final dayData = data as DailyWorkHour;
+
+                          if (dayData.status == WorkDayStatus.absent) {
+                            return Transform.rotate(
+                              angle:
+                                  1.5708, // Rotate 90 degrees clockwise (π/2 radians)
+                              child: const Text(
+                                'Absent',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
+                          }
+                          if (dayData.status == WorkDayStatus.holiday) {
+                            return Transform.rotate(
+                              angle: 1.5708, // Rotate 90 degrees clockwise
+                              child: const Text(
+                                'Holiday',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
                     )
                   ],
@@ -73,6 +159,22 @@ class WorkingHoursChart extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSummaryRow(
+      {required IconData icon,
+      required String label,
+      required String value,
+      required Color color}) {
+    return Row(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(color: Colors.grey)),
+        const Spacer(),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }

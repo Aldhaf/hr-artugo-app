@@ -25,14 +25,14 @@ class AboutAppView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              "ARTTEND",
+              "ArtuGo",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Obx(() => Text(
-              "Versi ${controller.appVersion.value}",
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            )),
+                  "Versi ${controller.appVersion.value}",
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                )),
             const SizedBox(height: 20),
             const Text(
               "Aplikasi absensi dan manajemen HR untuk karyawan.",

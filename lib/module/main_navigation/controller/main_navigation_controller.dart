@@ -10,8 +10,13 @@ class MainNavigationController extends GetxController {
 
   //Tambah PageController
   late PageController pageController;
-  
-  final screenNames = ['Dashboard', 'AttendanceHistory', 'Profile'];
+
+  final screenNames = [
+    'Dashboard',
+    'AttendanceHistory',
+    'MySchedule',
+    'Profile'
+  ];
 
   @override
   void onInit() {

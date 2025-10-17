@@ -1,8 +1,8 @@
 // lib/service/storage_service.dart
-
+import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class StorageService {
+class StorageService extends GetxService {
   final _secureStorage = const FlutterSecureStorage();
 
   static const _keyEmail = 'email';

@@ -29,8 +29,8 @@ class LoginView extends StatelessWidget {
 
               // --- Bagian Header ---
               Image.asset(
-                "assets/icon/app_icon_home.png", // Ganti dengan path logo Anda
-                width: 60.0,
+                "assets/icon/icon_login_view.png",
+                width: 80.0,
               ),
               const SizedBox(height: 20.0),
               RichText(
@@ -43,7 +43,7 @@ class LoginView extends StatelessWidget {
                   ),
                   children: <TextSpan>[
                     TextSpan(
-                      text: 'ARTTEND',
+                      text: 'ArtuGo',
                       style: TextStyle(
                         color: Theme.of(context)
                             .primaryColor, // Ambil warna aksen dari theme

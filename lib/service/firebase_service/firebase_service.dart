@@ -2,12 +2,13 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart'; // Import untuk kDebugMode
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
 import 'package:hr_artugo_app/service/local_notification_service/local_notification_service.dart';
 import 'package:hr_artugo_app/service/notification_preference_service/notification_preference_service.dart';
+import 'package:hr_artugo_app/shared/util/odoo_api/odoo_api.dart';
 
 // Fungsi ini HARUS berada di luar kelas (top-level function)
 @pragma('vm:entry-point')
@@ -18,6 +19,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class FirebaseService {
   final _firebaseMessaging = FirebaseMessaging.instance;
+  final _odooApi = Get.find<OdooApiService>();
+  final _notificationPrefService = Get.find<NotificationPreferenceService>();
 
   Future<void> initialize() async {
     // 1. Minta izin dari pengguna
@@ -25,7 +28,6 @@ class FirebaseService {
 
     String? fcmToken;
 
-    // --- PERUBAHAN UTAMA DI SINI ---
     // Gunakan try-catch untuk menangani error APNS di simulator
     try {
       // Hanya coba dapatkan APNS token jika BUKAN di simulator
@@ -60,13 +62,13 @@ class FirebaseService {
     print("FCM Token: $fcmToken");
     print("====================================");
 
-    if (OdooApi.session != null) {
-      await OdooApi.saveFcmToken(fcmToken);
+    if (_odooApi.session != null) {
+      await _odooApi.saveFcmToken(fcmToken);
     }
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
-      if (OdooApi.session != null) {
-        OdooApi.saveFcmToken(newToken);
+      if (_odooApi.session != null) {
+        _odooApi.saveFcmToken(newToken);
       }
     });
 
@@ -87,7 +89,7 @@ class FirebaseService {
 
         // 1. Cek apakah pengguna mengizinkan tipe notifikasi ini
         final bool isEnabled =
-            await NotificationPreferenceService.isNotificationTypeEnabled(
+            await _notificationPrefService.isNotificationTypeEnabled(
                 notificationType);
 
         // 2. Jika tidak diizinkan, hentikan semua proses selanjutnya
@@ -121,7 +123,6 @@ class FirebaseService {
       }
     });
 
-    // --- PERUBAHAN DI SINI ---
     // Saat PENGGUNA MENEKAN notifikasi
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('Notifikasi ditekan dengan data: ${message.data}');

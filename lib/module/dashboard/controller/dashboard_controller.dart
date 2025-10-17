@@ -1,166 +1,236 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core/data_state.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
-import '../../../service/cache_service/cache_service.dart';
 import '../../../service/work_profile_service/work_profile_service.dart';
-import '../../../model/work_profile_model.dart';
-
+import '../../../service/attendance_service/attendance_service.dart';
+import '../model/daily_work_hour_model.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
-// Tambahkan 'with WidgetsBindingObserver'
+enum AttendancePeriod { thisMonth, lastMonth }
+
 class DashboardController extends GetxController with WidgetsBindingObserver {
-  final _cacheService = CacheService();
+  final _workProfileService = Get.find<WorkProfileService>();
+  final _attendanceService = Get.find<AttendanceService>();
 
-  // --- Variabel State ---
+  // --- Variabel State untuk UI ---
+  var isLoading = true.obs;
   var userName = "".obs;
-  var locationState = Rx<DataState<String>>(const DataLoading());
+  var jobTitle = "".obs;
   var checkInTime = "N/A".obs;
   var checkOutTime = "N/A".obs;
-  var workingHours = "00:00:00".obs;
-  var presentDays = 0.obs;
-  var absentDays = 0.obs;
-  var lateInDays = 0.obs;
-  var isLoading = true.obs;
   var hasCheckedInToday = false.obs;
-  var workPatternInfo = "".obs;
-  var storeLocationInfo = "".obs;
-  var jobTitle = "".obs;
+  var workPatternInfo = "Belum ada jadwal".obs;
+  var hasApprovedScheduleToday = false.obs;
+  var locationState = Rx<DataState<String>>(const DataLoading());
+
+  // --- Variabel untuk Ringkasan Bulanan ---
+  var presentDays = 0.obs;
+  var lateInDays = 0.obs;
+  var absentDays = 0.obs;
+
+  // --- Variabel untuk Grafik Jam Kerja ---
   var dailyHours = <DailyWorkHour>[].obs;
+  var totalHoursSummary = "00:00 hrs".obs;
+  var overtimeSummary = "00:00 hrs".obs;
+  var chartStartDate = DateTime.now().subtract(const Duration(days: 6)).obs;
+  var chartEndDate = DateTime.now().obs;
+  var chartDateRangeText = "".obs;
+  var selectedPeriod = AttendancePeriod.thisMonth.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Daftarkan observer
     WidgetsBinding.instance.addObserver(this);
-    // Panggil refresh data pertama kali
-    loadData();
-    refreshLocation();
-    fetchWorkingHoursChart();
+    refreshData(); // Panggil refresh data utama saat inisialisasi
+    _updateDateRangeText();
   }
 
   @override
   void onClose() {
-    // Hapus observer saat controller ditutup
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
   }
 
-  Future<void> fetchWorkingHoursChart() async {
-    try {
-      // Tentukan rentang tanggal, misalnya 7 hari terakhir
-      final endDate = DateTime.now();
-      final startDate = endDate.subtract(const Duration(days: 6));
-      final formatter = DateFormat('yyyy-MM-dd');
-      final String startDateStr = formatter.format(startDate);
-      final String endDateStr = formatter.format(endDate);
-
-      // Panggil API untuk mendapatkan data live
-      final List<dynamic> results =
-          await OdooApi.getDailyWorkedHours(startDateStr, endDateStr);
-
-      print("[DEBUG-CHART] Flutter menerima RAW DATA dari Odoo: $results");
-
-      // Ubah data JSON dari API menjadi List<DailyWorkHour>
-      final List<DailyWorkHour> liveData = results.map((item) {
-        return DailyWorkHour(
-          date: DateTime.parse(item['date']),
-          hours: (item['hours'] as num).toDouble(),
-        );
-      }).toList();
-
-      print(
-          "[DEBUG-CHART] Data setelah di-parsing di Flutter: ${liveData.map((d) => '${d.date}: ${d.hours} jam').toList()}");
-
-      dailyHours.assignAll(liveData);
-    } catch (e) {
-      print("Gagal memuat data chart: $e");
-      dailyHours.clear(); // Kosongkan data jika error
-    }
-  }
-
-  // Fungsi ini akan dipanggil setiap kali state aplikasi berubah
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Jika aplikasi kembali aktif (dari background atau halaman lain)
     if (state == AppLifecycleState.resumed) {
-      print("App resumed, refreshing dashboard...");
-      // Panggil refresh data
-      refreshData();
+      refreshData(); // Selalu segarkan data saat aplikasi kembali aktif
     }
   }
 
-  // --- ALUR LOADING BARU ---
-  void loadData() async {
-    // 1. Coba muat dari cache terlebih dahulu
-    final cachedData = await _cacheService.getDashboardCache();
-    if (cachedData != null) {
-      // Jika ada cache, langsung tampilkan dan matikan loading
-      _updateStateFromMap(cachedData);
-      isLoading.value = false;
-    }
+  // fungsi baru untuk mengubah periode dan memuat ulang data
+  Future<void> changeAttendancePeriod(AttendancePeriod newPeriod) async {
+    if (selectedPeriod.value == newPeriod)
+      return; // Jangan lakukan apa-apa jika pilihannya sama
 
-    // 2. Selalu panggil refreshData untuk mengambil data terbaru dari network
-    // Jika tidak ada cache, UI akan menampilkan loading sampai ini selesai.
-    // Jika ada cache, ini berjalan di latar belakang.
-    await refreshData();
+    selectedPeriod.value = newPeriod;
+    await _refreshMonthlySummary(); // Panggil fungsi refresh yang terpisah
   }
 
-  // --- FUNGSI BARU UNTUK REFRESH RINGAN ---
-  Future<void> _updateMonthlySummary() async {
+  // fungsi terpisah untuk refresh ringkasan bulanan
+  Future<void> _refreshMonthlySummary() async {
     try {
-      // Panggil getMonthSummary dari instance tersebut
-      final summary = await AttendanceService.getMonthSummary();
+      final now = DateTime.now();
+      // Tentukan bulan target berdasarkan pilihan
+      final targetMonth = selectedPeriod.value == AttendancePeriod.thisMonth
+          ? now
+          : DateTime(now.year, now.month - 1, 1); // Bulan lalu
 
+      final summary = await _attendanceService.getMonthSummary(targetMonth);
+
+      // Update state UI
       presentDays.value = summary['present'] ?? 0;
       absentDays.value = summary['absent'] ?? 0;
       lateInDays.value = summary['late'] ?? 0;
     } catch (e) {
-      print("Gagal memperbarui ringkasan bulanan: $e");
+      print("Error refreshing monthly summary: $e");
+      // Reset ke nol jika gagal
+      presentDays.value = 0;
+      absentDays.value = 0;
+      lateInDays.value = 0;
     }
   }
 
-  // --- Fungsi Utama untuk Memuat Semua Data ---
-  Future<void> refreshData() async {
-    if (await _cacheService.getDashboardCache() == null) {
-      isLoading.value = true;
+  // Menampilkan dialog pemilih rentang tanggal untuk grafik.
+  Future<void> selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      initialDateRange:
+          DateTimeRange(start: chartStartDate.value, end: chartEndDate.value),
+      firstDate: DateTime(2023),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (picked != null) {
+      chartStartDate.value = picked.start;
+      chartEndDate.value = picked.end;
+      _updateDateRangeText();
+      fetchWorkingHoursChart(); // Ambil data baru untuk grafik
     }
+  }
 
+  /// Memperbarui teks rentang tanggal di UI.
+  void _updateDateRangeText() {
+    final start = DateFormat('d MMM').format(chartStartDate.value);
+    final end = DateFormat('d MMM').format(chartEndDate.value);
+    chartDateRangeText.value = "$start - $end";
+  }
+
+  /// Mengambil dan mem-parsing data untuk grafik jam kerja.
+  Future<void> fetchWorkingHoursChart() async {
     try {
-      // 1. FOKUS HANYA PADA PENGAMBILAN DATA
-      final results = await Future.wait([
-        AttendanceService.getTodayAttendance(),
-        AttendanceService.getMonthSummary(),
-        AttendanceService.getCurrentAddress(),
+      final formatter = DateFormat('yyyy-MM-dd');
+      final String startDateStr = formatter.format(chartStartDate.value);
+      final String endDateStr = formatter.format(chartEndDate.value);
+
+      final Map<String, dynamic> apiResponse = await _attendanceService
+          .getWorkingHoursChartData(startDateStr, endDateStr);
+
+      double total = (apiResponse['total_hours'] as num? ?? 0.0).toDouble();
+      double overtime = (apiResponse['overtime'] as num? ?? 0.0).toDouble();
+
+      int totalInt = total.toInt();
+      int overtimeInt = overtime.toInt();
+      totalHoursSummary.value =
+          "${totalInt}:${((total - totalInt) * 60).round().toString().padLeft(2, '0')} hrs";
+      overtimeSummary.value =
+          "${overtimeInt}:${((overtime - overtimeInt) * 60).round().toString().padLeft(2, '0')} hrs";
+
+      final List<dynamic> results =
+          apiResponse['details'] as List<dynamic>? ?? [];
+      dailyHours.assignAll(results.map((item) {
+        WorkDayStatus status;
+        switch (item['status']) {
+          case 'absent':
+            status = WorkDayStatus.absent;
+            break;
+          case 'holiday':
+            status = WorkDayStatus.holiday;
+            break;
+          default:
+            status = WorkDayStatus.worked;
+        }
+        return DailyWorkHour(
+          date: DateTime.parse(item['date']),
+          hours: (item['hours'] as num).toDouble(),
+          status: status,
+        );
+      }).toList());
+    } catch (e) {
+      print("Gagal memuat data chart dari Odoo: $e");
+      dailyHours.clear();
+      totalHoursSummary.value = "00:00 hrs";
+      overtimeSummary.value = "00:00 hrs";
+    }
+  }
+
+  // Fungsi utama yang memuat semua data yang dibutuhkan dasbor.
+  Future<void> refreshData() async {
+    isLoading.value = true;
+    try {
+      await Future.wait([
+        _workProfileService.fetchProfile().then((profile) {
+          userName.value = profile?.employeeName ?? "User";
+          jobTitle.value = profile?.jobTitle ?? "";
+
+          // --- Logika Penampilan Jam Shift ---
+          if (profile != null &&
+              profile.workPattern != null &&
+              profile.workPattern!.name.isNotEmpty) {
+            final pattern = profile.workPattern!;
+            hasApprovedScheduleToday.value = true;
+
+            int startHour = pattern.workFrom.toInt();
+            int startMinute = ((pattern.workFrom - startHour) * 60).round();
+            int endHour = pattern.workTo.toInt();
+            int endMinute = ((pattern.workTo - endHour) * 60).round();
+
+            String startTime =
+                "${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')}";
+            String endTime =
+                "${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}";
+
+            workPatternInfo.value = "$startTime - $endTime";
+          } else {
+            hasApprovedScheduleToday.value = false;
+            workPatternInfo.value = "Belum ada jadwal";
+          }
+        }),
+
+        _attendanceService.getTodayAttendance().then((todayAttendance) {
+          // Langsung proses hasilnya di sini
+          checkInTime.value = todayAttendance['check_in_time'] ?? "N/A";
+          checkOutTime.value = todayAttendance['check_out_time'] ?? "N/A";
+          hasCheckedInToday.value = checkInTime.value != "N/A";
+        }),
+
+        _attendanceService.getCurrentAddress().then((currentAddress) {
+          // Langsung proses hasilnya di sini
+          locationState.value = DataSuccess(currentAddress);
+        }),
+
+        // Fungsi-fungsi ini (Future<void>) tetap dipanggil, tapi hasilnya diabaikan
+        _refreshMonthlySummary(),
+        fetchWorkingHoursChart(),
       ]);
-
-      // 2. OLAH DATA MENJADI SATU MAP YANG RAPI
-      final preparedData = {
-        "userName": OdooApi.session?.userName,
-        "location": results[2],
-        "check_in_time": (results[0] as Map<String, String>)['check_in_time'],
-        "check_out_time": (results[0] as Map<String, String>)['check_out_time'],
-        "worked_hours": (results[0] as Map<String, String>)['worked_hours'],
-        "present": (results[1] as Map<String, int>)['present'],
-        "absent": (results[1] as Map<String, int>)['absent'],
-        "late": (results[1] as Map<String, int>)['late'],
-      };
-
-      // 3. PANGGIL HELPER METHOD & SIMPAN KE CACHE
-      _updateStateFromMap(preparedData);
-      await _cacheService.saveDashboardCache(preparedData);
     } catch (e) {
       print("Error refreshing dashboard: $e");
+      Get.snackbar("Error", "Gagal memuat data dasbor: ${e.toString()}");
+      // Set state error jika perlu
+      locationState.value = const DataError("Gagal memuat data");
     } finally {
       isLoading.value = false;
     }
   }
 
-  // TAMBAHKAN FUNGSI BARU INI
   Future<void> refreshLocation() async {
     locationState.value = const DataLoading();
     try {
-      final newLocation = await AttendanceService.getCurrentAddress();
+      final newLocation = await _attendanceService.getCurrentAddress();
 
       // Cek apakah hasilnya adalah pesan error dari service kita
       if (newLocation.contains("Gagal") ||
@@ -175,107 +245,30 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  // Buat helper method untuk mencegah duplikasi kode
-  void _updateStateFromMap(Map<String, dynamic> data) {
-    userName.value = data['userName'] as String? ?? "User";
-    checkInTime.value = data['check_in_time'] as String? ?? "N/A";
-    checkOutTime.value = data['check_out_time'] as String? ?? "N/A";
-    workingHours.value = data['worked_hours'] as String? ?? "00:00:00";
-    hasCheckedInToday.value = checkInTime.value != "N/A";
-    presentDays.value = data['present'] as int? ?? 0;
-    absentDays.value = data['absent'] as int? ?? 0;
-    lateInDays.value = data['late'] as int? ?? 0;
-
-    final workProfileService = Get.find<WorkProfileService>();
-    final WorkProfile? profile = workProfileService.workProfile;
-
-    print(
-        "[DEBUG-DASHBOARD] Mengambil profil dari service. Jabatan: ${profile?.jobTitle}");
-
-    /*
-    print("======================================");
-    print("DATA DI DALAM DASHBOARD CONTROLLER:");
-    print(
-        "Nama Toko dari Service: ${workProfileService.workProfile?.storeLocation?.name}");
-    print(
-        "Pola Kerja dari Service: ${workProfileService.workProfile?.workPattern?.name}");
-    print("======================================");
-    */
-
-    if (profile != null) {
-      jobTitle.value = profile.jobTitle ?? ""; // Ambil jobTitle dari service
-    }
-
-    final WorkPattern? pattern = profile?.workPattern;
-    final StoreLocation? location = profile?.storeLocation;
-
-    // Format teks untuk ditampilkan di UI
-    if (pattern != null) {
-      // Ubah jam dari float (misal 8.5) menjadi format jam (08:30)
-      int startHour = pattern.workFrom.toInt();
-      int startMinute = ((pattern.workFrom - startHour) * 60).round();
-      int endHour = pattern.workTo.toInt();
-      int endMinute = ((pattern.workTo - endHour) * 60).round();
-
-      String startTime =
-          "${startHour.toString().padLeft(2, '0')}:${startMinute.toString().padLeft(2, '0')}";
-      String endTime =
-          "${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}";
-
-      workPatternInfo.value = "Jam Kerja: $startTime - $endTime";
-    }
-
-    if (location != null && location.name.isNotEmpty) {
-      storeLocationInfo.value = "Lokasi: ${location.name}";
-    }
-  }
-
-  // --- doCheckIn() VERSI OPTIMAL ---
+  /// Fungsi untuk melakukan Check In yang aman.
   void doCheckIn() async {
-    // 1. UI Optimistis: Langsung perbarui state UI
-    final currentTime = DateTime.now();
-    checkInTime.value = DateFormat("HH:mm:ss").format(currentTime);
-    hasCheckedInToday.value = true;
+    Get.snackbar(
+        "Memproses Absensi", "Mohon tunggu, memvalidasi lokasi Anda...",
+        showProgressIndicator: true, duration: const Duration(seconds: 25));
 
     try {
-      // 2. Kirim permintaan ke server di latar belakang
-      await AttendanceService.checkin();
+      final Position position =
+          await _attendanceService.validateAndGetPosition();
+      await _attendanceService.checkInWithGps(position);
 
-      // Catat peristiwa 'check_in' ke Firebase Analytics
-      FirebaseAnalytics.instance.logEvent(
-        name: 'attendance_check_in',
-        parameters: {
-          'employee_name': userName.value,
-          'check_in_time': checkInTime.value,
-        },
-      );
+      if (Get.isSnackbarOpen) Get.back();
 
-      // 3. Setelah sukses, panggil refresh ringan untuk data bulanan
-      await _updateMonthlySummary();
+      // Panggil refreshData() untuk memuat ulang SEMUA data setelah check-in
+      await refreshData();
 
-      Get.snackbar(
-        "Berhasil",
-        "Check-in telah berhasil dicatat.",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-
-      // Refresh halaman riwayat jika sedang dibuka
-      if (Get.isRegistered<AttendanceHistoryListController>()) {
-        Get.find<AttendanceHistoryListController>().getAttendanceList();
-      }
+      Get.snackbar("Berhasil", "Check-in telah berhasil dicatat.",
+          backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
-      // 4. Rollback: Jika gagal, kembalikan UI ke state semula
-      checkInTime.value = "N/A";
-      hasCheckedInToday.value = false;
-      Get.snackbar(
-        "Gagal",
-        "Gagal melakukan check-in. Periksa koneksi Anda.",
-        backgroundColor: Colors.red.shade600,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      if (Get.isSnackbarOpen) Get.back();
+      Get.snackbar("Gagal Check-in", e.toString().replaceAll("Exception: ", ""),
+          backgroundColor: Colors.red.shade600,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 5));
     }
   }
 
@@ -288,7 +281,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
     try {
       // 2. Kirim permintaan ke server
-      await AttendanceService.checkOut();
+      await _attendanceService.checkOut();
 
       // 3. Panggil refresh ringan (opsional, karena checkout tidak mengubah summary)
       // await _updateMonthlySummary(); // Bisa di-uncomment jika ada logika yang berubah

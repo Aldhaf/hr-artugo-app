@@ -9,7 +9,7 @@ class AttendanceHistoryListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AttendanceHistoryListController());
+    final controller = Get.find<AttendanceHistoryListController>();
     final primaryColor = Theme.of(context).primaryColor;
 
     // Fungsi untuk memformat waktu sesuai desain baru (AM/PM)

@@ -35,7 +35,7 @@ class TimeOffDetailView extends StatelessWidget {
 
     switch (status) {
       case 'validate':
-        backgroundColor = Colors.green;
+        backgroundColor = const Color.fromRGBO(76, 175, 80, 1);
         label = 'Approved';
         break;
       case 'refuse':

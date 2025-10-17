@@ -1,9 +1,9 @@
-// lib/service/notification_preference_service/notification_preference_service.dart
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationPreferenceService {
   // Method untuk memeriksa apakah sebuah tipe notifikasi diizinkan oleh pengguna
-  static Future<bool> isNotificationTypeEnabled(String notificationType) async {
+  Future<bool> isNotificationTypeEnabled(String notificationType) async {
     final prefs = await SharedPreferences.getInstance();
 
     // 1. Cek dulu toggle utama "Semua Notifikasi"

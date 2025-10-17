@@ -32,40 +32,75 @@ class TodayAttendanceCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
+
+            // Tampilkan Jam Shift di sini
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
                 color: const Color(0xfff5f5f5),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Obx(() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Working Time",
-                          style: TextStyle(color: Colors.grey, fontSize: 12)),
-                      const SizedBox(height: 4),
-                      Text(
-                          controller.workPatternInfo.value
-                              .replaceFirst("Jam Kerja: ", ""),
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      if (controller.locationState.value is DataSuccess<String>)
-                        _buildInfoRow(
-                          icon: Icons.location_on_outlined,
-                          text: (controller.locationState.value
-                                  as DataSuccess<String>)
-                              .data,
-                        ),
-                    ],
-                  )),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // TAMBAHKAN KEMBALI LABEL "WORKING TIME"
+                  const Text(
+                    "Working Time",
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Color.fromRGBO(255, 236, 179, 1)36, 179, 1)workPatternInfo)
+                  Obx(() => Text(
+                        controller.workPatternInfo.value,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
+                        textAlign: TextAlign.start,
+                      )),
+                  const SizedBox(height: 8),
+
+                  // TAMBAHKAN KEMBALI LOKASI SAAT INI
+                  Obx(() {
+                    final state = controller.locationState.value;
+                    if (state is DataSuccess<String>) {
+                      return _buildInfoRow(
+                        icon: Icons.location_on_outlined,
+                        text: state.data,
+                      );
+                    }
+                    if (state is DataLoading) {
+                      return _buildInfoRow(
+                        icon: Icons.location_on_outlined,
+                        text: "Memuat lokasi...",
+                      );
+                    }
+                    if (state is DataError) {
+                      return _buildInfoRow(
+                        icon: Icons.warning_amber_outlined,
+                        text: (state as DataError).error ?? "Gagal memuat lokasi",
+                        color: Colors.red,
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 8),
+
+            // Tombol Check In / Check Out
             SizedBox(
               width: double.infinity,
               child: Obx(() => ElevatedButton(
                     onPressed: () {
+                      // Nonaktifkan tombol jika tidak ada jadwal dan belum check-in
+                      if (!controller.hasApprovedScheduleToday.value &&
+                          !controller.hasCheckedInToday.value) {
+                        return;
+                      }
+
                       if (controller.hasCheckedInToday.value) {
                         controller.doCheckOut();
                       } else {
@@ -74,16 +109,20 @@ class TodayAttendanceCard extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
-                      padding: EdgeInsets
-                          .zero, // Hapus padding default untuk memberi ruang pada Ink
+                      padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ).copyWith(
-                      // Buat background transparan agar gradasi terlihat
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.transparent),
+                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
+                          if (!controller.hasApprovedScheduleToday.value &&
+                              !controller.hasCheckedInToday.value) {
+                            return Colors.grey.shade400; // Warna saat nonaktif
+                          }
+                          return Colors.transparent;
+                        },
+                      ),
                     ),
-                    // Bungkus child dengan Ink untuk menampung gradasi
                     child: Ink(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -135,14 +174,15 @@ class TodayAttendanceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow({required IconData icon, required String text}) {
+  Widget _buildInfoRow(
+      {required IconData icon, required String text, Color? color}) {
     return Row(children: [
-      Icon(icon, size: 16, color: Colors.grey),
+      Icon(icon, size: 16, color: color ?? Colors.grey),
       const SizedBox(width: 8),
       Expanded(
           child: Text(text,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
-              maxLines: 1,
+              style: TextStyle(color: color ?? Colors.grey, fontSize: 14),
+              maxLines: 1, // Izinkan 2 baris untuk alamat yang panjang
               overflow: TextOverflow.ellipsis)),
     ]);
   }

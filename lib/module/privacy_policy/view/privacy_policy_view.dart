@@ -24,7 +24,7 @@ class PrivacyPolicyView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              "PT Artugo (\"Kami\") mengoperasikan aplikasi Arttend (\"Layanan\"). Kebijakan Privasi ini memberi tahu Anda tentang kebijakan kami mengenai pengumpulan, penggunaan, dan pengungkapan data pribadi saat Anda menggunakan Layanan kami.\n\nKami menggunakan data Anda untuk menyediakan dan meningkatkan Layanan. Dengan menggunakan Layanan, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.",
+              "PT Artugo (\"Kami\") mengoperasikan aplikasi ArtuGo (\"Layanan\"). Kebijakan Privasi ini memberi tahu Anda tentang kebijakan kami mengenai pengumpulan, penggunaan, dan pengungkapan data pribadi saat Anda menggunakan Layanan kami.\n\nKami menggunakan data Anda untuk menyediakan dan meningkatkan Layanan. Dengan menggunakan Layanan, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.",
               style: GoogleFonts.poppins(fontSize: 15, height: 1.5),
             ),
             const SizedBox(height: 24),

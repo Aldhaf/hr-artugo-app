@@ -1,16 +1,16 @@
-// lib/module/notification/controller/notification_controller.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/notification_model.dart';
-import '../../../shared/util/odoo_api/odoo_api.dart'; // Impor service API Anda
+import 'package:hr_artugo_app/service/notification_service/notification_service.dart';
 
 class NotificationController extends GetxController
     with WidgetsBindingObserver {
-  // --- TAMBAHKAN VARIABEL STATE DI SINI ---
+  // --- VARIABEL STATE DI SINI ---
   var isLoading = true.obs;
   var notificationList = <NotificationModel>[].obs;
   var unreadCount = 0.obs; // Untuk badge di dashboard
+
+  final _notificationService = Get.find<NotificationService>();
 
   @override
   void onInit() {
@@ -27,7 +27,6 @@ class NotificationController extends GetxController
     super.onClose();
   }
 
-  // --- LOGIKA UTAMA ADA DI SINI ---
   // Fungsi ini akan dipanggil setiap kali state aplikasi berubah (misal: dari background ke foreground)
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -40,18 +39,14 @@ class NotificationController extends GetxController
     }
   }
 
-  // --- TAMBAHKAN FUNGSI UNTUK MENGAMBIL DATA ---
+  // --- FUNGSI UNTUK MENGAMBIL DATA ---
   Future<void> fetchNotifications() async {
     try {
       isLoading(true);
-      // Panggil fungsi API yang sudah kita buat sebelumnya
-      final results = await OdooApi.fetchNotifications();
-      // Ubah data mentah dari API menjadi list model
-      final parsedList =
-          results.map((json) => NotificationModel.fromJson(json)).toList();
+      // 2. Panggil service. Service sudah mengembalikan List<NotificationModel>
+      final parsedList = await _notificationService.getNotifications();
 
       notificationList.assignAll(parsedList);
-      // Logika ini sekarang sudah benar, ia hanya menghitung
       unreadCount.value = parsedList.where((n) => !n.isRead).length;
     } catch (e) {
       print("Error fetching notifications: $e");
@@ -67,7 +62,8 @@ class NotificationController extends GetxController
         notificationList.where((n) => !n.isRead).map((n) => n.id).toList();
 
     if (unreadIds.isNotEmpty) {
-      await OdooApi.markNotificationsAsRead(unreadIds);
+      await _notificationService.markAllAsRead(unreadIds);
+
       // Setelah berhasil, panggil fetchNotifications lagi untuk refresh UI
       await fetchNotifications();
     }
@@ -81,7 +77,7 @@ class NotificationController extends GetxController
     final removedNotification = notificationList.removeAt(index);
 
     // Panggil API untuk menghapus di server
-    final bool success = await OdooApi.deleteNotification(id);
+    final bool success = await _notificationService.deleteNotification(id);
 
     // Jika gagal di server, kembalikan item ke list
     if (!success) {

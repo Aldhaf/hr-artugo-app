@@ -18,103 +18,177 @@ class ProfileView extends StatelessWidget {
     final controller = Get.put(ProfileController());
 
     return Scaffold(
+      // warna latar belakang utama sesuai desain baru
+      backgroundColor: const Color(0xFFF5F5F7),
       body: SafeArea(
-        // <-- BUNGKUS DENGAN SAFEAREA
-
-        // Gunakan Obx untuk memantau perubahan state
+        top: false, // SafeArea diatur manual karena header tumpang tindih
         child: Obx(() {
           final state = controller.profileState.value;
 
-          // Tampilkan Shimmer saat loading
           if (state is DataLoading) {
-            return const ProfileSkeleton();
+            // skeleton UI yang sudah diperbarui
+            return const ProfileSkeletonNew();
           }
 
-          // Tampilkan pesan error jika gagal
           if (state is DataError) {
-            // LAKUKAN CASTING SECARA EKSPLISIT DI SINI
-            // Ini akan 100% menyelesaikan error kompilasi
             final errorState = state as DataError;
-            return Center(child: Text(errorState.message));
+            return Center(
+                child: Text(errorState.error ?? "Gagal memuat profil"));
           }
 
-          // Tampilkan konten jika sukses
           if (state is DataSuccess<Profile>) {
             final profile = state.data;
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+            // Stack untuk menumpuk header dan konten
+            return Stack(
+              children: [
+                // Lapisan 1: Latar belakang berwarna di bagian atas
+                _buildHeaderBackground(context),
+
+                // Lapisan 2: Konten utama yang bisa di-scroll
+                ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   children: [
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 70), // Jarak agar avatar di tengah
                     _buildProfileAvatar(profile),
                     const SizedBox(height: 16),
                     Text(
                       profile.userName,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       profile.jobTitle,
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 16, color: Colors.grey.shade600),
                     ),
                     const SizedBox(height: 32),
-                    const Divider(),
-                    _buildProfileMenuItem(
-                      icon: Icons.notifications_outlined,
-                      label: "Notification Settings",
-                      onTap: () => Get.toNamed('/notification_settings'),
+
+                    // Kartu Menu Grup 1
+                    _buildMenuCard(
+                      children: [
+                        _buildProfileMenuItem(
+                          icon: Icons.notifications_outlined,
+                          label: "Notification Settings",
+                          onTap: () => Get.toNamed('/notification_settings'),
+                        ),
+                        _buildProfileMenuItem(
+                          icon: Icons.info_outline,
+                          label: "About App",
+                          onTap: () => Get.toNamed('/about_app'),
+                        ),
+                        _buildProfileMenuItem(
+                          icon: Icons.gavel_outlined,
+                          label: "Terms & Conditions",
+                          onTap: () => Get.toNamed('/terms_and_conditions'),
+                        ),
+                        _buildProfileMenuItem(
+                          icon: Icons.shield_outlined,
+                          label: "Privacy Policy",
+                          onTap: () => Get.toNamed('/privacy_policy'),
+                          hideDivider: true,
+                        ),
+                      ],
                     ),
-                    _buildProfileMenuItem(
-                      icon: Icons.info_outline,
-                      label: "About App",
-                      onTap: () => Get.toNamed('/about_app'),
+
+                    const SizedBox(height: 20),
+
+                    // Kartu Menu Grup 2
+                    _buildMenuCard(
+                      children: [
+                        _buildProfileMenuItem(
+                          icon: Icons.bug_report,
+                          label: "Test Crashlytics",
+                          color: Colors.orange,
+                          onTap: () {
+                            FirebaseCrashlytics.instance.crash();
+                          },
+                        ),
+                        _buildProfileMenuItem(
+                          icon: Icons.logout,
+                          label: "Logout",
+                          color: Colors.red,
+                          onTap: () => controller.logout(),
+                          hideDivider: true,
+                        ),
+                      ],
                     ),
-                    _buildProfileMenuItem(
-                      icon: Icons.gavel_outlined,
-                      label: "Terms & Conditions",
-                      onTap: () => Get.toNamed('/terms_and_conditions'),
-                    ),
-                    _buildProfileMenuItem(
-                      icon: Icons.shield_outlined,
-                      label: "Privacy Policy",
-                      onTap: () => Get.toNamed('/privacy_policy'),
-                    ),
-                    const Divider(),
-                    _buildProfileMenuItem(
-                      icon: Icons.bug_report,
-                      label: "Test Crashlytics",
-                      color: Colors.orange,
-                      onTap: () {
-                        print(
-                            "Tombol Test Crashlytics ditekan. Aplikasi akan crash.");
-                        FirebaseCrashlytics.instance.crash();
-                      },
-                    ),
-                    _buildProfileMenuItem(
-                      icon: Icons.logout,
-                      label: "Logout",
-                      color: Colors.red,
-                      onTap: () => controller.logout(),
-                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
-              ),
+              ],
             );
           }
-          return const SizedBox
-              .shrink(); // Fallback jika state tidak terdefinisi
+          return const SizedBox.shrink();
         }),
       ),
     );
   }
 
-  // Helper widget untuk avatar inisial nama
+  // WIDGET BARU: Header Latar Belakang
+  Widget _buildHeaderBackground(BuildContext context) {
+    return Container(
+      height: 150,
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(40),
+          bottomRight: Radius.circular(40),
+        ),
+      ),
+    );
+  }
+
+  // WIDGET BARU: Kartu untuk membungkus item menu
+  Widget _buildMenuCard({required List<Widget> children}) {
+    return Card(
+      color: const Color(0xFFFFFFFF),
+      elevation: 2,
+      shadowColor: Colors.grey.withOpacity(0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+
+  // Helper widget untuk avatar, tidak banyak berubah
+  Widget _buildProfileAvatar(Profile profile) {
+    Widget avatarContent;
+    if (profile.imageUrl != null &&
+        profile.imageUrl!.isNotEmpty &&
+        profile.imageUrl!.length > 100) {
+      try {
+        final imageBytes = base64Decode(profile.imageUrl!);
+        avatarContent = CircleAvatar(
+          radius: 50,
+          backgroundImage: MemoryImage(imageBytes),
+        );
+      } catch (e) {
+        avatarContent = _buildInitialAvatar(profile.userName);
+      }
+    } else {
+      avatarContent = _buildInitialAvatar(profile.userName);
+    }
+    // Tambahkan border putih di sekeliling avatar
+    return Center(
+      child: CircleAvatar(
+        radius: 54,
+        backgroundColor: Colors.white,
+        child: avatarContent,
+      ),
+    );
+  }
+
   Widget _buildInitialAvatar(String name) {
     return CircleAvatar(
-      radius: 60,
+      radius: 50,
       child: Text(
         name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
         style: const TextStyle(fontSize: 50),
@@ -122,71 +196,125 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileAvatar(Profile profile) {
-    // Cek jika imageUrl ada dan tidak kosong
-    if (profile.imageUrl != null &&
-        profile.imageUrl!.isNotEmpty &&
-        profile.imageUrl!.length > 100) {
-      try {
-        final imageBytes = base64Decode(profile.imageUrl!);
-        return CircleAvatar(
-          radius: 60,
-          backgroundImage: MemoryImage(imageBytes),
-        );
-      } catch (e) {
-        print("Gagal decode base64: $e");
-        return _buildInitialAvatar(profile.userName);
-      }
-    }
-    // Jika tidak ada imageUrl atau terlalu pendek, tampilkan avatar inisial
-    return _buildInitialAvatar(profile.userName);
-  }
-
-  // Widget helper untuk setiap item menu
-  // Helper widget untuk menu item
+  // Helper widget untuk item menu
   Widget _buildProfileMenuItem({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
     Color? color,
+    bool hideDivider = false,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: color ?? Get.theme.primaryColor),
-      title: Text(label, style: TextStyle(color: color, fontSize: 16)),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: onTap,
+    return Column(
+      children: [
+        ListTile(
+          leading: Icon(icon, color: color ?? Get.theme.primaryColor),
+          title: Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              // font semi-bold
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          // ikon panah agar lebih mirip desain
+          trailing: CircleAvatar(
+            radius: 15, // Atur ukuran lingkaran
+            backgroundColor: Colors.grey.shade100, // Warna background lingkaran
+            child: Icon(
+              Icons.arrow_forward_ios,
+              size: 16, // Ukuran ikon panah
+              color: Colors.grey.shade600, // Warna ikon panah
+            ),
+          ),
+          onTap: onTap,
+        ),
+        if (!hideDivider)
+          Padding(
+            padding: const EdgeInsets.only(left: 70.0), // Divider tidak full
+            child: Divider(height: 1, color: Colors.grey.shade200),
+          ),
+      ],
     );
   }
 }
 
-// WIDGET UNTUK SKELETON UI
-class ProfileSkeleton extends StatelessWidget {
-  const ProfileSkeleton({super.key});
+// WIDGET BARU: Skeleton UI yang disesuaikan dengan desain baru
+class ProfileSkeletonNew extends StatelessWidget {
+  const ProfileSkeletonNew({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const CircleAvatar(radius: 50, backgroundColor: Colors.white),
-            const SizedBox(height: 12),
-            Container(width: 200, height: 24, color: Colors.white),
-            const SizedBox(height: 8),
-            Container(width: 150, height: 18, color: Colors.white),
-            const SizedBox(height: 24),
-            // Kerangka untuk menu
-            Container(width: double.infinity, height: 50, color: Colors.white),
-            const SizedBox(height: 8),
-            Container(width: double.infinity, height: 50, color: Colors.white),
-            const SizedBox(height: 8),
-            Container(width: double.infinity, height: 50, color: Colors.white),
-          ],
+    return Stack(
+      children: [
+        // Latar belakang header skeleton
+        Container(
+          height: 150,
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(40),
+              bottomRight: Radius.circular(40),
+            ),
+          ),
         ),
-      ),
+        // Konten shimmer
+        Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            children: [
+              const SizedBox(height: 70),
+              const Center(
+                child: CircleAvatar(
+                  radius: 54,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Container(
+                  width: 200,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: Container(
+                  width: 150,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // Kerangka untuk kartu menu
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                height: 110,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

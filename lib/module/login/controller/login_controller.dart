@@ -11,6 +11,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 
 class LoginController extends GetxController {
   final _storageService = StorageService();
+  final _authService = Get.find<AuthService>();
+  final _workProfileService = Get.find<WorkProfileService>();
 
   // --- State ---
   // 1. Best practice untuk form adalah menggunakan TextEditingController
@@ -60,7 +62,7 @@ class LoginController extends GetxController {
   Future<void> doLogin() async {
     try {
       // 1. Lakukan Autentikasi terlebih dahulu
-      var isSuccess = await AuthService().login(
+      var isSuccess = await _authService.login(
         login: emailController.text,
         password: passwordController.text,
       );
@@ -90,44 +92,21 @@ class LoginController extends GetxController {
       FirebaseAnalytics.instance.logLogin(loginMethod: 'email');
       // Set User ID agar semua event berikutnya terhubung ke pengguna ini
       FirebaseAnalytics.instance
-          .setUserId(id: OdooApi.session?.userId.toString());
+          .setUserId(id: _authService.currentSession?.userId.toString());
 
       print(
           "Login berhasil, menjalankan tugas-tugas post-login secara berurutan...");
 
       // 3. Ambil Employee ID
-      await OdooApi.getEmployeeId();
+      await _workProfileService.fetchProfile();
       // 4. Inisialisasi Firebase Service
       await FirebaseService().initialize();
       // 5. Daftarkan service profil kerja
       await Get.putAsync(() => WorkProfileService().init());
 
-      // --- TAHAP INVESTIGASI DIMULAI DI SINI ---
-      print("[DEBUG] Memanggil OdooApi.getWorkProfile()...");
-      final profileData = await OdooApi.getWorkProfile();
-
-      print("=========================================================");
-      print("[DEBUG-LOGIN] 1. RAW DATA DARI ODOO API:");
-      print(profileData);
-      print("[DEBUG-LOGIN] Tipe data mentah: ${profileData.runtimeType}");
-      print("=========================================================");
-
-      final workProfile = WorkProfile.fromJson(profileData);
-
-      print("=========================================================");
-      print("[DEBUG-LOGIN] 2. DATA SETELAH DI-PARSING MENJADI OBJEK:");
-      print("   -> Nama Karyawan: ${workProfile.employeeName}");
-      print("   -> Jabatan: ${workProfile.jobTitle}");
-      print("=========================================================");
-
-      final workProfileService = Get.find<WorkProfileService>();
-      workProfileService.setProfile(workProfile);
-      print("[DEBUG] Profil kerja telah disimpan di WorkProfileService.");
-      // --- AKHIR TAHAP INVESTIGASI ---
-
       print("Semua tugas post-login selesai.");
       Get.find<NotificationController>().fetchNotifications();
-      Get.offAll(const MainNavigationView());
+      Get.offAllNamed('/dashboard');
     } catch (e) {
       print("Error selama proses login: $e");
       Get.snackbar("Error", "Terjadi kesalahan saat login: ${e.toString()}");

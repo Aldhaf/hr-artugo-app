@@ -1,11 +1,12 @@
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
-import '../../../shared/util/odoo_api/odoo_api.dart'; // Impor OdooApi Anda
+import 'package:hr_artugo_app/service/time_off_service/time_off_service.dart';
 
 class TimeOffDetailController extends GetxController {
   var isLoading = true.obs;
   var timeOffData = Rxn<Map<String, dynamic>>();
   final String timeOffId = Get.arguments; // Ambil ID dari argumen navigasi
+  final _timeOffService = Get.find<TimeOffService>();
 
   @override
   void onInit() {
@@ -16,7 +17,7 @@ class TimeOffDetailController extends GetxController {
   Future<void> fetchTimeOffDetail() async {
     try {
       isLoading(true);
-      final result = await OdooApi.getTimeOffDetail(int.parse(timeOffId));
+      final result = await _timeOffService.getTimeOffDetail(int.parse(timeOffId));
       if (result != null) {
         timeOffData.value = result;
       }

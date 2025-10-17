@@ -34,9 +34,7 @@ class ProfileController extends GetxController {
       final uiProfile = Profile(
         userName: profile.employeeName,
         jobTitle: profile.jobTitle ?? 'No Job Title',
-        imageUrl: OdooApi.session != null
-            ? OdooApi.getUserImageUrl(OdooApi.session!.userId)
-            : null,
+        imageUrl: profile.imageUrl,
       );
       profileState.value = DataSuccess(uiProfile);
     } else {
