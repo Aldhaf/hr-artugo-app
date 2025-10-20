@@ -33,7 +33,7 @@ class DashboardView extends StatelessWidget {
             children: [
               // Lapisan 1: Latar Belakang Berwarna di Bagian Atas
               Container(
-                height: 150, // Sesuaikan tinggi area header sesuai selera
+                height: 170, // Sesuaikan tinggi area header sesuai selera
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
                   borderRadius: const BorderRadius.only(
