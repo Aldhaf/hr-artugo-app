@@ -1,5 +1,3 @@
-// lib/module/dashboard/widget/interactive_swipe_button.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

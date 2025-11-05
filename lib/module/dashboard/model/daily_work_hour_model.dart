@@ -3,7 +3,7 @@ enum WorkDayStatus { worked, absent, holiday }
 class DailyWorkHour {
   final DateTime date;
   final double hours;
-  final WorkDayStatus status; // Opsional, tapi bagus untuk styling
+  final WorkDayStatus status;
 
   DailyWorkHour({
     required this.date,

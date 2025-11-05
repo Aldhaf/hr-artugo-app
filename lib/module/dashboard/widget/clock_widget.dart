@@ -1,10 +1,8 @@
-// File: lib/module/dashboard/widget/clock_widget.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-// Controller khusus untuk logika jam
 class ClockController extends GetxController {
   var currentTime = "".obs;
 
@@ -24,7 +22,6 @@ class ClockWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Daftarkan controller-nya
     final controller = Get.put(ClockController());
 
     // Obx akan otomatis me-refresh Text ini setiap detik

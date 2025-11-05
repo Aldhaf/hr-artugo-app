@@ -6,7 +6,7 @@ import 'package:hr_artugo_app/core.dart' hide Get;
 class CheckinDetailController extends GetxController {
   final _attendanceService = Get.find<AttendanceService>();
 
-  // Variabel state yang sudah ada
+  // Variabel state
   var loading = true.obs;
   var address = "".obs;
   var position = Position(
@@ -22,7 +22,7 @@ class CheckinDetailController extends GetxController {
     speedAccuracy: 0,
   ).obs;
 
-  // Variabel state untuk tombol (tidak ada perubahan)
+  // Variabel state untuk tombol
   var isCheckedIn = false.obs;
   var isCheckedOut = false.obs;
   var checkInTime = "".obs;
@@ -36,7 +36,7 @@ class CheckinDetailController extends GetxController {
 
   Future<void> loadInitialData() async {
     loading.value = true;
-    // Panggil kedua fungsi secara bersamaan untuk mempercepat loading
+    // Memanggil kedua fungsi secara bersamaan untuk mempercepat loading
     await Future.wait([
       getLocation(),
       updateButtonState(),
@@ -46,7 +46,7 @@ class CheckinDetailController extends GetxController {
 
   Future<void> getLocation() async {
     try {
-      // Kita gunakan fungsi yang sudah ada di AttendanceService
+      //  Fungsi yang sudah ada di AttendanceService
       address.value = await _attendanceService.getCurrentAddress();
     } catch (e) {
       address.value = "Gagal memuat alamat: ${e.toString()}";
@@ -55,7 +55,6 @@ class CheckinDetailController extends GetxController {
 
   Future<void> updateButtonState() async {
     try {
-      // Gunakan fungsi yang lebih efisien
       final todayAttendance = await _attendanceService.getTodayAttendance();
 
       final todayCheckInTime = todayAttendance['check_in_time'] ?? "N/A";
@@ -66,7 +65,6 @@ class CheckinDetailController extends GetxController {
       checkInTime.value = todayCheckInTime;
       checkOutTime.value = todayCheckOutTime;
     } catch (e) {
-      print("Error updating button state: $e");
       // Set ke nilai default jika gagal
       isCheckedIn.value = false;
       isCheckedOut.value = false;
@@ -82,10 +80,10 @@ class CheckinDetailController extends GetxController {
     );
 
     try {
-      // Gunakan alur absensi baru yang aman
+      // Alur absensi baru yang aman
       final Position validPosition =
         await _attendanceService.validateAndGetPosition();
-      await _attendanceService.checkInWithGps(validPosition);
+        await _attendanceService.checkInWithGps(validPosition);
 
       // Jika sukses, tutup dialog dan refresh state
       Get.back();

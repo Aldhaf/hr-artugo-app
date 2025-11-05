@@ -1,29 +1,23 @@
-// lib/module/login/view/login_view.dart
-
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; // Import GetX
+import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
 
 class LoginView extends StatelessWidget {
-  // <-- Ubah menjadi StatelessWidget
   const LoginView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Get.put() akan membuat instance LoginController yang sudah kita modifikasi
     final controller = Get.put(LoginController());
 
     return Scaffold(
-      // Kita hapus AppBar agar lebih bersih sesuai desain
-      // appBar: AppBar(title: const Text("Login")),
       body: SingleChildScrollView(
-        // Gunakan SafeArea agar tidak tertimpa status bar
+        // Menggunakan SafeArea agar tidak tertimpa status bar
         child: Container(
           padding: const EdgeInsets.all(30.0),
           width: double.infinity,
           child: Column(
             crossAxisAlignment:
-                CrossAxisAlignment.start, // Ratakan teks ke kiri
+                CrossAxisAlignment.start, // Meratakan teks ke kiri
             children: [
               const SizedBox(height: 50.0),
 
@@ -46,7 +40,7 @@ class LoginView extends StatelessWidget {
                       text: 'ArtuGo',
                       style: TextStyle(
                         color: Theme.of(context)
-                            .primaryColor, // Ambil warna aksen dari theme
+                            .primaryColor, // Mengambil warna aksen dari theme
                       ),
                     ),
                   ],
@@ -83,7 +77,7 @@ class LoginView extends StatelessWidget {
                       ),
                     ),
                   )),
-              // TAMBAHKAN CHECKBOX DI SINI
+              // Checkbox "Remember Me"
               Obx(() => CheckboxListTile(
                     title: const Text("Remember Me"),
                     value: controller.rememberMe.value,
@@ -93,7 +87,7 @@ class LoginView extends StatelessWidget {
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                   )),
-              const SizedBox(height: 10.0), // Beri sedikit jarak
+              const SizedBox(height: 10.0),
 
               // --- Tombol Login ---
               SizedBox(

@@ -6,12 +6,6 @@ class MyScheduleService extends GetxService {
 
   Future<void> submitMonthlyRoster(
       List<Map<String, dynamic>> schedules, String monthName) async {
-    // Di sini kita panggil metode khusus di OdooApiService yang akan memanggil
-    // endpoint /api/submit_monthly_roster. Anda perlu menambahkan metode ini
-    // ke OdooApiService jika belum ada.
-
-    // Asumsinya, Anda menambahkan metode submitMonthlyRoster ke OdooApiService
-    // yang menerima payload dan nama bulan.
     await _odooApi.submitMonthlyRoster({
       'schedules': schedules,
       'month_name': monthName,

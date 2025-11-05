@@ -1,7 +1,6 @@
 import 'package:intl/intl.dart';
 
 enum NotificationType { announcement, leaveApproval, checkinReminder, unknown }
-
 class NotificationModel {
   final int id;
   final String title;
@@ -21,7 +20,7 @@ class NotificationModel {
     this.relatedId,
   });
 
-  // --- FUNGSI PENERJEMAH YANG SUDAH DIPERBAIKI ---
+  // --- FUNGSI PENERJEMAH  ---
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     // Helper untuk mengubah string tipe notifikasi menjadi enum
     NotificationType notificationType;
@@ -39,10 +38,10 @@ class NotificationModel {
         notificationType = NotificationType.unknown;
     }
 
-    // Konversi tanggal yang lebih aman
+    // Konversi tanggal
     DateTime localTime;
     try {
-      // Odoo mengirim waktu dalam UTC, kita konversi ke waktu lokal perangkat
+      // Odoo mengirim waktu dalam UTC, konversi ke waktu lokal perangkat
       final utcTime =
           DateFormat("yyyy-MM-dd HH:mm:ss").parse(json['create_date'], true);
       localTime = utcTime.toLocal();
@@ -50,8 +49,7 @@ class NotificationModel {
       localTime = DateTime.now(); // Fallback jika format tanggal salah
     }
 
-    // --- LOGIKA PALING PENTING ADA DI SINI ---
-    // Logika parsing yang lebih aman untuk related_id
+    // Logika parsing untuk related_id
     String? parsedRelatedId;
     if (json['related_id'] is String) {
       parsedRelatedId = json['related_id'];

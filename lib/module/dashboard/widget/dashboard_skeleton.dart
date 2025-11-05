@@ -9,7 +9,7 @@ class DashboardSkeleton extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey[200]!,
       highlightColor: Colors.grey[50]!,
-      child: ListView( // Gunakan ListView agar cocok dengan layout utama
+      child: ListView(
         physics: const NeverScrollableScrollPhysics(), // Nonaktifkan scroll saat loading
         children: [
           // Kerangka untuk UserInfoHeader
@@ -34,7 +34,7 @@ class DashboardSkeleton extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
             child: Container(
-              height: 220, // Sesuaikan dengan tinggi kartu asli Anda
+              height: 220,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),

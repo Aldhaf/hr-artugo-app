@@ -13,7 +13,7 @@ class TimeOffDetailView extends StatelessWidget {
     }
     try {
       DateTime date;
-      // Coba parse dengan format 'yyyy-MM-dd' terlebih dahulu
+      // Parse dengan format 'yyyy-MM-dd' terlebih dahulu
       if (dateValue.length == 10) {
         date = DateFormat('yyyy-MM-dd').parse(dateValue);
       } else {

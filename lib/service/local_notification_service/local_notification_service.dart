@@ -5,7 +5,7 @@ class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  // --- TAMBAHKAN ID STATIS DI SINI ---
+  // --- ID STATIS ---
   static const int REMINDER_NOTIFICATION_ID = 888;
 
   static void initialize() {
@@ -22,8 +22,7 @@ class LocalNotificationService {
       // Aksi saat notifikasi lokal ditekan
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null) {
-          print("Notifikasi Lokal Ditekan dengan payload: ${response.payload}");
-          // Di sini Anda bisa menambahkan logika deep-linking jika dibutuhkan
+          // Bisa menambahkan logika deep-linking jika dibutuhkan
           // Contoh: Get.toNamed('/notifications');
         }
       },
@@ -39,7 +38,7 @@ class LocalNotificationService {
     int notificationId = isReminder ? 888 : DateTime.now().millisecond;
 
     _notificationsPlugin.show(
-      notificationId, // Gunakan variabel ID yang sudah Anda siapkan
+      notificationId, // variabel ID yang sudah disiapkan
       title,
       body,
       const NotificationDetails(

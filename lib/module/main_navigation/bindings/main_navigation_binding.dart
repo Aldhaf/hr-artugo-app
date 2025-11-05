@@ -1,25 +1,38 @@
-// lib/module/main_navigation/bindings/main_navigation_binding.dart
-
 import 'package:get/get.dart';
-import 'package:hr_artugo_app/module/dashboard/controller/dashboard_controller.dart';
-import 'package:hr_artugo_app/module/attendance_history_list/controller/attendance_history_list_controller.dart';
-import 'package:hr_artugo_app/module/my_schedule/controller/my_schedule_controller.dart'; // <-- IMPORT BARU
+import 'package:hr_artugo_app/core.dart' hide Get;
+
+// --- Import Service ---
+import 'package:hr_artugo_app/service/firebase_service/firebase_service.dart';
+import 'package:hr_artugo_app/service/leave_type_service/leave_type_service.dart';
+import 'package:hr_artugo_app/service/my_schedule_service/my_schedule_service.dart';
+import 'package:hr_artugo_app/module/my_schedule/controller/my_schedule_controller.dart';
 
 class MainNavigationBinding extends Bindings {
   @override
   void dependencies() {
-    // Daftarkan DashboardController di sini.
-    // lazyPut berarti controller baru akan dibuat saat pertama kali dibutuhkan.
+    Get.lazyPut<MainNavigationController>(() => MainNavigationController());
+
+    // GRUP 1 (Dasar setelah login)
+    Get.lazyPut<OdooApiService>(() => OdooApiService(), fenix: true);
+    Get.lazyPut<AuthService>(() => AuthService(), fenix: true);
+
+    // GRUP 2 (Butuh Grup 1)
+    Get.lazyPut<FirebaseService>(() => FirebaseService(), fenix: true);
+    Get.lazyPut<LeaveTypeService>(() => LeaveTypeService(), fenix: true);
+    Get.lazyPut<TimeOffService>(() => TimeOffService(), fenix: true);
+    Get.lazyPut<MyScheduleService>(() => MyScheduleService(), fenix: true);
+
+    // GRUP 3 (Butuh Grup 2)
+    Get.lazyPut<AttendanceService>(() => AttendanceService(), fenix: true);
+
+    // GRUP 4 (Controller Halaman Utama)
+    // controller ini juga lazyPut atau dibuat di binding masing-masing jika ada
     Get.lazyPut<DashboardController>(() => DashboardController());
-
-    // Ini memastikan controller-nya selalu ada di memori saat di navigasi utama
-    Get.put(AttendanceHistoryListController(), permanent: true);
-    Get.lazyPut<MyScheduleController>(
-      () => MyScheduleController(),
-    );
-
-    // Jika halaman lain di navigasi Anda punya controller,
-    // daftarkan juga di sini. Contoh:
-    // Get.lazyPut<TimeOffController>(() => TimeOffController());
+    Get.lazyPut<AttendanceHistoryListController>(
+        () => AttendanceHistoryListController());
+    Get.lazyPut<TimeOffHistoryListController>(
+        () => TimeOffHistoryListController());
+    Get.lazyPut<ProfileController>(() => ProfileController());
+    Get.lazyPut<MyScheduleController>(() => MyScheduleController());
   }
 }

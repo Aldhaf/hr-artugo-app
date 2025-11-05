@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hr_artugo_app/model/work_profile_model.dart';
 import 'package:hr_artugo_app/module/dashboard/controller/dashboard_controller.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
@@ -29,18 +28,6 @@ class WorkingHoursChart extends StatelessWidget {
                 const Text("Working Hours",
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Obx(() => OutlinedButton.icon(
-                      onPressed: () => controller.selectDateRange(
-                          context), // Panggil fungsi dari controller
-                      icon: const Icon(Icons.calendar_today_outlined, size: 16),
-                      label: Text(controller
-                          .chartDateRangeText.value), // Gunakan teks dinamis
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                    )),
               ],
             ),
             const SizedBox(height: 16),
@@ -61,7 +48,7 @@ class WorkingHoursChart extends StatelessWidget {
                 )),
             const SizedBox(height: 16),
 
-            // --- Chart Section (FIXED) ---
+            // --- Chart Section ---
             Obx(() {
               if (controller.dailyHours.isEmpty) {
                 return const SizedBox(
@@ -91,16 +78,13 @@ class WorkingHoursChart extends StatelessWidget {
                       xValueMapper: (DailyWorkHour data, _) =>
                           DateFormat('E').format(data.date),
 
-                      // Fixed bar height logic
                       yValueMapper: (DailyWorkHour data, _) {
                         if (data.status == WorkDayStatus.worked) {
                           return data.hours;
                         }
-                        // Use a reasonable height for absent/holiday bars
                         return 9.0;
                       },
 
-                      // Bar coloring logic
                       pointColorMapper: (DailyWorkHour data, _) {
                         switch (data.status) {
                           case WorkDayStatus.worked:
@@ -113,7 +97,6 @@ class WorkingHoursChart extends StatelessWidget {
                       },
                       borderRadius: BorderRadius.circular(8),
 
-                      // Fixed label positioning
                       dataLabelSettings: DataLabelSettings(
                         isVisible: true,
                         labelAlignment: ChartDataLabelAlignment.middle,
@@ -124,7 +107,7 @@ class WorkingHoursChart extends StatelessWidget {
                           if (dayData.status == WorkDayStatus.absent) {
                             return Transform.rotate(
                               angle:
-                                  1.5708, // Rotate 90 degrees clockwise (π/2 radians)
+                                  1.5708,
                               child: const Text(
                                 'Absent',
                                 style: TextStyle(
@@ -137,7 +120,7 @@ class WorkingHoursChart extends StatelessWidget {
                           }
                           if (dayData.status == WorkDayStatus.holiday) {
                             return Transform.rotate(
-                              angle: 1.5708, // Rotate 90 degrees clockwise
+                              angle: 1.5708,
                               child: const Text(
                                 'Holiday',
                                 style: TextStyle(

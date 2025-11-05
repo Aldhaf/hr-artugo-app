@@ -5,17 +5,17 @@ import 'package:hr_artugo_app/service/notification_service/notification_service.
 
 class NotificationController extends GetxController
     with WidgetsBindingObserver {
-  // --- VARIABEL STATE DI SINI ---
+  // --- VARIABEL STATE ---
   var isLoading = true.obs;
   var notificationList = <NotificationModel>[].obs;
-  var unreadCount = 0.obs; // Untuk badge di dashboard
+  var unreadCount = 0.obs;
 
   final _notificationService = Get.find<NotificationService>();
 
   @override
   void onInit() {
     super.onInit();
-    // Daftarkan controller ini sebagai pengamat siklus hidup aplikasi
+    // Mendaftarkan controller ini sebagai pengamat siklus hidup aplikasi
     WidgetsBinding.instance.addObserver(this);
     fetchNotifications();
   }
@@ -33,7 +33,6 @@ class NotificationController extends GetxController
     super.didChangeAppLifecycleState(state);
     // Jika aplikasi kembali aktif/dibuka
     if (state == AppLifecycleState.resumed) {
-      print("Aplikasi kembali aktif, memuat ulang notifikasi...");
       // Panggil fungsi untuk mengambil data terbaru dari server
       fetchNotifications();
     }
@@ -43,13 +42,12 @@ class NotificationController extends GetxController
   Future<void> fetchNotifications() async {
     try {
       isLoading(true);
-      // 2. Panggil service. Service sudah mengembalikan List<NotificationModel>
+      // Service sudah mengembalikan List<NotificationModel>
       final parsedList = await _notificationService.getNotifications();
 
       notificationList.assignAll(parsedList);
       unreadCount.value = parsedList.where((n) => !n.isRead).length;
     } catch (e) {
-      print("Error fetching notifications: $e");
     } finally {
       isLoading(false);
     }
@@ -57,7 +55,7 @@ class NotificationController extends GetxController
 
   // Fungsi ini khusus untuk menandai semua notifikasi sebagai sudah dibaca
   Future<void> markAllAsRead() async {
-    print("Menandai semua notifikasi sebagai sudah dibaca...");
+    
     final unreadIds =
         notificationList.where((n) => !n.isRead).map((n) => n.id).toList();
 

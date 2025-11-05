@@ -5,19 +5,18 @@ import 'package:hr_artugo_app/service/cache_service/cache_service.dart';
 
 class WorkProfileService extends GetxService {
   final _cacheService = CacheService();
-  static const _cacheKey = 'work_profile';
   final _odooApi = Get.find<OdooApiService>();
 
-  // 2. Deklarasikan variabel reaktif untuk menampung profil
+  // Deklarasi variabel reaktif untuk menampung profil
   final Rxn<WorkProfile> _workProfile = Rxn<WorkProfile>();
 
-  // Buat getter publik agar controller lain bisa mengakses nilainya
+  // Membuat getter publik agar controller lain bisa mengakses nilainya
   WorkProfile? get workProfile => _workProfile.value;
 
   Future<WorkProfileService> init() async {
-    // Panggil fungsi fetchProfile yang sudah ada untuk memuat data awal
+    // Memanggil fungsi fetchProfile yang sudah ada untuk memuat data awal
     await fetchProfile();
-    // Kembalikan 'this' (instance dari service ini) sesuai yang diharapkan oleh Get.putAsync
+    // Kembalikan 'this' (instance dari service ini) sesuai oleh Get.putAsync
     return this;
   }
 
@@ -25,8 +24,6 @@ class WorkProfileService extends GetxService {
     try {
       final profileData = await _odooApi.getWorkProfile();
       final Map<String, dynamic> data = await _odooApi.getWorkProfile();
-      
-      print("[DEBUG-SERVICE] Raw data dari OdooApi: $data");  // Debug log
 
       if (data.isNotEmpty && data['error'] == null) {
 
@@ -45,20 +42,17 @@ class WorkProfileService extends GetxService {
         return null;
       }
     } catch (e) {
-      print("Error fetching work profile: $e");
       clearProfile();
       return null;
     }
   }
 
   void setProfile(WorkProfile profile) {
-    print("Profil kerja disimpan ke service.");
     _workProfile.value = profile;
   }
 
   void clearProfile() {
     _workProfile.value = null;
     _cacheService.clearAllCache();
-    print("Profil kerja telah dibersihkan.");
   }
 }

@@ -1,7 +1,7 @@
 class Profile {
   final String userName;
   final String jobTitle;
-  final String? imageUrl; // Bisa null
+  final String? imageUrl;
 
   Profile({
     required this.userName,
@@ -9,7 +9,7 @@ class Profile {
     this.imageUrl,
   });
 
-  // 1. Konversi dari Map (JSON) menjadi objek Profile
+  // Konversi dari Map (JSON) menjadi objek Profile
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
       userName: json['userName'] as String,
@@ -18,7 +18,7 @@ class Profile {
     );
   }
 
-  // 2. Konversi dari objek Profile menjadi Map (JSON)
+  // Konversi dari objek Profile menjadi Map (JSON)
   Map<String, dynamic> toJson() {
     return {
       'userName': userName,
@@ -37,7 +37,6 @@ class Profile {
   bool get hasValidImage {
     final img = imageUrl;
     if (img == null || img.isEmpty) return false;
-    // Pengecekan sederhana, bisa disesuaikan
     return !img.contains(" ") && img.length % 4 == 0;
   }
 }

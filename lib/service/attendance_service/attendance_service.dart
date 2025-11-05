@@ -1,5 +1,3 @@
-// File: lib/service/attendance_service.dart (Versi Bersih)
-
 import 'package:geolocator/geolocator.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
 import 'dart:async';
@@ -9,16 +7,29 @@ import 'package:hr_artugo_app/service/work_profile_service/work_profile_service.
 class AttendanceService {
   final _odooApi = Get.find<OdooApiService>();
 
+  /*
+  Mengambil data detail jam kerja harian untuk rentang tanggal tertentu,
+  digunakan untuk menampilkan grafik jam kerja di dashboard.
+  Memanggil endpoint Odoo 'getDailyWorkedHours'.
+  */
   Future<Map<String, dynamic>> getWorkingHoursChartData(
       String startDate, String endDate) async {
     return await _odooApi.getDailyWorkedHours(startDate, endDate);
   }
 
+  /*
+  Mengirimkan data check-in ke Odoo beserta data posisi GPS yang valid.
+  Memanggil endpoint Odoo 'createAttendanceWithGPS'.
+  */
   Future<void> checkInWithGps(Position position) async {
     return await _odooApi.createAttendanceWithGPS(position: position);
   }
 
-  // Fungsi ini menjadi gerbang utama untuk validasi lokasi
+  /*
+  Memvalidasi izin lokasi, status layanan lokasi, mendeteksi lokasi palsu,
+  dan mengambil posisi GPS saat ini dengan akurasi tinggi.
+  Melempar Exception jika validasi gagal.
+  */
   Future<Position> validateAndGetPosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -51,6 +62,11 @@ class AttendanceService {
     return position;
   }
 
+  /*  
+  Mencari data absensi terakhir yang belum memiliki waktu check-out,
+  lalu memperbaruinya dengan waktu saat ini (UTC) sebagai waktu check-out.
+  Memanggil endpoint Odoo 'update' pada model 'hr.attendance'. 
+  */
   Future<void> checkOut() async {
     var checkinHistory = await getHistory();
     if (checkinHistory.isEmpty) return;
@@ -61,7 +77,6 @@ class AttendanceService {
     );
 
     if (openAttendance.isEmpty) {
-      print("Tidak ada sesi absensi yang terbuka untuk di-checkout.");
       return;
     }
 
@@ -78,6 +93,11 @@ class AttendanceService {
     );
   }
 
+  /*
+  Mengambil riwayat absensi (check-in dan check-out) untuk karyawan yang sedang login,
+  diurutkan berdasarkan waktu check-in terbaru.
+  Memanggil endpoint Odoo 'get' pada model 'hr.attendance'.
+  */
   Future<dynamic> getHistory() async {
     return await _odooApi.get(
       model: "hr.attendance",
@@ -88,6 +108,11 @@ class AttendanceService {
     );
   }
 
+  /*
+  Mengambil data absensi (check-in, check-out, jam kerja) spesifik untuk hari ini
+  bagi karyawan yang sedang login.
+  Mengembalikan 'N/A' jika belum ada absensi hari ini.
+  */
   Future<Map<String, String>> getTodayAttendance() async {
     DateTime now = DateTime.now();
     DateTime startOfDay = DateTime(now.year, now.month, now.day);
@@ -141,6 +166,11 @@ class AttendanceService {
     };
   }
 
+  /*
+  Mengambil ringkasan absensi (jumlah hadir, absen, telat) untuk bulan tertentu
+  bagi karyawan yang sedang login.
+  Membutuhkan `WorkProfileService` untuk logika perhitungan telat.
+  */
   Future<Map<String, int>> getMonthSummary(DateTime targetMonth) async {
     DateTime startOfMonth = DateTime(targetMonth.year, targetMonth.month, 1);
     DateTime endOfMonth = DateTime(targetMonth.year, targetMonth.month + 1, 0);
@@ -212,8 +242,12 @@ class AttendanceService {
     };
   }
 
+  /*
+  Mengambil nama alamat (reverse geocoding) berdasarkan posisi GPS saat ini.
+  Menggunakan API eksternal (Nominatim OpenStreetMap) via Dio.
+  Menangani error jika GPS mati, izin ditolak, timeout, atau koneksi gagal.
+  */
   Future<String> getCurrentAddress() async {
-    // ... (implementasi fungsi ini tidak berubah)
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return "Layanan lokasi mati. Mohon aktifkan.";
@@ -252,7 +286,7 @@ class AttendanceService {
     } on DioException {
       return "Gagal terhubung ke server peta.";
     } catch (e) {
-      print("Error getting address: $e");
+  
       return "Terjadi kesalahan tidak terduga.";
     }
   }

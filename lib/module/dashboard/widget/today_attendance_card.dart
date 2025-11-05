@@ -33,7 +33,7 @@ class TodayAttendanceCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Tampilkan Jam Shift di sini
+            // Tampilan Jam Shift
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -44,14 +44,11 @@ class TodayAttendanceCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TAMBAHKAN KEMBALI LABEL "WORKING TIME"
                   const Text(
                     "Working Time",
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   const SizedBox(height: 4),
-
-                  // Color.fromRGBO(255, 236, 179, 1)36, 179, 1)workPatternInfo)
                   Obx(() => Text(
                         controller.workPatternInfo.value,
                         style: const TextStyle(
@@ -59,8 +56,7 @@ class TodayAttendanceCard extends StatelessWidget {
                         textAlign: TextAlign.start,
                       )),
                   const SizedBox(height: 8),
-
-                  // TAMBAHKAN KEMBALI LOKASI SAAT INI
+                  // LOKASI SAAT INI
                   Obx(() {
                     final state = controller.locationState.value;
                     if (state is DataSuccess<String>) {
@@ -78,7 +74,8 @@ class TodayAttendanceCard extends StatelessWidget {
                     if (state is DataError) {
                       return _buildInfoRow(
                         icon: Icons.warning_amber_outlined,
-                        text: (state as DataError).error ?? "Gagal memuat lokasi",
+                        text:
+                            (state as DataError).error ?? "Gagal memuat lokasi",
                         color: Colors.red,
                       );
                     }
@@ -93,48 +90,56 @@ class TodayAttendanceCard extends StatelessWidget {
             // Tombol Check In / Check Out
             SizedBox(
               width: double.infinity,
-              child: Obx(() => ElevatedButton(
-                    onPressed: () {
-                      // Nonaktifkan tombol jika tidak ada jadwal dan belum check-in
-                      if (!controller.hasApprovedScheduleToday.value &&
-                          !controller.hasCheckedInToday.value) {
-                        return;
-                      }
+              child: Obx(() {
+                final primaryColor = Theme.of(context)
+                    .primaryColor; // Ambil warna primer di sini
 
-                      if (controller.hasCheckedInToday.value) {
-                        controller.doCheckOut();
-                      } else {
-                        controller.doCheckIn();
-                      }
-                    },
+                // --- KONDISI 1: TAMPILKAN PESAN "TERIMA KASIH" ---
+                if (controller.showThankYouMessage.value) {
+                  // ✅ Periksa showThankYouMessage
+                  return ElevatedButton(
+                    onPressed: null, // Tombol nonaktif
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300, // Warna abu-abu
+                      foregroundColor: Colors.grey.shade700,
                       elevation: 0,
-                      padding: EdgeInsets.zero,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
-                    ).copyWith(
-                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                        (Set<WidgetState> states) {
-                          if (!controller.hasApprovedScheduleToday.value &&
-                              !controller.hasCheckedInToday.value) {
-                            return Colors.grey.shade400; // Warna saat nonaktif
-                          }
-                          return Colors.transparent;
-                        },
-                      ),
+                    ),
+                    child: const Row(
+                      // Teks dan Ikon Terima Kasih
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle_outline),
+                        SizedBox(width: 8),
+                        Text("Terima Kasih untuk Hari Ini!",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  );
+                }
+                // --- KONDISI 2: TAMPILKAN TOMBOL CHECK OUT ---
+                else if (controller.isCurrentlyCheckedIn.value) {
+                  // ✅ Periksa isCurrentlyCheckedIn
+                  return ElevatedButton(
+                    onPressed: controller.doCheckOut, // Panggil doCheckOut
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding:
+                          EdgeInsets.zero, // Biarkan Ink yang mengatur padding
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      backgroundColor:
+                          Colors.transparent, // Buat transparan untuk gradient
+                      shadowColor: Colors.transparent,
                     ),
                     child: Ink(
+                      // Gunakan Ink untuk gradient
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: controller.hasCheckedInToday.value
-                              ? [
-                                  Colors.red.shade400,
-                                  Colors.red.shade600
-                                ] // Gradasi untuk Check Out
-                              : [
-                                  primaryColor,
-                                  const Color(0xff8f67e8)
-                                ], // Gradasi untuk Check In
+                          // Gradient Merah
+                          colors: [Colors.red.shade400, Colors.red.shade600],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -143,30 +148,86 @@ class TodayAttendanceCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         alignment: Alignment.center,
-                        child: Row(
+                        child: const Row(
+                          // Teks dan Ikon Check Out
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              controller.hasCheckedInToday.value
-                                  ? Icons.logout
-                                  : Icons.login,
-                              color: Colors.white,
-                            ),
+                            Icon(Icons.logout, color: Colors.white),
+                            SizedBox(width: 8),
+                            Text("Check Out",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                // --- KONDISI 3: TAMPILKAN TOMBOL CHECK IN (DEFAULT) ---
+                else {
+                  // Cek apakah tombol Check In harus dinonaktifkan (belum ada jadwal)
+                  bool isCheckInDisabled =
+                      !controller.hasApprovedScheduleToday.value;
+
+                  return ElevatedButton(
+                    onPressed: isCheckInDisabled
+                        ? null
+                        : controller.doCheckIn, // Panggil doCheckIn atau null
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: Colors
+                          .transparent, // Buat transparan untuk gradient/warna disable
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        // Gunakan gradient ungu jika aktif, abu-abu jika nonaktif
+                        gradient: isCheckInDisabled
+                            ? null
+                            : LinearGradient(
+                                colors: [
+                                  primaryColor,
+                                  const Color(0xff8f67e8)
+                                ], // Gunakan primaryColor
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                        color: isCheckInDisabled
+                            ? Colors.grey.shade400
+                            : null, // Warna disable jika tidak ada gradient
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        alignment: Alignment.center,
+                        child: Row(
+                          // Teks dan Ikon Check In
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.login,
+                                color: isCheckInDisabled
+                                    ? Colors.grey.shade700
+                                    : Colors.white),
                             const SizedBox(width: 8),
                             Text(
-                              controller.hasCheckedInToday.value
-                                  ? "Check Out"
-                                  : "Check In",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              "Check In",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isCheckInDisabled
+                                      ? Colors.grey.shade700
+                                      : Colors.white),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  )),
+                  );
+                }
+              }),
             )
           ],
         ),
@@ -182,7 +243,7 @@ class TodayAttendanceCard extends StatelessWidget {
       Expanded(
           child: Text(text,
               style: TextStyle(color: color ?? Colors.grey, fontSize: 14),
-              maxLines: 1, // Izinkan 2 baris untuk alamat yang panjang
+              maxLines: 1, // 1 baris untuk alamat yang panjang
               overflow: TextOverflow.ellipsis)),
     ]);
   }

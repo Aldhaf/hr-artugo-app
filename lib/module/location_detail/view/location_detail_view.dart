@@ -2,7 +2,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:hr_artugo_app/core.dart';
 
-// 1. Ubah menjadi StatelessWidget yang lebih ringan
 class LocationDetailView extends StatelessWidget {
   final double latitude;
   final double longitude;
@@ -15,7 +14,6 @@ class LocationDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2. Tidak perlu controller lagi
     return Scaffold(
       appBar: AppBar(
         title: const Text("Location Detail"),

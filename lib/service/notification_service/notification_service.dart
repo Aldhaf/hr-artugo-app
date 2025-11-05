@@ -13,15 +13,14 @@ class NotificationService extends GetxService {
     return await _odooApi.deleteNotification(id);
   }
 
-  /// Mengambil daftar notifikasi untuk pengguna yang sedang login.
+  // Mengambil daftar notifikasi untuk pengguna yang sedang login.
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      // 1. Ambil UID dari sesi dan cek apakah ada
+      // Ambil UID dari sesi dan cek apakah ada
       final int? userId = _odooApi.session?.userId;
 
       // Jika tidak ada user yang login, kembalikan list kosong
       if (userId == null) {
-        print("User not logged in, cannot fetch notifications.");
         return [];
       }
 
@@ -37,7 +36,7 @@ class NotificationService extends GetxService {
           "type",
           "related_id"
         ],
-        // 2. Gunakan variabel userId yang sudah aman dari null
+        // Menggunakan variabel userId yang sudah aman dari null
         where: [
           ['user_id', '=', userId]
         ],
@@ -45,14 +44,14 @@ class NotificationService extends GetxService {
         limit: 50,
       );
 
-      // Ubah data mentah dari Odoo menjadi List<NotificationModel>
+      // Mengubah data mentah dari Odoo menjadi List<NotificationModel>
       List<NotificationModel> notifications = [];
       for (var item in response) {
         notifications.add(NotificationModel(
           id: item['id'] as int,
           title: item['name'] ?? 'Tanpa Judul',
           body: item['body'] ?? 'Tanpa deskripsi',
-          // Odoo mengembalikan tanggal dalam format UTC, kita parse
+          // format UTS dari Odoo di parse ke DateTime lokal
           receivedAt: DateTime.parse(item['create_date']).toLocal(),
           isRead: item['is_read'] ?? false,
           // Logika untuk mengubah string dari Odoo menjadi enum
@@ -62,13 +61,12 @@ class NotificationService extends GetxService {
       }
       return notifications;
     } catch (e) {
-      print("Error fetching notifications: $e");
       // Lempar error agar bisa ditangkap oleh DataState di controller
       throw Exception("Gagal mengambil data notifikasi dari server.");
     }
   }
 
-  /// Helper untuk mengubah string dari Odoo menjadi Enum
+  // Helper untuk mengubah string dari Odoo menjadi Enum
   NotificationType _parseNotificationType(String? typeString) {
     switch (typeString) {
       case 'leave_approval':
@@ -79,8 +77,4 @@ class NotificationService extends GetxService {
         return NotificationType.announcement;
     }
   }
-
-  // Anda juga bisa menambahkan fungsi lain di sini, seperti:
-  // static Future<void> markAsRead(String id) async { ... }
-  // static Future<int> getUnreadCount() async { ... }
 }

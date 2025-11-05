@@ -1,5 +1,3 @@
-// lib/module/main_navigation/view/main_navigation_view.dart
-
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,18 +10,16 @@ class MainNavigationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(MainNavigationController());
-    // --- PERUBAHAN 1: Hapus halaman TimeOffHistoryListView dari daftar ---
     final List<Widget> pages = [
       DashboardView(),
       const AttendanceHistoryListView(),
-      // const TimeOffHistoryListView(), // Dinonaktifkan sementara
+      // const TimeOffHistoryListView(),  // nonaktif sementara
       const MyScheduleView(),
       ProfileView(),
     ];
 
     return WillPopScope(
       onWillPop: () async {
-        // Logika WillPopScope tidak perlu diubah
         if (controller.selectedIndex.value != 0) {
           controller.onTabTapped(0);
           return false;
@@ -77,7 +73,7 @@ class MainNavigationView extends StatelessWidget {
                   tabs: const [
                     GButton(icon: Icons.dashboard, text: 'Dashboard'),
                     GButton(icon: Icons.calendar_month, text: 'Attendance'),
-                    // GButton(icon: Icons.access_time_filled, text: 'Time Off'), // Dinonaktifkan sementara
+                    // GButton(icon: Icons.access_time_filled, text: 'Time Off'), // nonaktif sementara
                     GButton(icon: Icons.edit_calendar_outlined, text: 'Jadwal'),
                     GButton(icon: Icons.person, text: 'User'),
                   ],

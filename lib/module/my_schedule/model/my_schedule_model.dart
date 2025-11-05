@@ -1,4 +1,3 @@
-// lib/module/my_schedule/model/my_schedule_model.dart
 import 'package:get/get.dart';
 
 class Roster {
@@ -31,7 +30,7 @@ class Roster {
       rejectionReason:
           json['rejection_reason'] is bool ? null : json['rejection_reason'],
       createDate: json['create_date'] != null
-          ? DateTime.parse(json['create_date'])
+          ? DateTime.parse(json['create_date'] + 'Z')
           : null,
       workFrom: (json['work_from'] as num?)?.toDouble(),
       workTo: (json['work_to'] as num?)?.toDouble(),

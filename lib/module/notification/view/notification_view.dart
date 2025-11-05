@@ -13,7 +13,6 @@ class NotificationView extends StatefulWidget {
 }
 
 class _NotificationViewState extends State<NotificationView> {
-  // Anda bisa memindahkan 'controller' ke sini agar tidak dideklarasikan dua kali
   final controller = Get.find<NotificationController>();
 
   @override
@@ -50,7 +49,7 @@ class _NotificationViewState extends State<NotificationView> {
             itemBuilder: (context, index) {
               final notification = controller.notificationList[index];
 
-              // --- PERUBAHAN UTAMA: BUNGKUS NotificationTile DENGAN Dismissible ---
+              // --- Bungkus NotificationTile dengan Dismissible ---
               return Dismissible(
                 // Key wajib ada dan harus unik untuk setiap item
                 key: ValueKey(notification.id),
@@ -60,10 +59,10 @@ class _NotificationViewState extends State<NotificationView> {
 
                 // Callback yang dijalankan setelah item digeser penuh
                 onDismissed: (direction) {
-                  // Panggil fungsi delete di controller
+                  // Memanggil fungsi delete di controller
                   controller.deleteNotification(notification.id);
 
-                  // Tampilkan snackbar konfirmasi (opsional)
+                  // Tampilkan snackbar konfirmasi
                   Get.snackbar(
                     "Dihapus",
                     "'${notification.title}' telah dihapus.",
@@ -103,7 +102,7 @@ class _NotificationViewState extends State<NotificationView> {
   }
 }
 
-// WIDGET NotificationTile ANDA (TIDAK ADA PERUBAHAN)
+// Widget NotificationTile
 class NotificationTile extends StatelessWidget {
   final NotificationModel notification;
   const NotificationTile({super.key, required this.notification});

@@ -28,7 +28,7 @@ class NotificationSettingsView extends StatelessWidget {
               value: controller.attendanceReminders.value,
               onChanged: controller.allNotifications.value
                   ? (value) => controller.updateSetting('attendanceReminders', value)
-                  : null, // Nonaktifkan jika toggle utama mati
+                  : null,
             ),
             SwitchListTile(
               title: const Text("Persetujuan Cuti"),

@@ -20,7 +20,7 @@ class AuthService {
 
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
-    // Coba ambil token dari penyimpanan lokal
+    // Mengambil token dari penyimpanan lokal
     final token = prefs.getString('token');
 
     // Jika token tidak null dan tidak kosong, berarti pengguna sudah login.

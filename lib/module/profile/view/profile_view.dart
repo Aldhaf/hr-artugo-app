@@ -9,6 +9,7 @@ import '../model/profile_model.dart';
 import '/core/data_state.dart';
 import '../controller/profile_controller.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:hr_artugo_app/service/theme_service/theme_service.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({Key? key}) : super(key: key);
@@ -16,10 +17,10 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProfileController());
+    // final themeService = Get.find<ThemeService>();
 
     return Scaffold(
       // warna latar belakang utama sesuai desain baru
-      backgroundColor: const Color(0xFFF5F5F7),
       body: SafeArea(
         top: false, // SafeArea diatur manual karena header tumpang tindih
         child: Obx(() {
@@ -76,6 +77,29 @@ class ProfileView extends StatelessWidget {
                           label: "Notification Settings",
                           onTap: () => Get.toNamed('/notification_settings'),
                         ),
+                        /*
+                        Obx(() => SwitchListTile.adaptive(
+                              // Tampilkan ikon sesuai tema saat ini
+                              secondary: Icon(
+                                themeService.isDarkMode.value
+                                    ? Icons.dark_mode_outlined
+                                    : Icons.light_mode_outlined,
+                                color: Get.theme.primaryColor,
+                              ),
+                              title: const Text(
+                                "Mode Gelap",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              value: themeService.isDarkMode.value,
+                              onChanged: (value) {
+                                // Panggil fungsi untuk ganti tema
+                                themeService.switchTheme();
+                              },
+                            )),
+                        */
                         _buildProfileMenuItem(
                           icon: Icons.info_outline,
                           label: "About App",
@@ -129,7 +153,7 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  // WIDGET BARU: Header Latar Belakang
+  // Widget Header Latar Belakang
   Widget _buildHeaderBackground(BuildContext context) {
     return Container(
       height: 150,
@@ -143,7 +167,7 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  // WIDGET BARU: Kartu untuk membungkus item menu
+  // Widget Kartu untuk membungkus item menu
   Widget _buildMenuCard({required List<Widget> children}) {
     return Card(
       color: const Color(0xFFFFFFFF),
@@ -158,7 +182,7 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  // Helper widget untuk avatar, tidak banyak berubah
+  // Helper widget untuk avatar
   Widget _buildProfileAvatar(Profile profile) {
     Widget avatarContent;
     if (profile.imageUrl != null &&
@@ -176,7 +200,7 @@ class ProfileView extends StatelessWidget {
     } else {
       avatarContent = _buildInitialAvatar(profile.userName);
     }
-    // Tambahkan border putih di sekeliling avatar
+    // border putih di sekeliling avatar
     return Center(
       child: CircleAvatar(
         radius: 54,
@@ -213,18 +237,16 @@ class ProfileView extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontSize: 16,
-              // font semi-bold
               fontWeight: FontWeight.w600,
             ),
           ),
-          // ikon panah agar lebih mirip desain
           trailing: CircleAvatar(
-            radius: 15, // Atur ukuran lingkaran
-            backgroundColor: Colors.grey.shade100, // Warna background lingkaran
+            radius: 15,
+            backgroundColor: Colors.grey.shade100,
             child: Icon(
               Icons.arrow_forward_ios,
-              size: 16, // Ukuran ikon panah
-              color: Colors.grey.shade600, // Warna ikon panah
+              size: 16,
+              color: Colors.grey.shade600,
             ),
           ),
           onTap: onTap,
@@ -239,7 +261,7 @@ class ProfileView extends StatelessWidget {
   }
 }
 
-// WIDGET BARU: Skeleton UI yang disesuaikan dengan desain baru
+// Widget Skeleton UI yang disesuaikan dengan desain baru
 class ProfileSkeletonNew extends StatelessWidget {
   const ProfileSkeletonNew({super.key});
 

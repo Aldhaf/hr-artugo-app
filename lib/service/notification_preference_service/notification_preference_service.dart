@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationPreferenceService {
@@ -6,14 +5,14 @@ class NotificationPreferenceService {
   Future<bool> isNotificationTypeEnabled(String notificationType) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // 1. Cek dulu toggle utama "Semua Notifikasi"
+    // Cek toggle utama "Semua Notifikasi"
     final bool allNotificationsEnabled = prefs.getBool('allNotifications') ?? true;
     if (!allNotificationsEnabled) {
       // Jika toggle utama mati, abaikan semua notifikasi
       return false;
     }
 
-    // 2. Jika toggle utama nyala, cek toggle per tipe notifikasi
+    // Jika toggle utama nyala, cek toggle per tipe notifikasi
     switch (notificationType) {
       case 'checkin_reminder':
         return prefs.getBool('attendanceReminders') ?? true;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/module/dashboard/controller/dashboard_controller.dart';
 import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
-import 'package:intl/intl.dart';
 
 class UserInfoHeader extends StatelessWidget {
   const UserInfoHeader({super.key});
@@ -12,11 +11,11 @@ class UserInfoHeader extends StatelessWidget {
     final controller = Get.find<DashboardController>();
     final notificationC = Get.find<NotificationController>();
 
-    // Ambil padding atas dari perangkat (untuk notch)
+    // Mengambil padding atas dari perangkat (untuk notch)
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Padding(
-      // Tambahkan topPadding ke padding yang sudah ada
+      // Menambahkan topPadding ke padding yang sudah ada
       padding: EdgeInsets.fromLTRB(20.0, topPadding + 16.0, 20.0, 24.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -60,7 +59,7 @@ class UserInfoHeader extends StatelessWidget {
                 )),
           ),
 
-          // --- GANTI TANGGAL DENGAN TOMBOL NOTIFIKASI ---
+          // TOMBOL NOTIFIKASI
           IconButton(
             onPressed: () => Get.toNamed('/notifications'),
             icon: Obx(() => Badge(

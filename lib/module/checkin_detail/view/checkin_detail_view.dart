@@ -4,22 +4,19 @@ import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
-// 1. Ubah menjadi StatelessWidget
 class CheckinDetailView extends StatelessWidget {
   const CheckinDetailView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // 2. Daftarkan dan ambil instance controller dengan Get.put()
     final controller = Get.put(CheckinDetailController());
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Check In"),
       ),
-      // 3. Bungkus bagian body dengan Obx agar bisa "mendengarkan" perubahan
+      // Bungkus bagian body dengan Obx agar bisa "mendengarkan" perubahan
       body: Obx(() {
-        // 4. Akses variabel reaktif dengan .value
         if (controller.loading.value) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -27,9 +24,8 @@ class CheckinDetailView extends StatelessWidget {
         return SafeArea(
           child: Stack(
             children: [
-              // Menggunakan CheckinMapView yang sudah kita buat sebelumnya
               CheckinMapView(
-                // 4. Akses variabel reaktif dengan .value
+                // Akses variabel reaktif dengan .value
                 position: controller.position.value,
               ),
               Positioned(
@@ -47,7 +43,7 @@ class CheckinDetailView extends StatelessWidget {
                       children: [
                         const TimeWidget(),
                         const SizedBox(height: 12.0),
-                        // 4. Akses variabel reaktif dengan .value
+                        // Akses variabel reaktif dengan .value
                         Text(
                           controller.address.value,
                           maxLines: 2,
@@ -78,8 +74,6 @@ class CheckinDetailView extends StatelessWidget {
   }
 }
 
-// Ini adalah widget peta yang sudah kita pisahkan sebelumnya
-// Pastikan ia menerima 'Position' bukan 'CheckinDetailController'
 class CheckinMapView extends StatelessWidget {
   final Position position;
 
@@ -112,9 +106,8 @@ class CheckinMapView extends StatelessWidget {
         ),
         initialZoom: 16,
         interactionOptions: InteractionOptions(
-          // <-- TAMBAHKAN PEMBUNGKUS INI
           flags: InteractiveFlag.all -
-              InteractiveFlag.rotate, // <-- PINDAHKAN KE DALAM 'flags'
+              InteractiveFlag.rotate,
         ),
       ),
       children: [

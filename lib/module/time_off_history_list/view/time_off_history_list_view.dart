@@ -1,5 +1,3 @@
-// lib/module/time_off_history_list/view/time_off_history_list_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
@@ -13,7 +11,7 @@ class TimeOffHistoryListView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        // 1. Memposisikan judul di tengah
+        // Memposisikan judul di tengah
         centerTitle: true,
         title: const Text("Time Off"),
         elevation: 0.6, // Menambahkan sedikit bayangan agar terlihat

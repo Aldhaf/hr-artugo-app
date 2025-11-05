@@ -8,13 +8,12 @@ import '../../../service/work_profile_service/work_profile_service.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 class ProfileController extends GetxController {
-  // Gunakan satu state untuk mengelola semua kondisi (loading, success, error)
+  // Menggunakan satu state untuk mengelola semua kondisi (loading, success, error)
   var profileState = Rx<DataState<Profile>>(const DataLoading());
 
   // Instance service untuk logout
   final _cacheService = CacheService();
   final _storageService = StorageService();
-  final String _cacheKey = "profile_data";
 
   @override
   void onInit() {
@@ -24,11 +23,10 @@ class ProfileController extends GetxController {
 
   void getProfileFromService() {
     profileState.value = const DataLoading();
-    // Ambil data dari service terpusat
+    // Mengambil data dari service terpusat
     final profile = Get.find<WorkProfileService>().workProfile;
 
-    print(
-        "[DEBUG-PROFILE] Mengambil profil dari service. Jabatan: ${profile?.jobTitle}");
+    
 
     if (profile != null) {
       final uiProfile = Profile(
@@ -43,7 +41,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // FUNGSI LOGOUT YANG SUDAH DIPERBAIKI DAN BENAR
+  // FUNGSI LOGOUT
   Future<void> logout() async {
     FirebaseAnalytics.instance.logEvent(name: 'logout');
     // Hapus User ID saat logout
@@ -51,7 +49,7 @@ class ProfileController extends GetxController {
 
     Get.find<WorkProfileService>().clearProfile();
 
-    // 1. Bersihkan cache dan kredensial (Langkah ini sudah benar)
+    // Membersihkan cache dan kredensial
     await _cacheService.clearAllCache();
     await _storageService.clearCredentials();
     Get.offAll(() => const LoginView());

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/module/my_schedule/model/work_pattern_model.dart';
@@ -25,14 +24,13 @@ class MyScheduleView extends GetView<MyScheduleController> {
       ),
       body: Column(
         children: [
-          // --- INI WIDGET CUSTOM TAB SLIDER KITA ---
+          // --- WIDGET CUSTOM TAB SLIDER ---
           _buildCustomSlidingTab(context),
 
-          // --- KONTEN DINAMIS (Tidak Berubah) ---
           Expanded(
             child: Obx(() {
               if (controller.selectedTabIndex.value == 0) {
-                return _buildHistoryAndScheduleTab();
+                return _buildHistoryAndScheduleTab(context);
               } else {
                 return _buildRequestScheduleTab();
               }
@@ -41,6 +39,14 @@ class MyScheduleView extends GetView<MyScheduleController> {
         ],
       ),
     );
+  }
+
+  // ✅ 1. TAMBAHKAN FUNGSI HELPER INI DI SINI
+  String _formatHour(double? hour) {
+    if (hour == null) return '--:--';
+    int h = hour.toInt();
+    int m = ((hour - h) * 60).round();
+    return "${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}";
   }
 
   Widget _buildCustomSlidingTab(BuildContext context) {
@@ -55,7 +61,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
           height: 48,
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(24.0), // Sangat rounded
+            borderRadius: BorderRadius.circular(24.0),
           ),
           child: Stack(
             children: [
@@ -70,13 +76,12 @@ class MyScheduleView extends GetView<MyScheduleController> {
                 child: Container(
                   width: pillWidth,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor, // Warna ungu
+                    color: Theme.of(context).primaryColor,
                     borderRadius: BorderRadius.circular(24.0),
                   ),
                 ),
               ),
 
-              // Teks di atasnya
               Row(
                 children: [
                   Expanded(
@@ -123,36 +128,273 @@ class MyScheduleView extends GetView<MyScheduleController> {
   }
 
   // --- WIDGET UNTUK KONTEN TAB 1 ---
-  Widget _buildHistoryAndScheduleTab() {
+  Widget _buildHistoryAndScheduleTab(context) {
     return Obx(() {
+      // Obx utama untuk state loading/error
+      final state = controller.rosterState.value;
+
+      if (state is DataLoading && controller.historySchedules.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (state is DataError) {
+        final errorState = state as DataError;
+        return Center(
+            child: Text("Error: ${errorState.error ?? 'Unknown error'}"));
+      }
+
+      // Gunakan ListView untuk menampung semua section
       return ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildSectionHeader("Jadwal Terdekat"),
+          // --- Bagian Jadwal Terdekat ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildSectionHeader("Jadwal Terdekat"),
+
+              // ✅ GANTI CONTAINER INI DENGAN STACK
+              Obx(() {
+                // Bungkus dengan Obx agar UI bisa bereaksi
+                final primaryColor = Theme.of(context).primaryColor;
+                final bool isUpcomingActive =
+                    true; // Asumsi 'Upcoming' selalu aktif
+
+                return Container(
+                  height: 44, // Tentukan tinggi yang pas
+                  decoration: BoxDecoration(
+                    // Latar belakang abu-abu/putih untuk seluruh grup
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.circular(22), // Setengah dari tinggi
+                    boxShadow: [
+                      // Shadow halus
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min, // Agar Row tidak melebar
+                      children: [
+                        // --- Chip "Upcoming" ---
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 6),
+                          height: double.infinity,
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: const BorderRadius.horizontal(
+                                left: Radius.circular(22),
+                                right: Radius.circular(22)),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Upcoming",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // --- Dropdown Hari ---
+                        Container(
+                          padding: const EdgeInsets.only(
+                              left: 12, right: 8), // Padding internal
+                          child: DropdownButton<int>(
+                            value: controller.upcomingFilterDays.value,
+                            underline: const SizedBox(), // Hilangkan underline
+                            isDense: true,
+                            icon: Icon(
+                              Icons.keyboard_arrow_down,
+                              color: const Color(
+                                  0xFFB366FF), // Ungu muda seperti di contoh
+                              size: 20,
+                            ),
+                            style: const TextStyle(
+                              color: Color(0xFF8A4FFF), // Ungu terang
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            dropdownColor: Colors.white,
+                            items: const [
+                              DropdownMenuItem(
+                                  value: 3,
+                                  child: Text("3 Hari")), // Sesuaikan teks
+                              DropdownMenuItem(value: 7, child: Text("7 Hari")),
+                              DropdownMenuItem(
+                                  value: 30, child: Text("30 Hari")),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                controller.setUpcomingFilter(value);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
           const SizedBox(height: 12),
-          if (controller.approvedSchedules.isEmpty)
-            _EmptyStateCard(
-                icon: Icons.calendar_today,
-                message: "Tidak ada jadwal yang disetujui dalam waktu dekat.")
-          else
-            ...controller.approvedSchedules
-                .map((schedule) => _buildScheduleCard(schedule)),
+          Obx(() {
+            // Gunakan getter baru yang sudah difilter
+            final list = controller.filteredApprovedSchedules;
+            if (list.isEmpty) {
+              return _EmptyStateCard(
+                  icon: Icons.calendar_today,
+                  message:
+                      "Tidak ada jadwal yang disetujui dalam ${controller.upcomingFilterDays.value} hari ke depan.");
+            } else {
+              // Gunakan Column agar tidak error constraint di dalam ListView
+              return Column(
+                children: list
+                    .map((schedule) => _buildScheduleCard(schedule))
+                    .toList(),
+              );
+            }
+          }),
+
           const SizedBox(height: 24),
+
+          // --- Bagian Riwayat Pengajuan ---
           _buildSectionHeader("Riwayat Pengajuan"),
+          const SizedBox(height: 16),
+
+          // 1. Search Bar
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white, // Latar putih
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TextField(
+              onChanged: (value) => controller.updateHistorySearch(value),
+              decoration: InputDecoration(
+                hintText: "Search",
+                hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                prefixIcon: Icon(Icons.search,
+                    size: 20, color: Theme.of(context).primaryColor),
+                // Hapus warna dan border dari TextField agar transparan
+                filled: false,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 14.0),
+                border: InputBorder.none, // Hapus border
+                enabledBorder: InputBorder.none, // Hapus border
+                focusedBorder: InputBorder.none, // Hapus border
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
-          if (controller.historySchedules.isEmpty)
-            _EmptyStateCard(
-                icon: Icons.history,
-                message: "Anda belum pernah mengajukan jadwal.")
-          else
-            ...controller.historySchedules
-                .map((history) => _buildScheduleCard(history)),
+
+          // 2. Dropdown Bulan & Status
+          Row(
+            children: [
+              // Dropdown Bulan
+              Expanded(
+                flex: 2, // Beri rasio lebih besar untuk bulan
+                child: Obx(() => _buildFilterDropdown<DateTime?>(
+                      // Gunakan helper
+                      value: controller.historyMonthFilter.value,
+                      hint: "Oktober 2025", // Contoh hint
+                      items: [
+                        // Item untuk "Semua Bulan" (null)
+                        const DropdownMenuItem<DateTime?>(
+                          value: null,
+                          child: Text("Semua Bulan",
+                              style: TextStyle(fontSize: 14)),
+                        ),
+                        // Item untuk setiap bulan yang ada di riwayat
+                        ...controller.availableHistoryMonths.map((month) {
+                          return DropdownMenuItem<DateTime?>(
+                            value: month,
+                            child: Text(
+                                DateFormat('MMMM yyyy', 'id_ID').format(month),
+                                style: const TextStyle(fontSize: 14)),
+                          );
+                        }),
+                      ],
+                      onChanged: (value) =>
+                          controller.updateHistoryMonth(value),
+                    )),
+              ),
+              const SizedBox(width: 12),
+              // Dropdown Status
+              Expanded(
+                flex: 1, // Beri rasio lebih kecil untuk status
+                child: Obx(() => _buildFilterDropdown<String>(
+                      // Gunakan helper
+                      value: controller.historyStatusFilter.value,
+                      hint: "Status", // Hint tidak akan terpakai
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'All',
+                            child:
+                                Text("Semua", style: TextStyle(fontSize: 14))),
+                        DropdownMenuItem(
+                            value: 'Approved',
+                            child: Text("Approve",
+                                style: TextStyle(fontSize: 14))),
+                        DropdownMenuItem(
+                            value: 'Requested',
+                            child: Text("Pending",
+                                style: TextStyle(fontSize: 14))),
+                        DropdownMenuItem(
+                            value: 'Rejected',
+                            child: Text("Rejected",
+                                style: TextStyle(fontSize: 14))),
+                      ],
+                      onChanged: (value) {
+                        if (value != null)
+                          controller.updateHistoryStatus(value);
+                      },
+                    )),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 3. Daftar Hasil Filter (Menggantikan ExpansionTile)
+          Obx(() {
+            // Gunakan getter baru yang sudah difilter
+            final list = controller.filteredHistorySchedules;
+            if (list.isEmpty) {
+              return _EmptyStateCard(
+                  icon: Icons.search_off,
+                  message:
+                      "Tidak ada riwayat pengajuan yang cocok dengan filter Anda.");
+            }
+            // Tampilkan sebagai Column, BUKAN ExpansionTile
+            // Gunakan ListView.builder jika daftar bisa sangat panjang, tapi Column lebih sederhana
+            return Column(
+              children:
+                  list.map((history) => _buildScheduleCard(history)).toList(),
+            );
+          }),
+          // ------------------------------------------
         ],
       );
     });
   }
 
-  // --- WIDGET UNTUK KONTEN (KALENDER) ---
+  // --- WIDGET UNTUK KONTEN KALENDER ---
   Widget _buildRequestScheduleTab() {
     return Obx(() {
       return SingleChildScrollView(
@@ -173,7 +415,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
           },
           eventLoader: controller.getEventsForDay,
           enabledDayPredicate: (day) {
-            // Iterasi melalui kunci map dan gunakan isSameDay untuk menemukan match
+            // Iterasi melalui key map dan gunakan isSameDay untuk menemukan match
             final statusEntry =
                 controller.bookedDatesWithStatus.entries.firstWhere(
               (entry) => isSameDay(entry.key, day),
@@ -186,7 +428,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
           calendarBuilders: CalendarBuilders(
             // --- BUILDER INI UNTUK MENGUBAH WARNA ---
             disabledBuilder: (context, day, focusedDay) {
-              // Gunakan logika yang sama untuk menemukan status
+              // logika untuk menemukan status
               final statusEntry =
                   controller.bookedDatesWithStatus.entries.firstWhere(
                 (entry) => isSameDay(entry.key, day),
@@ -260,20 +502,45 @@ class MyScheduleView extends GetView<MyScheduleController> {
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
   }
 
-  Widget _buildScheduleInfoCard(Roster schedule) {
-    return Card(
-      child: ListTile(
-        leading: const Icon(Icons.event_available, color: Colors.green),
-        title: Text(schedule.workPatternName),
-        subtitle: Text(DateFormat('EEEE, d MMMM yyyy').format(schedule.date)),
+  Widget _buildFilterDropdown<T>({
+    required T value,
+    required String hint,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: Colors.white, // Latar putih
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1), // Warna shadow
+            spreadRadius: 1, // Seberapa jauh shadow menyebar
+            blurRadius: 5, // Seberapa kabur shadow
+            offset: const Offset(0, 2), // Posisi shadow (sedikit ke bawah)
+          ),
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          hint: Text(hint,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down,
+              color: Theme.of(Get.context!).primaryColor, size: 20),
+          items: items,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
 
   Widget _buildScheduleCard(Roster schedule) {
-    final controller = Get.find<MyScheduleController>();
+    // final controller = Get.find<MyScheduleController>();
 
-    // Tentukan warna berdasarkan status
+    // Menentukan warna berdasarkan status
     final Color statusColor;
     switch (schedule.status) {
       case 'Approved':
@@ -289,12 +556,9 @@ class MyScheduleView extends GetView<MyScheduleController> {
         statusColor = Colors.grey;
     }
 
-    // Helper untuk format jam dari float (misal: 8.5 -> "08:30")
+    // Helper untuk format jam dari float
     String formatHour(double? hour) {
-      if (hour == null) return '--:--';
-      int h = hour.toInt();
-      int m = ((hour - h) * 60).round();
-      return "${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}";
+      return _formatHour(hour);
     }
 
     return Card(
@@ -349,7 +613,8 @@ class MyScheduleView extends GetView<MyScheduleController> {
                       const SizedBox(height: 4),
                       // Tanggal dan Jam
                       Text(
-                        "${DateFormat('EEEE, d MMMM yyyy').format(schedule.date)}  •  ${formatHour(schedule.workFrom)} - ${formatHour(schedule.workTo)}",
+                        // ✅ 2. PANGGIL LANGSUNG _formatHour
+                        "${DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(schedule.date)}  •  ${_formatHour(schedule.workFrom)} - ${_formatHour(schedule.workTo)}",
                         style: TextStyle(
                             color: Colors.grey.shade700, fontSize: 13),
                       ),
@@ -357,7 +622,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                       // Detail Pengajuan
                       if (schedule.createDate != null)
                         Text(
-                          "Diajukan: ${DateFormat('d MMM yyyy, HH:mm').format(schedule.createDate!)}",
+                          "Diajukan: ${DateFormat('d MMM yyyy, HH:mm').format(schedule.createDate!.toLocal())}",
                           style: TextStyle(
                               color: Colors.grey.shade600, fontSize: 12),
                         ),
@@ -372,7 +637,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           ),
                         ),
                       const SizedBox(height: 12),
-                      // Tombol Aksi (Kondisional)
+                      // Tombol Aksi
                       if (schedule.status == 'Requested')
                         SizedBox(
                           width: double.infinity,
@@ -391,7 +656,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              /* Logika untuk lihat detail/ajukan ulang */
+                              controller.showRejectionDetail(schedule);
                             },
                             child: const Text("DETAIL"),
                           ),
@@ -414,7 +679,13 @@ class _EmptyStateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      color: Colors.grey[100],
+      color: Theme.of(Get.context!)
+          .cardColor
+          .withOpacity(0.5), // Sesuaikan dengan tema
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
         child: Row(

@@ -85,14 +85,14 @@ class _RequestScheduleBottomSheetState
             // Properti untuk menonaktifkan tanggal
             enabledDayPredicate: (day) {
               // 'day' adalah setiap tanggal yang akan digambar oleh kalender
-              // Kita periksa apakah tanggal ini ada di dalam daftar 'bookedDates'
+              // Periksa apakah tanggal ini ada di dalam daftar 'bookedDates'
               return !controller.bookedDates.any((bookedDate) =>
                   bookedDate.year == day.year &&
                   bookedDate.month == day.month &&
                   bookedDate.day == day.day);
             },
 
-            // Beri gaya visual berbeda untuk tanggal yang nonaktif
+            // Gaya visual berbeda untuk tanggal yang nonaktif
             calendarStyle: CalendarStyle(
               disabledTextStyle: TextStyle(
                 color: Colors.grey.shade400,
@@ -132,19 +132,19 @@ class _RequestScheduleBottomSheetState
   }
 
   Widget _buildShiftDropdown(int index, List<WorkPattern> patterns) {
-    // Beri batasan lebar pada DropdownButton
+    // batasan lebar pada DropdownButton
     return SizedBox(
-      width: 150, // Atur lebar yang sesuai, misalnya 150
+      width: 150, // Mengatur lebar yang sesuai, misalnya 150
       child: DropdownButton<WorkPattern>(
         value: controller.selectedRequests[index].selectedPattern,
         hint: const Text("Pilih Shift"),
-        isExpanded: true, // Pastikan dropdown mengisi SizedBox
+        isExpanded: true, // Memastikan dropdown mengisi SizedBox
         items: patterns.map((pattern) {
           return DropdownMenuItem<WorkPattern>(
             value: pattern,
             child: Text(
               pattern.name,
-              overflow: TextOverflow.ellipsis, // Cegah teks panjang meluber
+              overflow: TextOverflow.ellipsis, // Mencegah teks panjang meluber
             ),
           );
         }).toList(),

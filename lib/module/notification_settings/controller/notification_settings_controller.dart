@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationSettingsController extends GetxController {
+  
   // Variabel state untuk setiap toggle
   var allNotifications = true.obs;
   var attendanceReminders = true.obs;

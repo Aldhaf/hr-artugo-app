@@ -11,18 +11,16 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-import 'package:hr_artugo_app/service/local_notification_service/local_notification_service.dart';
+import 'package:hr_artugo_app/service/theme_service/theme_service.dart';
 import 'package:hr_artugo_app/service/work_profile_service/work_profile_service.dart';
-import 'package:hr_artugo_app/service/firebase_service/firebase_service.dart';
 import 'package:hr_artugo_app/service/notification_preference_service/notification_preference_service.dart';
-import 'package:hr_artugo_app/service/leave_type_service/leave_type_service.dart';
-import 'package:hr_artugo_app/service/time_off_service/time_off_service.dart';
-import 'package:hr_artugo_app/service/my_schedule_service/my_schedule_service.dart';
 import 'package:hr_artugo_app/service/cache_service/cache_service.dart';
 import 'package:hr_artugo_app/service/storage_service/storage_service.dart';
 import 'package:hr_artugo_app/service/notification_service/notification_service.dart';
 import 'package:hr_artugo_app/module/onboarding/bindings/onboarding_binding.dart';
+import 'package:hr_artugo_app/service/connectivity_service/connectivity_service.dart';
 
 import 'package:hr_artugo_app/module/notification/bindings/notification_binding.dart';
 import 'package:hr_artugo_app/module/notification/controller/notification_controller.dart';
@@ -39,27 +37,21 @@ import 'package:hr_artugo_app/module/onboarding/view/onboarding_view.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Pastikan Firebase sudah diinisialisasi di sini juga untuk background isolate
+  // Pastikan Firebase diinisialisasi di dalam handler ini
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print("Handling a background message: ${message.messageId}");
-
-  if (message.data['type'] == 'schedule_update') {
-    print("Trigger 'schedule_update' diterima di background.");
-    if (Get.isRegistered<DashboardController>()) {
-      final dashboardController = Get.find<DashboardController>();
-      await dashboardController.refreshData();
-      print("Dashboard data refreshed from background trigger.");
-    }
-  }
+  print("Data payload: ${message.data}");
 }
 
 Future<void> initServices() async {
-  // --- GRUP 1: SERVICE DASAR (TANPA DEPENDENSI INTERNAL) ---
+  /*
+  // --- GRUP 1: SERVICE DASAR ---
   // Service ini tidak butuh service lain yang kita buat, jadi aman di paling atas.
   await Get.putAsync(() async => OdooApiService(), permanent: true);
   Get.put(CacheService(), permanent: true);
   Get.put(StorageService(), permanent: true);
   Get.put(NotificationPreferenceService(), permanent: true);
+  Get.put(ConnectivityService(), permanent: true);
 
   // --- GRUP 2: SERVICE YANG BUTUH GRUP 1 ---
   // Service ini butuh service dari grup di atasnya.
@@ -77,18 +69,52 @@ Future<void> initServices() async {
   // AttendanceService butuh WorkProfileService, jadi harus setelahnya.
   Get.put(AttendanceService(), permanent: true);
 
-  // --- GRUP 4: CONTROLLER (YANG DI-INIT DI AWAL) ---
+  // --- GRUP 4: CONTROLLER ---
   // Controller biasanya didaftarkan terakhir karena mereka butuh semua service.
   Get.put(NotificationController(), permanent: true);
 
   // --- Utility (Non-GetX Service) ---
   LocalNotificationService.initialize();
-  print("All services initialized successfully in the correct order.");
+  */
+
+  // --- GRUP 1: Service Inti & Cepat (Diperlukan Paling Awal) ---
+  // Service ini tidak memiliki dependensi eksternal yang kompleks atau async init.
+  // Ditandai 'permanent' agar tidak dihapus GetX.
+  Get.put(StorageService(), permanent: true);
+  Get.put(CacheService(), permanent: true);
+  Get.put(ConnectivityService(), permanent: true);
+  Get.put(NotificationPreferenceService(), permanent: true);
+
+  // --- GRUP 2: Service Kritis untuk Koneksi & Autentikasi ---
+  // OdooApiService adalah fondasi, butuh 'await' karena mungkin ada setup async.
+  // AuthService bergantung pada OdooApiService, didaftarkan setelahnya (lazyPut OK).
+  print("Initializing critical connection & auth services...");
+  await Get.putAsync(() async => OdooApiService(), permanent: true);
+  Get.lazyPut<AuthService>(() => AuthService(),
+      fenix: true); // Fenix & Permanent krn penting
+
+  // --- GRUP 3: Service/Controller yang Diperlukan Segera Setelah Login ---
+  // WorkProfile butuh OdooApi dan punya init() async.
+  // Notifikasi dibutuhkan segera setelah login untuk mengambil data awal.
+  print("Initializing post-login essential services...");
+  await Get.putAsync(() => WorkProfileService().init(), permanent: true);
+  // Daftarkan Service Notifikasi sebelum Controller-nya
+  Get.lazyPut<NotificationService>(() => NotificationService(), fenix: true);
+  Get.lazyPut<NotificationController>(() => NotificationController(),
+      fenix: true);
+
+  // --- CATATAN ---
+  // Service lain yang BISA ditunda (FirebaseService, AttendanceService, MyScheduleService, dll.)
+  // akan tetap diinisialisasi di 'MainNavigationBinding' untuk mempercepat startup awal.
+
+  print("✅ Core services initialization complete.");
 }
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  await initializeDateFormatting('id_ID', null);
 
   // Inisialisasi Firebase
   await Firebase.initializeApp(
@@ -109,12 +135,17 @@ void main() async {
 
   await initServices();
 
+  // Inisialisasi ThemeService (cepat karena hanya baca SharedPreferences)
+  final themeService = await Get.putAsync(() => ThemeService().init());
+
+  // Cek Onboarding (cepat karena hanya baca SharedPreferences)
   final prefs = await SharedPreferences.getInstance();
   final bool onboardingCompleted =
       prefs.getBool('onboarding_completed') ?? false;
 
   // Jalankan aplikasi
-  runApp(MainApp(onboardingCompleted: onboardingCompleted));
+  runApp(MainApp(
+      onboardingCompleted: onboardingCompleted, themeService: themeService));
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
     // Hilangkan splash screen setelah UI siap
@@ -124,65 +155,69 @@ void main() async {
 
 class MainApp extends StatelessWidget {
   final bool onboardingCompleted;
-  const MainApp({Key? key, required this.onboardingCompleted})
+  final ThemeService themeService;
+  const MainApp(
+      {Key? key, required this.onboardingCompleted, required this.themeService})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'HR Artugo',
-      debugShowCheckedModeBanner: false,
-      theme: getDefaultTheme(),
-      initialRoute: onboardingCompleted ? '/login' : '/onboarding',
-      getPages: [
-        GetPage(
-          name: '/onboarding', // Gunakan string biasa
-          page: () => const OnboardingView(),
-          binding: OnboardingBinding(),
-        ),
-        GetPage(
-          name: '/login',
-          page: () => const LoginView(),
-          binding: LoginBinding(),
-        ),
-        GetPage(
-          name: '/dashboard',
-          page: () => const MainNavigationView(),
-          binding: MainNavigationBinding(),
-        ),
-        GetPage(
-          name: '/notifications',
-          page: () => const NotificationView(),
-          binding: NotificationBinding(),
-        ),
-        GetPage(
-          name: '/time_off_detail',
-          page: () => const TimeOffDetailView(),
-          binding: TimeOffDetailBinding(),
-        ),
-        GetPage(
-          name: '/about_app',
-          page: () => const AboutAppView(),
-          binding: AboutAppBinding(),
-        ),
-        GetPage(
-          name: '/notification_settings',
-          page: () => const NotificationSettingsView(),
-        ),
-        GetPage(
-          name: '/terms_and_conditions',
-          page: () => const TermsView(),
-        ),
-        GetPage(
-          name: '/privacy_policy',
-          page: () => const PrivacyPolicyView(),
-        ),
-        GetPage(
-          name: '/my_schedule',
-          page: () => const MyScheduleView(),
-          binding: MyScheduleBinding(),
-        ),
-      ],
-    );
+    return Obx(() => GetMaterialApp(
+          title: 'ArtuGo',
+          debugShowCheckedModeBanner: false,
+          theme: getDefaultTheme(),
+          darkTheme: getDarkTheme(),
+          themeMode: themeService.themeMode,
+          initialRoute: onboardingCompleted ? '/login' : '/onboarding',
+          getPages: [
+            GetPage(
+              name: '/onboarding', // Gunakan string biasa
+              page: () => const OnboardingView(),
+              binding: OnboardingBinding(),
+            ),
+            GetPage(
+              name: '/login',
+              page: () => const LoginView(),
+              binding: LoginBinding(),
+            ),
+            GetPage(
+              name: '/dashboard',
+              page: () => const MainNavigationView(),
+              binding: MainNavigationBinding(),
+            ),
+            GetPage(
+              name: '/notifications',
+              page: () => const NotificationView(),
+              binding: NotificationBinding(),
+            ),
+            GetPage(
+              name: '/time_off_detail',
+              page: () => const TimeOffDetailView(),
+              binding: TimeOffDetailBinding(),
+            ),
+            GetPage(
+              name: '/about_app',
+              page: () => const AboutAppView(),
+              binding: AboutAppBinding(),
+            ),
+            GetPage(
+              name: '/notification_settings',
+              page: () => const NotificationSettingsView(),
+            ),
+            GetPage(
+              name: '/terms_and_conditions',
+              page: () => const TermsView(),
+            ),
+            GetPage(
+              name: '/privacy_policy',
+              page: () => const PrivacyPolicyView(),
+            ),
+            GetPage(
+              name: '/my_schedule',
+              page: () => const MyScheduleView(),
+              binding: MyScheduleBinding(),
+            ),
+          ],
+        ));
   }
 }

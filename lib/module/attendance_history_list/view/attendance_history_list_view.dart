@@ -1,5 +1,3 @@
-// lib/module/attendance_history_list/view/attendance_history_list_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
@@ -28,10 +26,9 @@ class AttendanceHistoryListView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        //Memposisikan judul di tengah
         centerTitle: true,
         title: const Text("Attendance History"),
-        elevation: 0.6, // Menambahkan sedikit bayangan agar terlihat
+        elevation: 0.6,
       ),
       body: Obx(() {
         if (controller.loading.value) {
@@ -69,18 +66,16 @@ class AttendanceHistoryListView extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // --- AKSEN WARNA DI SINI ---
                     Container(
-                      width: 8, // Lebar garis aksen
+                      width: 8,
                       decoration: BoxDecoration(
-                        color: primaryColor, // Mengambil warna dari tema
+                        color: primaryColor,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(16),
                           bottomLeft: Radius.circular(16),
                         ),
                       ),
                     ),
-                    // -------------------------
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),

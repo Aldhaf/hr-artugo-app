@@ -5,7 +5,7 @@ import 'package:hr_artugo_app/service/leave_type_service/leave_type_service.dart
 
 class TimeOffFormController extends GetxController {
   // --- State Variables ---
-  // Variabel form dibuat reaktif, Rxn<> digunakan agar bisa null di awal.
+  // Variabel form dibuat reaktif, Rxn<> digunakan agar bisa null di awal
   var leaveTypeId = Rxn<int>();
   var dateFrom = Rxn<DateTime>();
   var dateTo = Rxn<DateTime>();
@@ -43,7 +43,6 @@ class TimeOffFormController extends GetxController {
       return;
     }
 
-    // --- GANTI showLoading() DENGAN Get.dialog() ---
     Get.dialog(
       const Center(child: CircularProgressIndicator()),
       barrierDismissible: false, // Mencegah dialog ditutup oleh user
@@ -57,7 +56,7 @@ class TimeOffFormController extends GetxController {
         dateTo: dateTo.value!,
       );
 
-      // Tutup dialog loading SEBELUM menampilkan snackbar atau kembali
+      // Tutup dialog loading sebelum menampilkan snackbar atau kembali
       Get.back();
 
       if (!isSuccess) {
@@ -68,7 +67,7 @@ class TimeOffFormController extends GetxController {
 
       Get.back(result: true);
     } catch (e) {
-      // Jika terjadi error, pastikan dialog loading juga ditutup
+      // Jika terjadi error, dialog loading juga ditutup
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }

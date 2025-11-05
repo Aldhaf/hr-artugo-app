@@ -1,5 +1,3 @@
-// lib/module/checkin_detail/widget/check_out_button.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
@@ -21,7 +19,7 @@ class CheckOutButton extends StatelessWidget {
         return Expanded(
           child: QButton(
               label: controller.checkOutTime.value,
-              onPressed: () {}), // <-- Gunakan fungsi kosong
+              onPressed: () {}),
         );
       }
 

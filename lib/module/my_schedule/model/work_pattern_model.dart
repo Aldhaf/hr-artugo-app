@@ -1,7 +1,7 @@
 class WorkPattern {
   final int id;
   final String name;
-  final double workFrom; // <-- 1. TAMBAHKAN PROPERTI INI
+  final double workFrom;
   final double workTo;
 
   WorkPattern(

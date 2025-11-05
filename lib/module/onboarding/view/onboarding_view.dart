@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../controller/onboarding_controller.dart';
 
@@ -11,7 +10,6 @@ class OnboardingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Controller tidak perlu diubah, kita hanya mengambilnya
     final controller = Get.find<OnboardingController>();
     final primaryColor = Theme.of(context).primaryColor;
 
@@ -27,7 +25,6 @@ class OnboardingView extends StatelessWidget {
                 onPageChanged: controller.onPageChanged,
                 itemCount: controller.pages.length,
                 itemBuilder: (context, index) {
-                  // HAPUS Padding di sini, karena gambar sudah memiliki ruang sendiri
                   return Container(
                     alignment: Alignment.topCenter,
                     child: Image.asset(
@@ -125,7 +122,7 @@ class OnboardingView extends StatelessWidget {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              elevation: 0, // Hilangkan bayangan bawaan
+                              elevation: 0, // Menghilangkan bayangan bawaan
                             ),
                             onPressed: controller.nextPage,
                             child: Text(

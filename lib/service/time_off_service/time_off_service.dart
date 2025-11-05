@@ -32,14 +32,13 @@ class TimeOffService extends GetxService {
       await _odooApi.create(
         model: "hr.leave",
         data: {
-          // 'employee_id': AuthService.session.id,
           'employee_id': _odooApi.employeeId,
           // 'date_from': DateFormat("yyyy-MM-dd kk:mm:ss").format(dateFrom),
           // 'date_to': DateFormat("yyyy-MM-dd kk:mm:ss").format(dateTo),
           'date_from': DateFormat("yyyy-MM-dd 00:00:00").format(dateFrom),
           'date_to': DateFormat("yyyy-MM-dd 00:00:00").format(dateTo),
-          // 'duration': duration, //
-          'name': name, //
+          // 'duration': duration,
+          'name': name,
           'holiday_status_id': leaveTypeId,
         },
       );
@@ -49,6 +48,3 @@ class TimeOffService extends GetxService {
     }
   }
 }
-/*
-http://103.49.239.49:8069/jw_expense/delete?domain=[['id','=',13]]&model='hr.expense'
-*/
