@@ -74,7 +74,8 @@ class MainNavigationView extends StatelessWidget {
                     GButton(icon: Icons.dashboard, text: 'Dashboard'),
                     GButton(icon: Icons.calendar_month, text: 'Attendance'),
                     // GButton(icon: Icons.access_time_filled, text: 'Time Off'), // nonaktif sementara
-                    GButton(icon: Icons.edit_calendar_outlined, text: 'Jadwal'),
+                    GButton(
+                        icon: Icons.edit_calendar_outlined, text: 'Schedule'),
                     GButton(icon: Icons.person, text: 'User'),
                   ],
                   selectedIndex: controller.selectedIndex.value,

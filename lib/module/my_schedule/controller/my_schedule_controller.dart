@@ -105,29 +105,27 @@ class MyScheduleController extends GetxController {
     Get.bottomSheet(
       Container(
         decoration: BoxDecoration(
-          color:
-              Theme.of(Get.context!).cardColor, // Gunakan warna kartu dari tema
+          color: Colors.white,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
         ),
         child: Wrap(
-          // Wrap agar tinggi sheet pas dengan konten
           children: [
             // Header BottomSheet
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Text(
-                "Pilih Shift untuk\n${DateFormat('EEEE, d MMMM yyyy').format(selectedDay)}",
+                "Select Shifts for\n${DateFormat('EEEE, d MMMM yyyy').format(selectedDay)}",
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
             // Opsi Hapus Pilihan
             ListTile(
-              leading: const Icon(Icons.highlight_off, color: Colors.grey),
-              title: const Text("-- Hapus Pilihan / Hari Libur --"),
+              leading: const Icon(Icons.highlight_off, color: Colors.red),
+              title: const Text("-- Clear Choice / Holiday --"),
               onTap: () {
                 // Buat salinan Map, hapus entri untuk tanggal ini, update state
                 final newMap = Map<DateTime, WorkPattern>.from(selectedShifts);
@@ -139,7 +137,6 @@ class MyScheduleController extends GetxController {
                 Get.back(); // Tutup bottom sheet
               },
             ),
-            // Daftar Shift yang Tersedia
             // Obx di sini agar daftar shift otomatis update jika availablePatterns berubah
             Obx(() => Column(
                   mainAxisSize: MainAxisSize

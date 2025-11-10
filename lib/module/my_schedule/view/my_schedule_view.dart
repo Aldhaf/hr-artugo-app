@@ -14,7 +14,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jadwal Saya'),
+        title: const Text('My Schedule'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -90,7 +90,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           foregroundColor: Colors.transparent),
                       onPressed: () => controller.changeTabIndex(0),
                       child: Text(
-                        'Riwayat & Jadwal',
+                        'History & Schedule',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           // Ganti warna teks berdasarkan tab yang aktif
@@ -107,7 +107,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           foregroundColor: Colors.transparent),
                       onPressed: () => controller.changeTabIndex(1),
                       child: Text(
-                        'Ajukan Jadwal',
+                        'Request Schedule',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           // Ganti warna teks berdasarkan tab yang aktif
@@ -151,22 +151,16 @@ class MyScheduleView extends GetView<MyScheduleController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildSectionHeader("Jadwal Terdekat"),
-
-              // ✅ GANTI CONTAINER INI DENGAN STACK
+              _buildSectionHeader("Upcoming Schedule"),
               Obx(() {
-                // Bungkus dengan Obx agar UI bisa bereaksi
                 final primaryColor = Theme.of(context).primaryColor;
-                final bool isUpcomingActive =
-                    true; // Asumsi 'Upcoming' selalu aktif
+                final bool isUpcomingActive = true;
 
                 return Container(
-                  height: 44, // Tentukan tinggi yang pas
+                  height: 44,
                   decoration: BoxDecoration(
-                    // Latar belakang abu-abu/putih untuk seluruh grup
                     color: Colors.white,
-                    borderRadius:
-                        BorderRadius.circular(22), // Setengah dari tinggi
+                    borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       // Shadow halus
                       BoxShadow(
@@ -179,7 +173,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(22),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min, // Agar Row tidak melebar
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // --- Chip "Upcoming" ---
                         Container(
@@ -206,31 +200,27 @@ class MyScheduleView extends GetView<MyScheduleController> {
 
                         // --- Dropdown Hari ---
                         Container(
-                          padding: const EdgeInsets.only(
-                              left: 12, right: 8), // Padding internal
+                          padding: const EdgeInsets.only(left: 12, right: 8),
                           child: DropdownButton<int>(
                             value: controller.upcomingFilterDays.value,
-                            underline: const SizedBox(), // Hilangkan underline
+                            underline: const SizedBox(),
                             isDense: true,
                             icon: Icon(
                               Icons.keyboard_arrow_down,
-                              color: const Color(
-                                  0xFFB366FF), // Ungu muda seperti di contoh
+                              color: const Color(0xFFB366FF),
                               size: 20,
                             ),
                             style: const TextStyle(
-                              color: Color(0xFF8A4FFF), // Ungu terang
-                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF8A4FFF),
+                              fontWeight: FontWeight.w400,
                               fontSize: 13,
                             ),
                             dropdownColor: Colors.white,
                             items: const [
+                              DropdownMenuItem(value: 3, child: Text("3 Days")),
+                              DropdownMenuItem(value: 7, child: Text("7 Days")),
                               DropdownMenuItem(
-                                  value: 3,
-                                  child: Text("3 Hari")), // Sesuaikan teks
-                              DropdownMenuItem(value: 7, child: Text("7 Hari")),
-                              DropdownMenuItem(
-                                  value: 30, child: Text("30 Hari")),
+                                  value: 30, child: Text("30 Days")),
                             ],
                             onChanged: (value) {
                               if (value != null) {
@@ -254,7 +244,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
               return _EmptyStateCard(
                   icon: Icons.calendar_today,
                   message:
-                      "Tidak ada jadwal yang disetujui dalam ${controller.upcomingFilterDays.value} hari ke depan.");
+                      "There are no approved schedules in the next ${controller.upcomingFilterDays.value} days.");
             } else {
               // Gunakan Column agar tidak error constraint di dalam ListView
               return Column(
@@ -268,7 +258,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
           const SizedBox(height: 24),
 
           // --- Bagian Riwayat Pengajuan ---
-          _buildSectionHeader("Riwayat Pengajuan"),
+          _buildSectionHeader("Submission History"),
           const SizedBox(height: 16),
 
           // 1. Search Bar
@@ -315,11 +305,11 @@ class MyScheduleView extends GetView<MyScheduleController> {
                       value: controller.historyMonthFilter.value,
                       hint: "Oktober 2025", // Contoh hint
                       items: [
-                        // Item untuk "Semua Bulan" (null)
+                        // Item untuk "All Month" (null)
                         const DropdownMenuItem<DateTime?>(
                           value: null,
-                          child: Text("Semua Bulan",
-                              style: TextStyle(fontSize: 14)),
+                          child:
+                              Text("All Month", style: TextStyle(fontSize: 14)),
                         ),
                         // Item untuk setiap bulan yang ada di riwayat
                         ...controller.availableHistoryMonths.map((month) {
@@ -346,8 +336,8 @@ class MyScheduleView extends GetView<MyScheduleController> {
                       items: const [
                         DropdownMenuItem(
                             value: 'All',
-                            child:
-                                Text("Semua", style: TextStyle(fontSize: 14))),
+                            child: Text("All Status",
+                                style: TextStyle(fontSize: 14))),
                         DropdownMenuItem(
                             value: 'Approved',
                             child: Text("Approve",
@@ -379,7 +369,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
               return _EmptyStateCard(
                   icon: Icons.search_off,
                   message:
-                      "Tidak ada riwayat pengajuan yang cocok dengan filter Anda.");
+                      "Oppss, there are no submissions matching your filter.");
             }
             // Tampilkan sebagai Column, BUKAN ExpansionTile
             // Gunakan ListView.builder jika daftar bisa sangat panjang, tapi Column lebih sederhana
@@ -475,7 +465,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
             style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50)),
             onPressed: controller.submitScheduleRequest,
-            child: const Text("Kirim Pengajuan Jadwal"),
+            child: const Text("Submit Schedule Request"),
           ),
         ),
       ]));
@@ -532,6 +522,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
               color: Theme.of(Get.context!).primaryColor, size: 20),
           items: items,
           onChanged: onChanged,
+          dropdownColor: Colors.white,
         ),
       ),
     );
