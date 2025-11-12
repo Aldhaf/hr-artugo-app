@@ -1,22 +1,36 @@
+import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:odoo_rpc/odoo_rpc.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../../env.dart';
 
 class OdooApiService {
-  OdooClient client = OdooClient(config['host']!);
+  final Map<String, String> _config =
+      Get.find<Map<String, String>>(tag: 'config');
+
+  late OdooClient client;
   OdooSession? session;
   int? employeeId;
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: config['host']!,
-  ));
+  late final Dio _dio;
+
+  OdooApiService() {
+    final host = _config['host'];
+    if (host == null) {
+      throw Exception(
+          "Config 'host' not found. Make sure config is passed to runSharedApp.");
+    }
+    client = OdooClient(host);
+    _dio = Dio(BaseOptions(
+      baseUrl: host,
+    ));
+    print(
+        "OdooApiService Initialized for env: ${_config['env']} at host: $host");
+  }
 
   // Mengirimkan pengajuan jadwal bulanan yang dipilih pengguna ke API Odoo.
   Future<void> submitMonthlyRoster(Map<String, dynamic> data) async {
     // Path endpoint yang ada di Odoo
     const String path = '/api/submit_monthly_roster';
-
     final String? sessionId = session?.id;
     if (sessionId == null || sessionId.isEmpty) {
       throw Exception("Sesi tidak ditemukan, harap login ulang.");
@@ -78,7 +92,7 @@ class OdooApiService {
 
   // Membatalkan pengajuan jadwal (roster) yang masih berstatus 'requested' melalui API Odoo.
   Future<void> cancelShiftRequest(int rosterId) async {
-    final url = "${config['host']!}/api/cancel_shift_request";
+    final url = "${_config['host']!}/api/cancel_shift_request";
     final dio = Dio();
     final String? sessionId = session?.id;
     if (sessionId == null || sessionId.isEmpty) {
@@ -109,7 +123,7 @@ class OdooApiService {
 
   // Mengambil daftar pola kerja (shift) yang tersedia untuk dipilih oleh karyawan dari API Odoo.
   Future<List<dynamic>> getAvailableShifts() async {
-    final url = "${config['host']!}/api/get_available_shifts";
+    final url = "${_config['host']!}/api/get_available_shifts";
     final dio = Dio();
     final String? sessionId = session?.id;
 
@@ -135,7 +149,7 @@ class OdooApiService {
   Future<void> createAttendanceWithGPS({
     required Position position,
   }) async {
-    final url = "${config['host']!}/api/hr_attendance/check_in";
+    final url = "${_config['host']!}/api/hr_attendance/check_in";
     final String? sessionId = session?.id;
 
     if (sessionId == null || sessionId.isEmpty) {
@@ -180,7 +194,7 @@ class OdooApiService {
   // Mengirimkan pengajuan jadwal shift individual ke API Odoo (kemungkinan deprecated, digantikan submitMonthlyRoster).
   Future<Map<String, dynamic>> submitShiftRequest(
       List<Map<String, dynamic>> schedules) async {
-    final url = "${config['host']!}/api/submit_shift_request";
+    final url = "${_config['host']!}/api/submit_shift_request";
     final dio = Dio();
     final String? sessionId = session?.id;
 
@@ -202,7 +216,7 @@ class OdooApiService {
 
   // Mengambil riwayat pengajuan jadwal (roster) milik karyawan yang sedang login dari API Odoo.
   Future<List<dynamic>> getMyRoster() async {
-    final url = "${config['host']!}/api/get_my_roster";
+    final url = "${_config['host']!}/api/get_my_roster";
     final dio = Dio();
     final String? sessionId = session?.id;
 
@@ -263,7 +277,7 @@ class OdooApiService {
 
   // Mengambil data profil kerja karyawan (termasuk jadwal kerja default) dari API Odoo.
   Future<Map<String, dynamic>> getWorkProfile() async {
-    final url = "${config['host']!}/api/get_work_profile";
+    final url = "${_config['host']!}/api/get_work_profile";
     final dio = Dio();
     final String? sessionId = session?.id;
 
@@ -288,7 +302,7 @@ class OdooApiService {
     required Position position,
     required File photo,
   }) async {
-    final url = "${config['host']!}/api/hr_attendance/check_in";
+    final url = "${_config['host']!}/api/hr_attendance/check_in";
 
     // Mengambil ID sesi (dalam bentuk String) dari objek sesi yang disimpan saat login.
     final String? sessionId = session?.id;
@@ -338,7 +352,7 @@ class OdooApiService {
 
   // Menghasilkan URL gambar profil pengguna Odoo berdasarkan ID pengguna.
   String? getUserImageUrl(int uid) {
-    return "${config['host']!}/web/image?model=res.users&id=$uid&field=image_1920";
+    return "${_config['host']!}/web/image?model=res.users&id=$uid&field=image_1920";
   }
 
   // Menghapus notifikasi spesifik dari Odoo berdasarkan ID notifikasi.
@@ -528,7 +542,7 @@ class OdooApiService {
   }) async {
     try {
       session = await client.authenticate(
-        config["database"]!,
+        _config["database"]!,
         login,
         password,
       );

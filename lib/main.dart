@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:hr_artugo_app/config/env_dev.dart';
 
 import 'package:hr_artugo_app/service/theme_service/theme_service.dart';
 import 'package:hr_artugo_app/service/work_profile_service/work_profile_service.dart';
@@ -111,8 +112,15 @@ Future<void> initServices() async {
 }
 
 void main() async {
+  // Panggil fungsi bersama kita dan teruskan konfigurasi 'dev'
+  // (Pastikan configDev diimpor dari env_dev.dart)
+  await runSharedApp(configDev);
+}
+
+Future<void> runSharedApp(Map<String, String> config) async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  Get.put<Map<String, String>>(config, permanent: true, tag: 'config');
 
   await initializeDateFormatting('id_ID', null);
 
