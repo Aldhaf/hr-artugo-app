@@ -24,7 +24,7 @@ class TodayAttendanceCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Todays Attendance",
+                Text('today_attend'.tr,
                     style:
                         TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 Text(DateFormat("d MMM, yyyy").format(DateTime.now()),
@@ -44,8 +44,8 @@ class TodayAttendanceCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Working Time",
+                  Text(
+                    'working_time'.tr,
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   const SizedBox(height: 4),
@@ -75,7 +75,7 @@ class TodayAttendanceCard extends StatelessWidget {
                       return _buildInfoRow(
                         icon: Icons.warning_amber_outlined,
                         text:
-                            (state as DataError).error ?? "Gagal memuat lokasi",
+                            (state as DataError).error ?? 'failed_load_loc'.tr,
                         color: Colors.red,
                       );
                     }
@@ -107,13 +107,13 @@ class TodayAttendanceCard extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Row(
+                    child: Row(
                       // Teks dan Ikon Terima Kasih
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.check_circle_outline),
                         SizedBox(width: 8),
-                        Text("Terima Kasih untuk Hari Ini!",
+                        Text('thanks_today'.tr,
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -148,13 +148,13 @@ class TodayAttendanceCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         alignment: Alignment.center,
-                        child: const Row(
+                        child: Row(
                           // Teks dan Ikon Check Out
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.logout, color: Colors.white),
                             SizedBox(width: 8),
-                            Text("Check Out",
+                            Text('check_out'.tr,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white)),
@@ -214,7 +214,7 @@ class TodayAttendanceCard extends StatelessWidget {
                                     : Colors.white),
                             const SizedBox(width: 8),
                             Text(
-                              "Check In",
+                              'check_in'.tr,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: isCheckInDisabled

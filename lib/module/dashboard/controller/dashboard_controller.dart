@@ -81,7 +81,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         (status.value == DashboardStatus.offline ||
             status.value == DashboardStatus.error)) {
       // Jika kembali online dan sebelumnya error/offline, coba muat ulang
-      print("Back online, attempting to refresh data...");
       refreshData();
     } else if (!isOnline) {
       // Jika menjadi offline
@@ -101,31 +100,26 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     // Coba muat dari cache dulu
     final cachedData = await _cacheService.getDashboardCache();
     if (cachedData != null) {
-      print("Loading dashboard from cache...");
       try {
         _updateStateFromData(cachedData);
         status.value =
             DashboardStatus.success; // Anggap sukses dulu (dari cache)
         isShowingCachedData.value = true;
       } catch (e) {
-        print("Error parsing cached data: $e");
         await _cacheService.clearAllCache();
       }
     }
 
     // Jika online, selalu coba refresh di latar belakang setelah cache (jika ada) tampil
     if (_connectivityService.isOnline.value) {
-      print("Attempting to fetch fresh dashboard data in background...");
       // Panggil refreshData TAPI jangan await, biarkan jalan di background
       refreshData();
     } else if (cachedData == null) {
       // Offline DAN tidak ada cache
-      print("Offline and no cache available.");
       status.value = DashboardStatus.offline;
       errorMessage.value = "Anda sedang offline dan tidak ada data tersimpan.";
     } else {
       // Offline TAPI ada cache (sudah ditampilkan)
-      print("Offline, displaying cached data.");
       status.value = DashboardStatus.offline;
       errorMessage.value = "Anda sedang offline. Menampilkan data terakhir.";
     }
@@ -154,7 +148,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
       // status.value = DashboardStatus.success;
     } catch (e) {
-      print("Error updating monthly summary: $e");
       Get.snackbar("Error", "Gagal memuat ringkasan bulan lalu.");
     }
   }
@@ -173,7 +166,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         _updateChartState(chartData);
         isChartLoading.value = false; // <-- Selesai loading
       }).catchError((e) {
-        print("Error updating chart data: $e");
         Get.snackbar("Error", "Gagal memuat data jam kerja.");
         dailyHours.clear(); // Kosongkan data chart jika error
         isChartLoading.value = false; // <-- Selesai loading (meskipun error)
@@ -247,7 +239,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
       status.value = DashboardStatus.success; // Semua berhasil
     } catch (e) {
-      print("Error refreshing dashboard: $e");
       status.value = DashboardStatus.error;
       isShowingCachedData.value = true; // Coba tampilkan cache jika ada error
 
@@ -276,17 +267,14 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       // Jika error, coba muat dari cache sebagai fallback
       final cachedData = await _cacheService.getDashboardCache();
       if (cachedData != null) {
-        print("Error fetching data, loading from cache as fallback...");
         try {
           _updateStateFromData(cachedData);
         } catch (parseError) {
-          print("Error parsing cached data after error: $parseError");
           await _cacheService.clearAllCache(); // Hapus cache jika rusak
           errorMessage.value =
               "Gagal memuat data baru maupun data cache."; // Update error message
         }
       } else {
-        print("Error fetching data and no cache available.");
         // Reset state jika tidak ada cache sama sekali
         _resetStateToDefault();
       }
@@ -304,8 +292,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
   }
 
   void _updateAttendanceState(Map<String, dynamic> attendanceData) {
-    print(
-        "[_updateAttendanceState] Received data: $attendanceData"); // Log data masuk
     checkInTime.value = attendanceData['check_in_time'] ?? "N/A";
     checkOutTime.value = attendanceData['check_out_time'] ?? "N/A";
 
@@ -314,10 +300,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
     isCurrentlyCheckedIn.value = hasCheckedIn && !hasCheckedOut;
     showThankYouMessage.value = hasCheckedIn && hasCheckedOut;
-
-    // ✅ Log state setelah diupdate
-    print(
-        "[_updateAttendanceState] Updated state: isCurrentlyCheckedIn=${isCurrentlyCheckedIn.value}, showThankYou=${showThankYouMessage.value}");
   }
 
   // Mengupdate state dari data Map (baik dari cache maupun API)
@@ -370,7 +352,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       }
     } catch (e) {
       // Tangani error spesifik jika perlu (misal timeout)
-      print("Error refreshing location: $e");
       locationState.value = DataError("Gagal memuat lokasi.");
     }
   }
@@ -385,7 +366,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       final summary = await _attendanceService.getMonthSummary(targetMonth);
       return summary;
     } catch (e) {
-      print("Error refreshing monthly summary: $e");
       return {"present": 0, "absent": 0, "late": 0};
     }
   }
@@ -400,7 +380,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
           .getWorkingHoursChartData(startDateStr, endDateStr);
       return apiResponse;
     } catch (e) {
-      print("Gagal memuat data chart dari Odoo: $e");
       return {'total_hours': 0.0, 'overtime': 0.0, 'details': []};
     }
   }
@@ -456,7 +435,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       try {
         date = DateTime.parse(item['date']);
       } catch (e) {
-        print("Error parsing date from chart data: ${item['date']}");
         date = DateTime.now();
       }
       return DailyWorkHour(
@@ -521,8 +499,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
           Get.find<AttendanceHistoryListController>().getAttendanceList();
         }
       }).catchError((e) {
-        print(
-            "[doCheckIn] Error during background refreshData after check-in: $e");
         // Anda bisa menampilkan snackbar error di sini jika perlu
       });
     } catch (e) {
@@ -549,17 +525,10 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         duration: const Duration(seconds: 10));
 
     try {
-      print("[doCheckOut] Calling _attendanceService.checkOut()...");
       await _attendanceService.checkOut(); // Panggil API checkout
-      print("[doCheckOut] _attendanceService.checkOut() completed.");
-
       if (Get.isSnackbarOpen) Get.back(); // Tutup snackbar loading
-
       isCurrentlyCheckedIn.value = false;
       showThankYouMessage.value = true;
-      print(
-          "[doCheckOut] UI State updated optimistically: isCurrentlyCheckedIn=false, showThankYou=true");
-
       // Tampilkan Snackbar Sukses
       Get.snackbar(
         "Berhasil",
@@ -568,10 +537,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
-
-      print("[doCheckOut] Calling refreshData() in background...");
       await refreshData(); // Tetap await agar history refresh konsisten
-      print("[doCheckOut] Background refreshData() completed.");
 
       // Refresh riwayat jika perlu
       if (Get.isRegistered<AttendanceHistoryListController>()) {
@@ -591,7 +557,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       // Rollback tidak perlu jika UI optimis dihapus
       // checkOutTime.value = oldCheckOutTime;
 
-      print("[doCheckOut] Error during checkout: $e"); // Log error
       Get.snackbar(
         "Gagal",
         "Gagal melakukan check-out: ${e.toString().replaceAll('Exception: ', '')}",

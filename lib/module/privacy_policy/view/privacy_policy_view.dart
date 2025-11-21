@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PrivacyPolicyView extends StatelessWidget {
@@ -10,7 +11,7 @@ class PrivacyPolicyView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Privacy Policy"),
+        title: Text('privacy_title'.tr),
         elevation: 0.5,
       ),
       body: SingleChildScrollView(
@@ -18,42 +19,37 @@ class PrivacyPolicyView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Efektif per: 26 September 2025",
+            Text(
+              'privacy_effective_date'.tr,
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 16),
             Text(
-              "PT Artugo (\"Kami\") mengoperasikan aplikasi ArtuGo (\"Layanan\"). Kebijakan Privasi ini memberi tahu Anda tentang kebijakan kami mengenai pengumpulan, penggunaan, dan pengungkapan data pribadi saat Anda menggunakan Layanan kami.\n\nKami menggunakan data Anda untuk menyediakan dan meningkatkan Layanan. Dengan menggunakan Layanan, Anda menyetujui pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.",
+              'privacy_intro'.tr,
               style: GoogleFonts.poppins(fontSize: 15, height: 1.5),
             ),
             const SizedBox(height: 24),
             _buildSection(
-              title: "1. Pengumpulan dan Penggunaan Informasi",
-              content:
-                  "Kami mengumpulkan beberapa jenis informasi untuk berbagai tujuan guna menyediakan dan meningkatkan Layanan kami kepada Anda.\n\nJenis Data yang Dikumpulkan:\n- Data Identifikasi Pribadi: Nama Lengkap, ID Karyawan, dan Jabatan.\n- Data Lokasi (Geolocation): Koordinat GPS Anda saat Anda melakukan aksi check-in dan check-out.\n- Data Perangkat: FCM Token untuk tujuan pengiriman notifikasi push.",
+              title: 'privacy_sec1_title'.tr,
+              content: 'privacy_sec1_content'.tr,
               titleColor: primaryColor,
             ),
             _buildSection(
-              title: "2. Penggunaan Data",
-              content:
-                  "PT Artugo menggunakan data yang dikumpulkan untuk berbagai tujuan:\n- Untuk menyediakan dan memelihara Layanan.\n- Untuk mengelola dan memverifikasi data kehadiran karyawan.\n- Untuk mengirimkan notifikasi dan komunikasi penting terkait pekerjaan.",
+              title: 'privacy_sec2_title'.tr,
+              content: 'privacy_sec2_content'.tr,
               titleColor: primaryColor,
             ),
             _buildSection(
-                title: "3. Keamanan Data",
-                content:
-                    "Keamanan data Anda penting bagi kami. Kami berusaha untuk menggunakan cara yang dapat diterima secara komersial untuk melindungi Data Pribadi Anda. Namun, harap diingat bahwa tidak ada metode transmisi melalui Internet atau metode penyimpanan elektronik yang 100% aman.",
+                title: 'privacy_sec3_title'.tr,
+                content: 'privacy_sec3_content'.tr,
                 titleColor: primaryColor),
             _buildSection(
-                title: "4. Penyedia Layanan Pihak Ketiga",
-                content:
-                    "Kami dapat menggunakan penyedia layanan pihak ketiga untuk memfasilitasi Layanan kami (\"Penyedia Layanan\"), seperti:\n- Google Firebase: Untuk layanan notifikasi push (Firebase Cloud Messaging).\n- OpenStreetMap: Untuk layanan pemetaan dan konversi koordinat menjadi alamat.",
+                title: 'privacy_sec4_title'.tr,
+                content: 'privacy_sec4_content'.tr,
                 titleColor: primaryColor),
             _buildSection(
-                title: "5. Hubungi Kami",
-                content:
-                    "Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi Departemen HR.",
+                title: 'privacy_sec5_title'.tr,
+                content: 'privacy_sec5_content'.tr,
                 titleColor: primaryColor),
           ],
         ),

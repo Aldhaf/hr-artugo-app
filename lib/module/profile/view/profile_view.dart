@@ -9,10 +9,55 @@ import '../model/profile_model.dart';
 import '/core/data_state.dart';
 import '../controller/profile_controller.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:hr_artugo_app/service/localization_service/localization_service.dart';
 // import 'package:hr_artugo_app/service/theme_service/theme_service.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({Key? key}) : super(key: key);
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Wrap(
+          children: [
+            Text(
+              "choose_language".tr, // Contoh penggunaan .tr nanti
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: const Text("🇮🇩", style: TextStyle(fontSize: 24)),
+              title: const Text("Bahasa Indonesia"),
+              trailing: Get.locale?.languageCode == 'id'
+                  ? Icon(Icons.check, color: Theme.of(context).primaryColor)
+                  : null,
+              onTap: () {
+                Get.find<LocalizationService>().changeLocale('id');
+                Get.back();
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Text("🇺🇸", style: TextStyle(fontSize: 24)),
+              title: const Text("English"),
+              trailing: Get.locale?.languageCode == 'en'
+                  ? Icon(Icons.check, color: Theme.of(context).primaryColor)
+                  : null,
+              onTap: () {
+                Get.find<LocalizationService>().changeLocale('en');
+                Get.back();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +79,7 @@ class ProfileView extends StatelessWidget {
           if (state is DataError) {
             final errorState = state as DataError;
             return Center(
-                child: Text(errorState.error ?? "Gagal memuat profil"));
+                child: Text(errorState.error ?? "error_loading_profile".tr));
           }
 
           if (state is DataSuccess<Profile>) {
@@ -74,7 +119,7 @@ class ProfileView extends StatelessWidget {
                       children: [
                         _buildProfileMenuItem(
                           icon: Icons.notifications_outlined,
-                          label: "Notification Settings",
+                          label: "notification_settings".tr,
                           onTap: () => Get.toNamed('/notification_settings'),
                         ),
                         /*
@@ -102,17 +147,22 @@ class ProfileView extends StatelessWidget {
                         */
                         _buildProfileMenuItem(
                           icon: Icons.info_outline,
-                          label: "About App",
+                          label: "about_app".tr,
                           onTap: () => Get.toNamed('/about_app'),
                         ),
                         _buildProfileMenuItem(
+                          icon: Icons.language,
+                          label: 'language'.tr, // Gunakan key dari kamus
+                          onTap: () => _showLanguageBottomSheet(context),
+                        ),
+                        _buildProfileMenuItem(
                           icon: Icons.gavel_outlined,
-                          label: "Terms & Conditions",
+                          label: "terms_conditions".tr,
                           onTap: () => Get.toNamed('/terms_and_conditions'),
                         ),
                         _buildProfileMenuItem(
                           icon: Icons.shield_outlined,
-                          label: "Privacy Policy",
+                          label: "privacy_policy".tr,
                           onTap: () => Get.toNamed('/privacy_policy'),
                           hideDivider: true,
                         ),
@@ -124,17 +174,19 @@ class ProfileView extends StatelessWidget {
                     // Kartu Menu Grup 2
                     _buildMenuCard(
                       children: [
+                        /*
                         _buildProfileMenuItem(
                           icon: Icons.bug_report,
-                          label: "Test Crashlytics",
+                          label: "test_crashlytics".tr,
                           color: Colors.orange,
                           onTap: () {
                             FirebaseCrashlytics.instance.crash();
                           },
                         ),
+                        */
                         _buildProfileMenuItem(
                           icon: Icons.logout,
-                          label: "Logout",
+                          label: "logout".tr,
                           color: Colors.red,
                           onTap: () => controller.logout(),
                           hideDivider: true,

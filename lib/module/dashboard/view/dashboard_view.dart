@@ -50,7 +50,7 @@ class DashboardView extends StatelessWidget {
       children: [
         // --- Latar Belakang Header ---
         Container(
-          height: 150,
+          height: 180,
           decoration: BoxDecoration(
             color: Theme.of(context).primaryColor,
             borderRadius: const BorderRadius.only(
@@ -86,11 +86,11 @@ class DashboardView extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Total Attendance",
+                    Text('dashboard_total_attendance'.tr,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(
-                      width: 200,
+                      width: 180,
                       height: 36,
                       child: Obx(() => Container(
                             decoration: BoxDecoration(
@@ -100,14 +100,14 @@ class DashboardView extends StatelessWidget {
                               children: [
                                 _buildSegmentOption(
                                     context,
-                                    "Last Month",
+                                    'dashboard_last_month'.tr,
                                     controller.selectedPeriod.value ==
                                         AttendancePeriod.lastMonth,
                                     () => controller.changeAttendancePeriod(
                                         AttendancePeriod.lastMonth)),
                                 _buildSegmentOption(
                                     context,
-                                    "This Month",
+                                    'dashboard_this_month'.tr,
                                     controller.selectedPeriod.value ==
                                         AttendancePeriod.thisMonth,
                                     () => controller.changeAttendancePeriod(
@@ -126,21 +126,21 @@ class DashboardView extends StatelessWidget {
                       children: [
                         Expanded(
                             child: SummaryCard(
-                                title: "Present",
+                                title: 'dashboard_present'.tr,
                                 value: "${controller.presentDays.value}",
                                 color: Colors.green.shade100,
                                 textColor: Colors.green.shade800)),
                         const SizedBox(width: 12),
                         Expanded(
                             child: SummaryCard(
-                                title: "Late",
+                                title: 'dashboard_late'.tr,
                                 value: "${controller.lateInDays.value}",
                                 color: Colors.orange.shade100,
                                 textColor: Colors.orange.shade800)),
                         const SizedBox(width: 12),
                         Expanded(
                             child: SummaryCard(
-                                title: "Absent",
+                                title: 'dashboard_absent'.tr,
                                 value: "${controller.absentDays.value}",
                                 color: Colors.red.shade100,
                                 textColor: Colors.red.shade800)),
@@ -159,7 +159,7 @@ class DashboardView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Text("Working Hours",
+                        Text('dashboard_working_hours'.tr,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         TextButton(
@@ -199,11 +199,10 @@ class DashboardView extends StatelessWidget {
                                     Center(child: CircularProgressIndicator()),
                               );
                             } else if (controller.dailyHours.isEmpty) {
-                              return const SizedBox(
+                              return SizedBox(
                                   height: 200,
                                   child: Center(
-                                      child: Text(
-                                          "Tidak ada data untuk periode ini.")));
+                                      child: Text('dashboard_no_data'.tr)));
                             } else {
                               // --- KONFIGURASI CHART ---
                               return SizedBox(
@@ -261,13 +260,13 @@ class DashboardView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               Obx(() => _buildHourSummary(
-                                    "Total Hours",
+                                    'dashboard_total_hours'.tr,
                                     controller.totalHoursSummary.value,
                                     Theme.of(context)
                                         .primaryColor, // Gunakan warna tema
                                   )),
                               Obx(() => _buildHourSummary(
-                                    "Overtime",
+                                    'dashboard_overtime'.tr,
                                     controller.overtimeSummary.value,
                                     Colors.orange,
                                   )),
@@ -297,7 +296,7 @@ class DashboardView extends StatelessWidget {
                   color: Colors.black.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
@@ -307,7 +306,7 @@ class DashboardView extends StatelessWidget {
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation(Colors.white))),
                     SizedBox(width: 12),
-                    Text("Memuat data baru...",
+                    Text('dashboard_loading_data'.tr,
                         style: TextStyle(color: Colors.white)),
                   ],
                 ),
@@ -333,15 +332,14 @@ class DashboardView extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
-              controller.errorMessage.value ??
-                  "Terjadi kesalahan saat memuat data.",
+              controller.errorMessage.value ?? 'dashboard_error_loading'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               icon: const Icon(Icons.refresh),
-              label: const Text("Coba Lagi"),
+              label: Text('dashboard_try_again'.tr),
               onPressed: () => controller.refreshData(),
             )
           ],
@@ -358,13 +356,13 @@ class DashboardView extends StatelessWidget {
 
     if (controller.status.value == DashboardStatus.offline) {
       message = controller.isShowingCachedData.value
-          ? "Offline. Menampilkan data terakhir."
-          : "Anda sedang offline.";
+          ? 'dashboard_offline_cache_msg'.tr
+          : 'dashboard_offline_msg'.tr;
       backgroundColor = Colors.orange.shade700;
       icon = Icons.wifi_off;
     } else {
       // Berarti isShowingCachedData == true tapi status bukan offline (misal: error)
-      message = "Menampilkan data cache.";
+      message = 'dashboard_cache_msg'.tr;
       backgroundColor = Colors.blueGrey.shade600;
       icon = Icons.cloud_off;
     }
@@ -492,8 +490,8 @@ class _DateRangePickerSheetState extends State<_DateRangePickerSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "Pilih Rentang Tanggal",
+          Text(
+            'dashboard_pick_date_range'.tr,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -551,7 +549,7 @@ class _DateRangePickerSheetState extends State<_DateRangePickerSheet> {
                 widget.onApply(null);
               }
             },
-            child: const Text("Terapkan"),
+            child: Text('dashboard_apply'.tr),
           ),
           const SizedBox(height: 8),
         ],

@@ -59,7 +59,7 @@ class _RequestScheduleBottomSheetState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Pilih Rentang Tanggal",
+          Text('req_schedule_title'.tr,
               style:
                   const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           TableCalendar(
@@ -111,7 +111,9 @@ class _RequestScheduleBottomSheetState
                 itemBuilder: (context, index) {
                   final request = controller.selectedRequests[index];
                   return ListTile(
-                    title: Text(DateFormat('EEEE, d MMM').format(request.date)),
+                    title: Text(
+                        DateFormat('EEEE, d MMM', Get.locale?.languageCode)
+                            .format(request.date)),
                     trailing: Obx(() => _buildShiftDropdown(
                         index, controller.availablePatterns)),
                   );
@@ -122,7 +124,7 @@ class _RequestScheduleBottomSheetState
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => controller.submitScheduleRequest(),
-            child: const Text("Kirim Pengajuan"),
+            child: Text('req_schedule_submit'.tr),
             style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50)),
           )
@@ -137,7 +139,7 @@ class _RequestScheduleBottomSheetState
       width: 150, // Mengatur lebar yang sesuai, misalnya 150
       child: DropdownButton<WorkPattern>(
         value: controller.selectedRequests[index].selectedPattern,
-        hint: const Text("Pilih Shift"),
+        hint: Text('req_schedule_select_shift'.tr),
         isExpanded: true, // Memastikan dropdown mengisi SizedBox
         items: patterns.map((pattern) {
           return DropdownMenuItem<WorkPattern>(

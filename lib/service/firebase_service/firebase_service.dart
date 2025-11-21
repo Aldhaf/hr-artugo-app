@@ -27,39 +27,27 @@ class FirebaseService {
       fcmToken = await _firebaseMessaging.getToken();
     } on FirebaseException catch (e) {
       if (e.code == 'apns-token-not-set') {
-        print(
-            "⚠️ APNS token tidak tersedia. Ini wajar terjadi di Simulator iOS.");
       } else {
         rethrow;
       }
     }
 
     if (fcmToken == null) {
-      print("⚠️ FCM Token is null. Skipping token save and setup listeners.");
       _setupListeners(); // Tetap setup listener agar tidak crash
       return;
     }
-
-    print("====================================");
-    print("FCM Token: $fcmToken");
-    print("====================================");
 
     // Kirim token ke Odoo jika sesi sudah ada
     if (_odooApi.session != null) {
       try {
         await _odooApi.saveFcmToken(fcmToken);
-      } catch (e) {
-        print("Error saving initial FCM token: $e");
-      }
+      } catch (e) {}
     }
 
     // Listener untuk token refresh
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
-      print("FCM Token Refreshed: $newToken");
       if (_odooApi.session != null) {
-        _odooApi.saveFcmToken(newToken).catchError((e) {
-          print("Error saving refreshed FCM token: $e");
-        });
+        _odooApi.saveFcmToken(newToken).catchError((e) {});
       }
     });
 
@@ -72,13 +60,8 @@ class FirebaseService {
 
     // --- LISTENER GABUNGAN UNTUK FOREGROUND MESSAGE ---
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      // Jadikan async
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
       // --- Logika untuk Notifikasi Visual ---
       if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
         final String notificationType = message.data['type'] ?? 'unknown';
 
         // Cek preferensi notifikasi
@@ -91,7 +74,6 @@ class FirebaseService {
           LocalNotificationService.showNotification(
             message.notification!.title ?? 'No Title',
             message.notification!.body ?? 'No Body',
-            
           );
 
           // Perbarui badge/list notifikasi
@@ -105,16 +87,7 @@ class FirebaseService {
               Get.find<TimeOffHistoryListController>().getTimeOffHistories();
             }
           }
-        } else {
-          print(
-              "Notification type '$notificationType' is disabled by user preference.");
-          // Jika notifikasi visual dimatikan, kita tetap proses data payload di bawah
         }
-      }
-
-      else {
-        print(
-            "Foreground message data received, but type is not 'schedule_update' or data is missing/empty.");
       }
     });
 

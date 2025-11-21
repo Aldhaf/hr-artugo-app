@@ -13,7 +13,7 @@ class CheckinDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Check In"),
+        title: Text('check_in'.tr),
       ),
       // Bungkus bagian body dengan Obx agar bisa "mendengarkan" perubahan
       body: Obx(() {
@@ -106,8 +106,7 @@ class CheckinMapView extends StatelessWidget {
         ),
         initialZoom: 16,
         interactionOptions: InteractionOptions(
-          flags: InteractiveFlag.all -
-              InteractiveFlag.rotate,
+          flags: InteractiveFlag.all - InteractiveFlag.rotate,
         ),
       ),
       children: [

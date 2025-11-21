@@ -1,5 +1,6 @@
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart';
 
 class LocationDetailView extends StatelessWidget {
@@ -16,7 +17,7 @@ class LocationDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Location Detail"),
+        title: Text("location_title".tr),
       ),
       body: FlutterMap(
         options: MapOptions(

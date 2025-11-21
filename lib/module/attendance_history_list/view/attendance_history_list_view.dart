@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
+import 'package:intl/intl.dart';
+import '../controller/attendance_history_list_controller.dart';
 
 class AttendanceHistoryListView extends StatelessWidget {
   const AttendanceHistoryListView({Key? key}) : super(key: key);
@@ -19,15 +21,15 @@ class AttendanceHistoryListView extends StatelessWidget {
 
     // Fungsi untuk memformat tanggal sesuai desain baru
     String formatDate(dynamic timeValue) {
-      if (timeValue == null || timeValue == false) return "No Date";
+      if (timeValue == null || timeValue == false) return 'history_no_date'.tr;
       DateTime date = DateTime.parse(timeValue.toString() + "Z").toLocal();
-      return DateFormat("MMMM d, yyyy").format(date);
+      return DateFormat("MMMM d, yyyy", Get.locale?.languageCode).format(date);
     }
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Attendance History"),
+        title: Text('history_attendance_title'.tr),
         elevation: 0.6,
       ),
       body: Obx(() {
@@ -35,7 +37,7 @@ class AttendanceHistoryListView extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (controller.items.isEmpty) {
-          return const Center(child: Text("No attendance history."));
+          return Center(child: Text('history_empty'.tr));
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16.0),
@@ -96,13 +98,13 @@ class AttendanceHistoryListView extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildTimeInfo(
-                                  label: "Check In",
+                                  label: 'history_check_in'.tr,
                                   time: checkIn,
                                   icon: Icons.arrow_forward,
                                   color: Colors.green,
                                 ),
                                 _buildTimeInfo(
-                                  label: "Check Out",
+                                  label: 'history_check_out'.tr,
                                   time: checkOut,
                                   icon: Icons.arrow_back,
                                   color: Colors.red,

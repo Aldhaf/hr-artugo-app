@@ -10,37 +10,39 @@ class NotificationSettingsView extends StatelessWidget {
     final controller = Get.put(NotificationSettingsController());
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notification Settings"),
+        title: Text('settings_notif_title'.tr),
       ),
       body: Obx(
         () => ListView(
           children: [
             SwitchListTile(
-              title: const Text("Semua Notifikasi"),
-              subtitle: const Text("Aktifkan atau nonaktifkan semua notifikasi"),
+              title: Text('settings_notif_all'.tr),
+              subtitle: Text('settings_notif_all_desc'.tr),
               value: controller.allNotifications.value,
-              onChanged: (value) => controller.updateSetting('allNotifications', value),
+              onChanged: (value) =>
+                  controller.updateSetting('allNotifications', value),
             ),
             const Divider(),
             SwitchListTile(
-              title: const Text("Pengingat Absensi"),
-              subtitle: const Text("Notifikasi harian untuk check-in dan check-out"),
+              title: Text('settings_notif_attendance'.tr),
+              subtitle: Text('settings_notif_attendance_desc'.tr),
               value: controller.attendanceReminders.value,
               onChanged: controller.allNotifications.value
-                  ? (value) => controller.updateSetting('attendanceReminders', value)
+                  ? (value) =>
+                      controller.updateSetting('attendanceReminders', value)
                   : null,
             ),
             SwitchListTile(
-              title: const Text("Persetujuan Cuti"),
-              subtitle: const Text("Saat cuti disetujui atau ditolak"),
+              title: Text('settings_notif_leave'.tr),
+              subtitle: Text('settings_notif_leave_desc'.tr),
               value: controller.leaveApprovals.value,
               onChanged: controller.allNotifications.value
                   ? (value) => controller.updateSetting('leaveApprovals', value)
                   : null,
             ),
             SwitchListTile(
-              title: const Text("Pengumuman"),
-              subtitle: const Text("Saat ada pengumuman baru dari HR"),
+              title: Text('settings_notif_announcement'.tr),
+              subtitle: Text('settings_notif_announcement_desc'.tr),
               value: controller.announcements.value,
               onChanged: controller.allNotifications.value
                   ? (value) => controller.updateSetting('announcements', value)

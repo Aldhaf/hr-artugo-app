@@ -10,7 +10,7 @@ class AboutAppView extends StatelessWidget {
     final controller = Get.put(AboutAppController());
     return Scaffold(
       appBar: AppBar(
-        title: const Text("About App"),
+        title: Text("about_app_title".tr),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -30,18 +30,19 @@ class AboutAppView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Obx(() => Text(
-                  "Versi ${controller.appVersion.value}",
+                  "about_version"
+                      .trParams({'ver': controller.appVersion.value}),
                   style: const TextStyle(fontSize: 16, color: Colors.grey),
                 )),
             const SizedBox(height: 20),
-            const Text(
-              "Aplikasi absensi dan manajemen HR untuk karyawan.",
+            Text(
+              "about_description".tr,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16),
             ),
             const Spacer(),
-            const Text(
-              "© 2025 PT Kreasi Arduo Indonesia. All Rights Reserved.",
+            Text(
+              "about_copyright".tr,
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],

@@ -71,12 +71,8 @@ class MyScheduleController extends GetxController {
   void showRejectionDetail(Roster schedule) {
     // Pastikan hanya jadwal yang ditolak yang bisa dilihat detailnya
     if (schedule.status != 'Rejected') {
-      print(
-          "[MyScheduleController] showRejectionDetail called for non-rejected schedule. Ignoring.");
       return;
     }
-    print(
-        "[MyScheduleController] Showing rejection detail for roster ID: ${schedule.id}");
 
     // Panggil Get.bottomSheet dengan widget kustom
     Get.bottomSheet(
@@ -278,19 +274,13 @@ class MyScheduleController extends GetxController {
           // Normalisasi tanggal ke tengah malam sebagai key Map
           final normalizedDate = DateTime(date.year, date.month, date.day);
           newBookedDates[normalizedDate] = status; // Simpan statusnya
-        } catch (e) {
-          print("Error parsing booked date: $dateString");
-        }
+        } catch (e) {}
       }
 
       // Update state hanya jika data baru berbeda dengan data lama
       if (!mapEquals(bookedDatesWithStatus.value, newBookedDates)) {
         bookedDatesWithStatus.value = newBookedDates;
         calendarRebuildKey.value++; // Trigger rebuild TableCalendar di view
-        print(
-            "[MyScheduleController] Booked dates status updated. Triggering calendar rebuild.");
-      } else {
-        print("[MyScheduleController] Booked dates status data is the same.");
       }
     } catch (e) {
       // Tampilkan error jika gagal mengambil data
@@ -300,8 +290,6 @@ class MyScheduleController extends GetxController {
 
   // Mengirimkan jadwal shift yang telah dipilih pengguna ke server Odoo.
   Future<void> submitScheduleRequest() async {
-    print(
-        "[submitScheduleRequest] Attempting submit. Current selectedShifts: ${selectedShifts.value}");
     if (selectedShifts.isEmpty) {
       Get.snackbar("Gagal",
           "Harap pilih setidaknya satu tanggal dan shift untuk diajukan.");
@@ -322,8 +310,6 @@ class MyScheduleController extends GetxController {
 
     final String monthName =
         DateFormat('MMMM yyyy', 'id_ID').format(focusedDay.value);
-    print(
-        "[submitScheduleRequest] Submitting schedule request for $monthName with payload: $payload");
 
     try {
       Get.snackbar("Memproses", "Mengirim pengajuan jadwal Anda...",
@@ -335,7 +321,7 @@ class MyScheduleController extends GetxController {
 
       if (Get.isSnackbarOpen) Get.back();
 
-      Get.snackbar("Berhasil", "Pengajuan jadwal berhasil dikirim.");
+      Get.snackbar('success'.tr, 'success_request'.tr);
 
       if (Get.isBottomSheetOpen ?? false) Get.back();
 
@@ -349,7 +335,7 @@ class MyScheduleController extends GetxController {
       }
     } catch (e) {
       if (Get.isSnackbarOpen) Get.back();
-      Get.snackbar("Error", "Gagal mengirim pengajuan: $e");
+      Get.snackbar('error'.tr, "Gagal mengirim pengajuan: $e");
     }
   }
 
@@ -359,32 +345,30 @@ class MyScheduleController extends GetxController {
       await Get.dialog(
         CustomConfirmationDialog(
           // Panggil widget kustom
-          title: "Konfirmasi",
-          message: "Apakah Anda yakin ingin membatalkan pengajuan jadwal ini?",
-          confirmText: "Ya, Batalkan",
-          cancelText: "Tidak",
+          title: 'confirm'.tr,
+          message: 'confirm_state'.tr,
+          confirmText: 'confirm_cancel'.tr,
+          cancelText: 'no'.tr,
           confirmButtonColor:
               Colors.red, // Atur warna tombol konfirmasi jika perlu
           onConfirm: () async {
             Get.back(); // Tutup dialog secara manual setelah konfirmasi
-            Get.snackbar("Memproses...", "Sedang membatalkan pengajuan Anda.");
+            Get.snackbar('processing'.tr, 'processing_state'.tr);
             try {
               // Tambahkan try-catch di dalam onConfirm
               await _myScheduleService.cancelShiftRequest(rosterId);
-              Get.snackbar("Berhasil", "Pengajuan jadwal telah dibatalkan.");
+              Get.snackbar('success'.tr, 'success_state'.tr);
               // Muat ulang data setelah batal
               fetchMyRoster();
               fetchBookedDatesForMonth(focusedDay.value);
             } catch (e) {
-              Get.snackbar(
-                  "Gagal", "Gagal membatalkan pengajuan: ${e.toString()}");
+              Get.snackbar('failed'.tr, 'failed_state ${e.toString()}'.tr);
             }
           },
         ),
         barrierDismissible: true, // Izinkan menutup dengan klik di luar dialog
       );
     } catch (e) {
-      print("Error showing dialog: $e");
       // Fallback ke snackbar jika dialog gagal
       Get.snackbar("Error", "Gagal menampilkan konfirmasi: ${e.toString()}");
     }
@@ -398,7 +382,7 @@ class MyScheduleController extends GetxController {
         results.map((data) => WorkPattern.fromJson(data)).toList(),
       );
     } catch (e) {
-      Get.snackbar("Error", "Gagal memuat daftar shift: $e");
+      Get.snackbar('error'.tr, "error_load_shift $e".tr);
     } finally {
       isLoadingPatterns.value = false;
     }
@@ -435,13 +419,13 @@ class MyScheduleController extends GetxController {
     }
   }
 
-  // ---Metode Baru untuk Update Filter "Jadwal Terdekat" ---
+  // --- Metode untuk Update Filter "Jadwal Terdekat" ---
   void setUpcomingFilter(int days) {
     upcomingFilterDays.value = days;
     // approvedSchedules.refresh(); // Tidak perlu, getter akan otomatis update
   }
 
-  // --- ✅ Metode Baru untuk Update Filter "Riwayat Pengajuan" ---
+  // --- Metode untuk Update Filter "Riwayat Pengajuan ---
   void updateHistorySearch(String query) {
     historySearchQuery.value = query;
   }
@@ -476,10 +460,7 @@ class MyScheduleController extends GetxController {
   void updateSelectedPattern(int index, WorkPattern pattern) {
     if (index >= 0 && index < selectedRequests.length) {
       selectedRequests[index].selectedPattern = pattern;
-      selectedRequests.refresh(); // Update UI
-      print("Updated pattern for index $index: ${pattern.name}");
-    } else {
-      print("Error: Invalid index $index for updateSelectedPattern");
+      selectedRequests.refresh(); // Update UI;
     }
   }
 

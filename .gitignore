@@ -40,6 +40,24 @@ app.*.map.json
 /android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 /android/local.properties
 
-# --- SANGAT PENTING UNTUK KEAMANAN ---
 # Abaikan file environment yang berisi kunci rahasia dan kredensial.
 *.env
+
+# Kunci Penandatanganan (Keystore)
+*.jks
+*.keystore
+*.p12
+*.p8
+
+# Konfigurasi Password Keystore
+key.properties
+android/key.properties
+
+# Konfigurasi Firebase
+# Jika repo ini publik, sebaiknya file ini di-ignore.
+# Jika repo privat (internal kantor), boleh di-commit agar tim lain bisa langsung run.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# 4. Konfigurasi Environment lain
+.env*

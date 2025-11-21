@@ -61,27 +61,30 @@ class LoginController extends GetxController {
   Future<void> doLogin() async {
     // Cek konektivitas
     if (!_connectivityService.isOnline.value) {
-      Get.snackbar("Offline",
-          "Tidak ada koneksi internet. Silakan periksa jaringan Anda.");
-      return; // Hentikan proses jika offline
+      Get.snackbar("Offline", "Tidak ada koneksi internet.");
+      return;
     }
 
     try {
       // Melanjutkan proses autentikasi jika online
-      var isSuccess = await _authService.login(
+      var isSuccess = await _authService
+          .login(
         login: emailController.text,
         password: passwordController.text,
-      );
+      )
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        throw Exception("Koneksi ke server terlalu lama (Timeout).");
+      });
 
       if (!isSuccess) {
         // Pesan error jika autentikasi gagal dari server
         Get.dialog(
           AlertDialog(
-            title: const Text("Gagal Login"), // Judul lebih jelas
-            content: const Text(
-                "Email atau password yang Anda masukkan salah."), // Pesan lebih jelas
+            title: Text("login_error_title".tr), // Judul lebih jelas
+            content: Text("login_error_msg".tr), // Pesan lebih jelas
             actions: [
-              TextButton(onPressed: () => Get.back(), child: const Text("OK")),
+              TextButton(
+                  onPressed: () => Get.back(), child: Text("login_btn_ok".tr)),
             ],
           ),
         );
@@ -101,28 +104,50 @@ class LoginController extends GetxController {
       FirebaseAnalytics.instance
           .setUserId(id: _authService.currentSession?.userId.toString());
 
-      // Inisialisasi Firebase Service
-      await FirebaseService().initialize();
+      // Pengguna tidak perlu menunggu satu per satu selesai.
+      await Future.wait([
+        // Simpan Kredensial (Lokal, Cepat)
+        rememberMe.value
+            ? _storageService.saveCredentials(
+                emailController.text, passwordController.text)
+            : _storageService.clearCredentials(),
 
-      // Ambil profil kerja (termasuk employee ID)
-      await _workProfileService.fetchProfile();
+        // Ambil Profil Kerja (Network Call)
+        _workProfileService.fetchProfile(),
 
-      // Ambil notifikasi awal
-      Get.find<NotificationController>().fetchNotifications();
+        // Inisialisasi Firebase (Async)
+        FirebaseService().initialize(),
+
+        // Ambil Notifikasi Awal (Network Call)
+        // Bungkus dalam try-catch agar jika notifikasi gagal, login tetap berhasil
+        Get.find<NotificationController>().fetchNotifications().catchError((e) {
+          return []; // Return list kosong agar Future.wait tidak crash
+        }),
+      ]);
 
       // Navigasi ke dashboard
       Get.offAllNamed('/dashboard');
     } catch (e) {
-      // Menangani error koneksi atau server lainnya
-      print("Login error: $e"); // Log error untuk debugging
-      String errorMessage = "Terjadi kesalahan saat mencoba login.";
-      if (e is Exception &&
-          e.toString().contains("Tidak bisa terhubung ke server")) {
-        errorMessage = "Gagal terhubung ke server. Silakan coba lagi nanti.";
-      }
-      // Tambahkan penanganan error spesifik lainnya jika perlu
+      String title = "Terjadi Kesalahan";
+      String message = "Gagal melakukan login.";
 
-      Get.snackbar("Error", errorMessage);
+      // Cek pesan error untuk menentukan jenis dialog
+      if (e.toString().contains("Gagal terhubung")) {
+        title = "Server Tidak Terjangkau";
+        message = "Aplikasi tidak dapat terhubung ke server Odoo.";
+      }
+
+      // Tampilkan Dialog Warning
+      Get.dialog(
+        AlertDialog(
+          title: Text(title, style: const TextStyle(color: Colors.red)),
+          content: Text(message),
+          actions: [
+            TextButton(
+                onPressed: () => Get.back(), child: const Text("Mengerti")),
+          ],
+        ),
+      );
     }
   }
 }

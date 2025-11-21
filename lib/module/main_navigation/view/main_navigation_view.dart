@@ -27,17 +27,16 @@ class MainNavigationView extends StatelessWidget {
 
         bool exit = await Get.dialog(
           AlertDialog(
-            title: const Text('Konfirmasi'),
-            content:
-                const Text('Apakah Anda yakin ingin keluar dari aplikasi?'),
+            title: Text('confirm'.tr),
+            content: Text('confirm_state'.tr),
             actions: [
               TextButton(
                 onPressed: () => Get.back(result: false),
-                child: const Text('Tidak'),
+                child: Text('no'.tr),
               ),
               TextButton(
                 onPressed: () => Get.back(result: true),
-                child: const Text('Ya'),
+                child: Text('yes'.tr),
               ),
             ],
           ),
@@ -70,13 +69,15 @@ class MainNavigationView extends StatelessWidget {
                       fontSize: 12,
                       color: Colors.white,
                       fontWeight: FontWeight.w600),
-                  tabs: const [
-                    GButton(icon: Icons.dashboard, text: 'Dashboard'),
-                    GButton(icon: Icons.calendar_month, text: 'Attendance'),
+                  tabs: [
+                    GButton(icon: Icons.dashboard, text: 'nav_dashboard'.tr),
+                    GButton(
+                        icon: Icons.calendar_month, text: 'nav_attendance'.tr),
                     // GButton(icon: Icons.access_time_filled, text: 'Time Off'), // nonaktif sementara
                     GButton(
-                        icon: Icons.edit_calendar_outlined, text: 'Schedule'),
-                    GButton(icon: Icons.person, text: 'User'),
+                        icon: Icons.edit_calendar_outlined,
+                        text: 'nav_schedule'.tr),
+                    GButton(icon: Icons.person, text: 'nav_profile'.tr),
                   ],
                   selectedIndex: controller.selectedIndex.value,
                   onTabChange: (index) => controller.onTabTapped(index),

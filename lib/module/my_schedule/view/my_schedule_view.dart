@@ -14,11 +14,14 @@ class MyScheduleView extends GetView<MyScheduleController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Schedule'),
+        title: Text('my_schedule_title'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => controller.fetchMyRoster(),
+            onPressed: () {
+              controller.fetchMyRoster();
+              controller.fetchBookedDatesForMonth(controller.focusedDay.value);
+            },
           ),
         ],
       ),
@@ -41,7 +44,6 @@ class MyScheduleView extends GetView<MyScheduleController> {
     );
   }
 
-  // ✅ 1. TAMBAHKAN FUNGSI HELPER INI DI SINI
   String _formatHour(double? hour) {
     if (hour == null) return '--:--';
     int h = hour.toInt();
@@ -90,7 +92,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           foregroundColor: Colors.transparent),
                       onPressed: () => controller.changeTabIndex(0),
                       child: Text(
-                        'History & Schedule',
+                        'tab_history'.tr,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           // Ganti warna teks berdasarkan tab yang aktif
@@ -107,7 +109,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           foregroundColor: Colors.transparent),
                       onPressed: () => controller.changeTabIndex(1),
                       child: Text(
-                        'Request Schedule',
+                        'tab_request'.tr,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           // Ganti warna teks berdasarkan tab yang aktif
@@ -151,16 +153,16 @@ class MyScheduleView extends GetView<MyScheduleController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildSectionHeader("Upcoming Schedule"),
+              _buildSectionHeader("section_upcoming".tr),
               Obx(() {
                 final primaryColor = Theme.of(context).primaryColor;
                 final bool isUpcomingActive = true;
 
                 return Container(
-                  height: 44,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       // Shadow halus
                       BoxShadow(
@@ -171,28 +173,28 @@ class MyScheduleView extends GetView<MyScheduleController> {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(18),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // --- Chip "Upcoming" ---
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
+                              horizontal: 12, vertical: 4),
                           height: double.infinity,
                           decoration: BoxDecoration(
                             color: primaryColor,
                             borderRadius: const BorderRadius.horizontal(
-                                left: Radius.circular(22),
-                                right: Radius.circular(22)),
+                                left: Radius.circular(18),
+                                right: Radius.circular(18)),
                           ),
                           child: Center(
                             child: Text(
-                              "Upcoming",
+                              "upcoming_chip".tr,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: 11,
                               ),
                             ),
                           ),
@@ -200,7 +202,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
 
                         // --- Dropdown Hari ---
                         Container(
-                          padding: const EdgeInsets.only(left: 12, right: 8),
+                          padding: const EdgeInsets.only(left: 8, right: 4),
                           child: DropdownButton<int>(
                             value: controller.upcomingFilterDays.value,
                             underline: const SizedBox(),
@@ -208,19 +210,21 @@ class MyScheduleView extends GetView<MyScheduleController> {
                             icon: Icon(
                               Icons.keyboard_arrow_down,
                               color: const Color(0xFFB366FF),
-                              size: 20,
+                              size: 18,
                             ),
                             style: const TextStyle(
                               color: Color(0xFF8A4FFF),
                               fontWeight: FontWeight.w400,
-                              fontSize: 13,
+                              fontSize: 11,
                             ),
                             dropdownColor: Colors.white,
-                            items: const [
-                              DropdownMenuItem(value: 3, child: Text("3 Days")),
-                              DropdownMenuItem(value: 7, child: Text("7 Days")),
+                            items: [
                               DropdownMenuItem(
-                                  value: 30, child: Text("30 Days")),
+                                  value: 3, child: Text("filter_days_3".tr)),
+                              DropdownMenuItem(
+                                  value: 7, child: Text("filter_days_7".tr)),
+                              DropdownMenuItem(
+                                  value: 30, child: Text("filter_days_30".tr)),
                             ],
                             onChanged: (value) {
                               if (value != null) {
@@ -243,8 +247,9 @@ class MyScheduleView extends GetView<MyScheduleController> {
             if (list.isEmpty) {
               return _EmptyStateCard(
                   icon: Icons.calendar_today,
-                  message:
-                      "There are no approved schedules in the next ${controller.upcomingFilterDays.value} days.");
+                  message: "empty_upcoming".trParams({
+                    'days': controller.upcomingFilterDays.value.toString()
+                  }));
             } else {
               // Gunakan Column agar tidak error constraint di dalam ListView
               return Column(
@@ -258,7 +263,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
           const SizedBox(height: 24),
 
           // --- Bagian Riwayat Pengajuan ---
-          _buildSectionHeader("Submission History"),
+          _buildSectionHeader("section_history".tr),
           const SizedBox(height: 16),
 
           // 1. Search Bar
@@ -278,7 +283,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
             child: TextField(
               onChanged: (value) => controller.updateHistorySearch(value),
               decoration: InputDecoration(
-                hintText: "Search",
+                hintText: "search_hint".tr,
                 hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                 prefixIcon: Icon(Icons.search,
                     size: 20, color: Theme.of(context).primaryColor),
@@ -303,13 +308,13 @@ class MyScheduleView extends GetView<MyScheduleController> {
                 child: Obx(() => _buildFilterDropdown<DateTime?>(
                       // Gunakan helper
                       value: controller.historyMonthFilter.value,
-                      hint: "Oktober 2025", // Contoh hint
+                      hint: "filter_all_months".tr, // Contoh hint
                       items: [
                         // Item untuk "All Month" (null)
-                        const DropdownMenuItem<DateTime?>(
+                        DropdownMenuItem<DateTime?>(
                           value: null,
-                          child:
-                              Text("All Month", style: TextStyle(fontSize: 14)),
+                          child: Text("filter_all_months".tr,
+                              style: TextStyle(fontSize: 14)),
                         ),
                         // Item untuk setiap bulan yang ada di riwayat
                         ...controller.availableHistoryMonths.map((month) {
@@ -332,23 +337,24 @@ class MyScheduleView extends GetView<MyScheduleController> {
                 child: Obx(() => _buildFilterDropdown<String>(
                       // Gunakan helper
                       value: controller.historyStatusFilter.value,
-                      hint: "Status", // Hint tidak akan terpakai
-                      items: const [
+                      hint:
+                          "filter_status_label".tr, // Hint tidak akan terpakai
+                      items: [
                         DropdownMenuItem(
                             value: 'All',
-                            child: Text("All Status",
+                            child: Text("status_all".tr,
                                 style: TextStyle(fontSize: 14))),
                         DropdownMenuItem(
                             value: 'Approved',
-                            child: Text("Approve",
+                            child: Text("status_approved".tr,
                                 style: TextStyle(fontSize: 14))),
                         DropdownMenuItem(
                             value: 'Requested',
-                            child: Text("Pending",
+                            child: Text("status_requested".tr,
                                 style: TextStyle(fontSize: 14))),
                         DropdownMenuItem(
                             value: 'Rejected',
-                            child: Text("Rejected",
+                            child: Text("status_rejected".tr,
                                 style: TextStyle(fontSize: 14))),
                       ],
                       onChanged: (value) {
@@ -367,18 +373,13 @@ class MyScheduleView extends GetView<MyScheduleController> {
             final list = controller.filteredHistorySchedules;
             if (list.isEmpty) {
               return _EmptyStateCard(
-                  icon: Icons.search_off,
-                  message:
-                      "Oppss, there are no submissions matching your filter.");
+                  icon: Icons.search_off, message: "empty_history".tr);
             }
-            // Tampilkan sebagai Column, BUKAN ExpansionTile
-            // Gunakan ListView.builder jika daftar bisa sangat panjang, tapi Column lebih sederhana
             return Column(
               children:
                   list.map((history) => _buildScheduleCard(history)).toList(),
             );
           }),
-          // ------------------------------------------
         ],
       );
     });
@@ -465,7 +466,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
             style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50)),
             onPressed: controller.submitScheduleRequest,
-            child: const Text("Submit Schedule Request"),
+            child: Text("btn_submit_request".tr),
           ),
         ),
       ]));
@@ -501,14 +502,14 @@ class MyScheduleView extends GetView<MyScheduleController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: Colors.white, // Latar putih
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1), // Warna shadow
-            spreadRadius: 1, // Seberapa jauh shadow menyebar
-            blurRadius: 5, // Seberapa kabur shadow
-            offset: const Offset(0, 2), // Posisi shadow (sedikit ke bawah)
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -547,9 +548,19 @@ class MyScheduleView extends GetView<MyScheduleController> {
         statusColor = Colors.grey;
     }
 
-    // Helper untuk format jam dari float
-    String formatHour(double? hour) {
-      return _formatHour(hour);
+    String statusText;
+    switch (schedule.status) {
+      case 'Approved':
+        statusText = 'schedule_status_approved'.tr; // "DISETUJUI"
+        break;
+      case 'Requested':
+        statusText = 'schedule_status_requested'.tr; // "DIAJUKAN"
+        break;
+      case 'Rejected':
+        statusText = 'schedule_status_rejected'.tr; // "DITOLAK"
+        break;
+      default:
+        statusText = schedule.status.toUpperCase();
     }
 
     return Card(
@@ -586,7 +597,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          schedule.status.toUpperCase(),
+                          statusText,
                           style: TextStyle(
                             color: statusColor,
                             fontWeight: FontWeight.bold,
@@ -604,8 +615,8 @@ class MyScheduleView extends GetView<MyScheduleController> {
                       const SizedBox(height: 4),
                       // Tanggal dan Jam
                       Text(
-                        // ✅ 2. PANGGIL LANGSUNG _formatHour
-                        "${DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(schedule.date)}  •  ${_formatHour(schedule.workFrom)} - ${_formatHour(schedule.workTo)}",
+                        // ✅ Gunakan Get.locale?.languageCode agar mengikuti bahasa aplikasi (id/en)
+                        "${DateFormat('EEEE, d MMMM yyyy', Get.locale?.languageCode).format(schedule.date)}  •  ${_formatHour(schedule.workFrom)} - ${_formatHour(schedule.workTo)}",
                         style: TextStyle(
                             color: Colors.grey.shade700, fontSize: 13),
                       ),
@@ -613,7 +624,11 @@ class MyScheduleView extends GetView<MyScheduleController> {
                       // Detail Pengajuan
                       if (schedule.createDate != null)
                         Text(
-                          "Diajukan: ${DateFormat('d MMM yyyy, HH:mm').format(schedule.createDate!.toLocal())}",
+                          'schedule_submitted_on'.trParams({
+                            'date': DateFormat('d MMM yyyy, HH:mm',
+                                    Get.locale?.languageCode)
+                                .format(schedule.createDate!.toLocal())
+                          }),
                           style: TextStyle(
                               color: Colors.grey.shade600, fontSize: 12),
                         ),
@@ -622,7 +637,8 @@ class MyScheduleView extends GetView<MyScheduleController> {
                         Padding(
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Text(
-                            "Alasan: ${schedule.rejectionReason}",
+                            'schedule_reason'.trParams(
+                                {'reason': schedule.rejectionReason!}),
                             style: TextStyle(
                                 color: Colors.grey.shade600, fontSize: 12),
                           ),
@@ -639,7 +655,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                               foregroundColor: Colors.red,
                               side: const BorderSide(color: Colors.red),
                             ),
-                            child: const Text("CANCEL REQUEST"),
+                            child: Text("btn_cancel".tr),
                           ),
                         ),
                       if (schedule.status == 'Rejected')
@@ -649,7 +665,7 @@ class MyScheduleView extends GetView<MyScheduleController> {
                             onPressed: () {
                               controller.showRejectionDetail(schedule);
                             },
-                            child: const Text("DETAIL"),
+                            child: Text("btn_detail".tr),
                           ),
                         ),
                     ],

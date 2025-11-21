@@ -27,28 +27,30 @@ class LoginView extends StatelessWidget {
                 width: 80.0,
               ),
               const SizedBox(height: 20.0),
-              RichText(
-                text: TextSpan(
-                  text: 'Welcome Back 👋\nto ',
-                  style: GoogleFonts.poppins(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                  children: <TextSpan>[
-                    TextSpan(
-                      text: 'ArtuGo',
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .primaryColor, // Mengambil warna aksen dari theme
-                      ),
+              FittedBox(
+                fit: BoxFit.scaleDown, // Hanya kecilkan jika tidak muat
+                child: RichText(
+                  text: TextSpan(
+                    text: 'login_welcome_back'.tr,
+                    style: GoogleFonts.poppins(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
-                  ],
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'ArtuGo',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 8.0),
-              const Text(
-                "Hello Artlanders!, login to continue",
+              Text(
+                'login_subtitle'.tr,
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
@@ -59,14 +61,14 @@ class LoginView extends StatelessWidget {
               // --- Bagian Form ---
               TextField(
                 controller: controller.emailController,
-                decoration: const InputDecoration(labelText: "Email Address"),
+                decoration: InputDecoration(labelText: 'login_email_label'.tr),
               ),
               const SizedBox(height: 16.0),
               Obx(() => TextField(
                     controller: controller.passwordController,
                     obscureText: controller.isPasswordObscured.value,
                     decoration: InputDecoration(
-                      labelText: "Password",
+                      labelText: 'login_password_label'.tr,
                       suffixIcon: IconButton(
                         icon: Icon(
                           controller.isPasswordObscured.value
@@ -79,7 +81,7 @@ class LoginView extends StatelessWidget {
                   )),
               // Checkbox "Remember Me"
               Obx(() => CheckboxListTile(
-                    title: const Text("Remember Me"),
+                    title: Text('login_remember_me'.tr),
                     value: controller.rememberMe.value,
                     onChanged: (newValue) {
                       controller.rememberMe.value = newValue ?? false;
@@ -95,8 +97,8 @@ class LoginView extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () => controller.doLogin(),
-                  child: const Text(
-                    "Login",
+                  child: Text(
+                    'login_btn'.tr,
                     style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,

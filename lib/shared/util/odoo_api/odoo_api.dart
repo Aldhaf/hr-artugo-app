@@ -3,6 +3,7 @@ import 'package:odoo_rpc/odoo_rpc.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/foundation.dart';
 
 class OdooApiService {
   final Map<String, String> _config =
@@ -16,15 +17,15 @@ class OdooApiService {
   OdooApiService() {
     final host = _config['host'];
     if (host == null) {
-      throw Exception(
-          "Config 'host' not found. Make sure config is passed to runSharedApp.");
+      throw Exception("Config 'host' not found.");
     }
     client = OdooClient(host);
     _dio = Dio(BaseOptions(
       baseUrl: host,
+      connectTimeout: const Duration(seconds: 10), // Batas waktu koneksi
+      receiveTimeout: const Duration(seconds: 15), // Batas waktu terima data
+      sendTimeout: const Duration(seconds: 10), // Batas waktu kirim data
     ));
-    print(
-        "OdooApiService Initialized for env: ${_config['env']} at host: $host");
   }
 
   // Mengirimkan pengajuan jadwal bulanan yang dipilih pengguna ke API Odoo.
@@ -328,16 +329,8 @@ class OdooApiService {
 
       // Set header Cookie dengan session ID yang sudah diverifikasi
       dio.options.headers['Cookie'] = 'session_id=$sessionId';
-
-      print("Mengirim data absensi ke: $url");
       await dio.post(url, data: formData);
-      print("Data absensi berhasil dikirim.");
     } on DioException catch (e) {
-      print("--- Dio Error on Upload ---");
-      print("Error: ${e.message}");
-      print("Response: ${e.response?.data}");
-      print("--------------------------");
-
       // Periksa jika error disebabkan oleh redirect lagi
       if (e.response?.statusCode == 302) {
         throw Exception(
@@ -345,7 +338,6 @@ class OdooApiService {
       }
       throw Exception("Gagal terhubung ke server saat mengirim absensi.");
     } catch (e) {
-      print("Error tidak terduga saat upload: $e");
       throw Exception("Terjadi kesalahan tidak terduga saat upload.");
     }
   }
@@ -366,10 +358,8 @@ class OdooApiService {
         ],
         'kwargs': {},
       });
-      print("Notifikasi ID $id berhasil dihapus dari server.");
       return response as bool? ?? false;
     } catch (e) {
-      print("Gagal menghapus notifikasi ID $id: $e");
       return false;
     }
   }
@@ -398,13 +388,10 @@ class OdooApiService {
       });
       // search_read mengembalikan list, kita ambil elemen pertamanya
       if (response is List && response.isNotEmpty) {
-        // Print di sini untuk debugging
-        print("Data cuti yang diterima dari Odoo: ${response[0]}");
         return response[0] as Map<String, dynamic>;
       }
       return null;
     } catch (e) {
-      print("Gagal mengambil detail Time Off: $e");
       return null;
     }
   }
@@ -423,17 +410,13 @@ class OdooApiService {
         ],
         'kwargs': {},
       });
-      print("Menandai notifikasi ${ids.toString()} sebagai sudah dibaca.");
-    } catch (e) {
-      print("Gagal menandai notifikasi sebagai sudah dibaca: $e");
-    }
+    } catch (e) {}
   }
 
   // Mengambil daftar notifikasi milik pengguna yang sedang login dari Odoo.
   Future<List<dynamic>> fetchNotifications() async {
     final uid = session?.userId;
     if (uid == null) {
-      print("Tidak bisa mengambil notifikasi, user belum login.");
       return [];
     }
 
@@ -460,7 +443,6 @@ class OdooApiService {
       });
       return response as List<dynamic>? ?? [];
     } catch (e) {
-      print("Gagal mengambil notifikasi dari Odoo: $e");
       return [];
     }
   }
@@ -469,22 +451,14 @@ class OdooApiService {
   Future<void> saveFcmToken(String token) async {
     final uid = session?.userId;
     if (uid == null) {
-      print("❌ [FCM Save] Gagal: User belum login (session.userId is null).");
       return;
     }
-
-    print("🚀 [FCM Save] Memulai proses penyimpanan token untuk user ID: $uid");
-    print(
-        "   - Token: ${token.substring(0, 15)}..."); // Mencetak sebagian token
 
     try {
       final args = [
         [uid], // List of IDs yang akan diupdate
         {'fcm_token': token}, // Map of values yang akan diupdate
       ];
-
-      print("   - Memanggil Odoo RPC 'write' pada model 'res.users'");
-      print("   - Argumen yang dikirim: $args");
 
       // callKw yang sudah dikonfirmasi berfungsi
       final result = await client.callKw({
@@ -496,16 +470,20 @@ class OdooApiService {
 
       // Operasi 'write' yang sukses akan mengembalikan 'true'
       if (result == true) {
-        print("✅ [FCM Save] SUKSES: Odoo mengonfirmasi token telah tersimpan.");
+        // 2. Bungkus dengan kDebugMode
+        if (kDebugMode) {
+          print(
+              "✅ [FCM Save] SUKSES: Odoo mengonfirmasi token telah tersimpan.");
+        }
       } else {
-        print(
-            "⚠️ [FCM Save] PERINGATAN: Operasi berhasil dieksekusi tapi Odoo tidak mengembalikan 'true'. Result: $result");
+        if (kDebugMode) {
+          print("⚠️ [FCM Save] PERINGATAN: Result: $result");
+        }
       }
     } catch (e) {
-      print(
-          "🔥 [FCM Save] FATAL ERROR: Terjadi error saat mencoba menyimpan token.");
-      print("   - Tipe Error: ${e.runtimeType}");
-      print("   - Pesan Error: $e");
+      if (kDebugMode) {
+        print("🔥 [FCM Save] ERROR: $e");
+      }
     }
   }
 
@@ -525,14 +503,8 @@ class OdooApiService {
           res[0]["employee_id"] != false &&
           res[0]["employee_id"] != null) {
         employeeId = res[0]["employee_id"][0];
-      } else {
-        // Handle kasus di mana user tidak terhubung ke data karyawan
-        print(
-            "User (ID: ${session!.userId}) tidak terhubung dengan data Employee.");
       }
-    } catch (e) {
-      print("Gagal mendapatkan employee_id: $e");
-    }
+    } catch (e) {}
   }
 
   // Melakukan proses autentikasi (login) pengguna ke Odoo menggunakan username dan password
@@ -540,6 +512,10 @@ class OdooApiService {
     required String login,
     required String password,
   }) async {
+    final database = _config['database'];
+    if (database == null) {
+      throw Exception("Konfigurasi database tidak ditemukan.");
+    }
     try {
       session = await client.authenticate(
         _config["database"]!,
@@ -548,20 +524,16 @@ class OdooApiService {
       );
 
       if (session == null) {
-        print("Login Gagal: Sesi tidak didapatkan (null).");
         return false;
       }
 
       await getEmployeeId();
       return true;
     } on OdooException catch (e) {
-      // Tangkap error spesifik dari Odoo seperti AccessDenied
-      print("Login Gagal: OdooException: $e");
       return false;
     } catch (e) {
-      // Tangkap semua jenis error lainnya
-      print("Login Gagal: Terjadi error tidak terduga: $e");
-      return false;
+      // LEMPAR ULANG error ini agar Controller tahu ada masalah jaringan
+      throw Exception("Gagal terhubung ke server, detail: $e");
     }
   }
 
@@ -597,10 +569,6 @@ class OdooApiService {
     required Map data,
   }) async {
     try {
-      print("----");
-      print("data:");
-      print(data);
-      print("----");
       var partnerId = await client.callKw({
         'model': model,
         'method': 'create',
@@ -609,7 +577,6 @@ class OdooApiService {
       });
       return partnerId != null;
     } on Exception catch (e) {
-      print(e);
       throw Exception(e);
     }
   }

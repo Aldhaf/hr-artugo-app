@@ -13,6 +13,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:hr_artugo_app/config/env_dev.dart';
+import 'package:hr_artugo_app/shared/localization/app_translations.dart';
+import 'package:hr_artugo_app/service/localization_service/localization_service.dart';
 
 import 'package:hr_artugo_app/service/theme_service/theme_service.dart';
 import 'package:hr_artugo_app/service/work_profile_service/work_profile_service.dart';
@@ -40,8 +42,6 @@ import 'package:hr_artugo_app/module/onboarding/view/onboarding_view.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Pastikan Firebase diinisialisasi di dalam handler ini
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print("Handling a background message: ${message.messageId}");
-  print("Data payload: ${message.data}");
 }
 
 Future<void> initServices() async {
@@ -89,7 +89,6 @@ Future<void> initServices() async {
   // --- GRUP 2: Service Kritis untuk Koneksi & Autentikasi ---
   // OdooApiService adalah fondasi, butuh 'await' karena mungkin ada setup async.
   // AuthService bergantung pada OdooApiService, didaftarkan setelahnya (lazyPut OK).
-  print("Initializing critical connection & auth services...");
   await Get.putAsync(() async => OdooApiService(), permanent: true);
   Get.lazyPut<AuthService>(() => AuthService(),
       fenix: true); // Fenix & Permanent krn penting
@@ -97,18 +96,20 @@ Future<void> initServices() async {
   // --- GRUP 3: Service/Controller yang Diperlukan Segera Setelah Login ---
   // WorkProfile butuh OdooApi dan punya init() async.
   // Notifikasi dibutuhkan segera setelah login untuk mengambil data awal.
-  print("Initializing post-login essential services...");
   await Get.putAsync(() => WorkProfileService().init(), permanent: true);
   // Daftarkan Service Notifikasi sebelum Controller-nya
   Get.lazyPut<NotificationService>(() => NotificationService(), fenix: true);
   Get.lazyPut<NotificationController>(() => NotificationController(),
       fenix: true);
+  
+  final prefs = await SharedPreferences.getInstance();
+  Get.put(prefs);
+
+  await Get.putAsync(() => LocalizationService().init());
 
   // --- CATATAN ---
   // Service lain yang BISA ditunda (FirebaseService, AttendanceService, MyScheduleService, dll.)
   // akan tetap diinisialisasi di 'MainNavigationBinding' untuk mempercepat startup awal.
-
-  print("✅ Core services initialization complete.");
 }
 
 void main() async {
@@ -170,8 +171,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizationService = Get.find<LocalizationService>();
     return Obx(() => GetMaterialApp(
           title: 'ArtuGo',
+          translations: AppTranslations(), // Kamus bahasa
+          locale: localizationService.currentLocale, // Bahasa saat ini
+          fallbackLocale: const Locale('en', 'US'),
           debugShowCheckedModeBanner: false,
           theme: getDefaultTheme(),
           darkTheme: getDarkTheme(),

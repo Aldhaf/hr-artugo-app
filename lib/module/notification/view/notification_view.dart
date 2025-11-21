@@ -27,7 +27,7 @@ class _NotificationViewState extends State<NotificationView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notifikasi"),
+        title: Text("notification_page_title".tr),
       ),
       body: RefreshIndicator(
         // Pull-to-refresh sekarang akan memanggil markAllAsRead juga
@@ -39,8 +39,8 @@ class _NotificationViewState extends State<NotificationView> {
           }
 
           if (controller.notificationList.isEmpty) {
-            return const Center(
-                child: Text("Tidak ada notifikasi",
+            return Center(
+                child: Text("notification_empty".tr,
                     style: TextStyle(color: Colors.grey)));
           }
 
@@ -64,8 +64,9 @@ class _NotificationViewState extends State<NotificationView> {
 
                   // Tampilkan snackbar konfirmasi
                   Get.snackbar(
-                    "Dihapus",
-                    "'${notification.title}' telah dihapus.",
+                    "deleted_success_title".tr,
+                    "deleted_success_msg"
+                        .trParams({'title': notification.title}),
                     snackPosition: SnackPosition.BOTTOM,
                     duration: const Duration(seconds: 2),
                   );
@@ -81,8 +82,7 @@ class _NotificationViewState extends State<NotificationView> {
                       children: [
                         const Icon(Icons.delete_outline, color: Colors.white),
                         const SizedBox(width: 8.0),
-                        const Text("Hapus",
-                            style: TextStyle(color: Colors.white)),
+                        Text("delete_action".tr, style: TextStyle(color: Colors.white)),
                       ],
                     ),
                   ),

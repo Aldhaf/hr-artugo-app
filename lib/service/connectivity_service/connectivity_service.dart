@@ -22,7 +22,6 @@ class ConnectivityService extends GetxService {
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> result) {
-    print("Connection Status Changed: $result");
     if (result.contains(ConnectivityResult.none)) {
       isOnline.value = false;
     } else {
