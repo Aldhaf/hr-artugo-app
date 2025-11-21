@@ -74,17 +74,39 @@ Aplikasi ini menggunakan *entry points* terpisah untuk memisahkan database dan k
 **1. Mode Development (Debug):**
 ```bash
 flutter run -t lib/main_dev.dart
+```
 
 **2. Mode Staging (Release APK untuk HP Fisik):**
 ```bash
 flutter build apk -t lib/main_staging.dart
-
+```
 **3. Mode Production (App Bundle untuk Store):**
 ```bash
 flutter build appbundle -t lib/main_prod.dart --obfuscate --split-debug-info=./debug-info
+```
 
 ## 🔐 Keamanan (Security)
-* ProGuard/R8: Diaktifkan untuk mengecilkan dan mengaburkan kode (obfuscation).
-* Certificate Pinning: (Direncanakan).
-* Secure Storage: Token otentikasi tidak disimpan di plain text.
-* Git Ignore: File sensitif seperti key.properties, serviceAccountKey.json, dan keystore (*.jks) TIDAK disertakan dalam repository ini demi keamanan.
+* **ProGuard/R8:** Diaktifkan untuk mengecilkan dan mengaburkan kode (obfuscation).
+* **Certificate Pinning:** (Direncanakan).
+* **Secure Storage:** Token otentikasi tidak disimpan di plain text.
+* **Git Ignore:** File sensitif seperti key.properties, serviceAccountKey.json, dan keystore (*.jks) TIDAK disertakan dalam repository ini demi keamanan.
+
+## 📦 Setup Backend (Odoo)
+Aplikasi ini membutuhkan modul Odoo kustom hr_attendance_pattern yang menangani:
+* 1. Logika Shift Roster & Batch Submission.
+* 2. Logika Shift Roster & Batch Submission.
+* 3. Logika Shift Roster & Batch Submission.
+**Dependensi Python Server:**
+```bash
+pip install firebase-admin
+```
+Pastikan file serviceAccountKey.json diletakkan di lokasi aman di server dan path-nya dikonfigurasi di __init__.py modul.
+
+## 🤝 Kontribusi
+Project ini dikelola secara internal.
+* Branch main: Kode produksi stabil.
+* Branch develop: Integrasi fitur baru.
+* Branch feature/...: Pengembangan fitur spesifik.
+
+## 📄 Lisensi
+Copyright © 2025 PT Kreasi Arduo Indonesia (Artugo). All Rights Reserved.
