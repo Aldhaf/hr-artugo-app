@@ -2,7 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    id 'com.google.gms.google-services' // Plugin Firebase Anda
+    id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
 }
 
@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.example.hr_artugo_app" // Pastikan ini sesuai dengan proyek Anda
+    namespace "com.example.hr_artugo_app" // Pastikan ini sesuai dengan nama proyek
     compileSdkVersion 35
     ndkVersion "27.0.12077973"
 

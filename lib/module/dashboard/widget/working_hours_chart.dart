@@ -77,14 +77,12 @@ class WorkingHoursChart extends StatelessWidget {
                       width: 0.6,
                       xValueMapper: (DailyWorkHour data, _) =>
                           DateFormat('E').format(data.date),
-
                       yValueMapper: (DailyWorkHour data, _) {
                         if (data.status == WorkDayStatus.worked) {
                           return data.hours;
                         }
                         return 9.0;
                       },
-
                       pointColorMapper: (DailyWorkHour data, _) {
                         switch (data.status) {
                           case WorkDayStatus.worked:
@@ -96,7 +94,6 @@ class WorkingHoursChart extends StatelessWidget {
                         }
                       },
                       borderRadius: BorderRadius.circular(8),
-
                       dataLabelSettings: DataLabelSettings(
                         isVisible: true,
                         labelAlignment: ChartDataLabelAlignment.middle,
@@ -106,8 +103,7 @@ class WorkingHoursChart extends StatelessWidget {
 
                           if (dayData.status == WorkDayStatus.absent) {
                             return Transform.rotate(
-                              angle:
-                                  1.5708,
+                              angle: 1.5708,
                               child: const Text(
                                 'Absent',
                                 style: TextStyle(

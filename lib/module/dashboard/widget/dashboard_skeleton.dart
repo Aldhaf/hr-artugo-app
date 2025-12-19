@@ -10,7 +10,7 @@ class DashboardSkeleton extends StatelessWidget {
       baseColor: Colors.grey[200]!,
       highlightColor: Colors.grey[50]!,
       child: ListView(
-        physics: const NeverScrollableScrollPhysics(), // Nonaktifkan scroll saat loading
+        physics: const NeverScrollableScrollPhysics(),
         children: [
           // Kerangka untuk UserInfoHeader
           Padding(

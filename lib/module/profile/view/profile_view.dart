@@ -8,9 +8,9 @@ import 'package:shimmer/shimmer.dart';
 import '../model/profile_model.dart';
 import '/core/data_state.dart';
 import '../controller/profile_controller.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:hr_artugo_app/service/localization_service/localization_service.dart';
 // import 'package:hr_artugo_app/service/theme_service/theme_service.dart';
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({Key? key}) : super(key: key);
@@ -26,7 +26,7 @@ class ProfileView extends StatelessWidget {
         child: Wrap(
           children: [
             Text(
-              "choose_language".tr, // Contoh penggunaan .tr nanti
+              "choose_language".tr,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -65,7 +65,6 @@ class ProfileView extends StatelessWidget {
     // final themeService = Get.find<ThemeService>();
 
     return Scaffold(
-      // warna latar belakang utama sesuai desain baru
       body: SafeArea(
         top: false, // SafeArea diatur manual karena header tumpang tindih
         child: Obx(() {
@@ -87,14 +86,14 @@ class ProfileView extends StatelessWidget {
             // Stack untuk menumpuk header dan konten
             return Stack(
               children: [
-                // Lapisan 1: Latar belakang berwarna di bagian atas
+                // Lapisan 1: Latar belakang header
                 _buildHeaderBackground(context),
 
-                // Lapisan 2: Konten utama yang bisa di-scroll
+                // Lapisan 2: Konten profil
                 ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   children: [
-                    const SizedBox(height: 70), // Jarak agar avatar di tengah
+                    const SizedBox(height: 70),
                     _buildProfileAvatar(profile),
                     const SizedBox(height: 16),
                     Text(

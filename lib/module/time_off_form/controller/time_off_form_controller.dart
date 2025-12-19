@@ -4,7 +4,7 @@ import 'package:hr_artugo_app/core.dart' hide Get;
 import 'package:hr_artugo_app/service/leave_type_service/leave_type_service.dart';
 
 class TimeOffFormController extends GetxController {
-  // --- State Variables ---
+  // State Variables
   // Variabel form dibuat reaktif, Rxn<> digunakan agar bisa null di awal
   var leaveTypeId = Rxn<int>();
   var dateFrom = Rxn<DateTime>();
@@ -23,7 +23,7 @@ class TimeOffFormController extends GetxController {
     getLeaveTypes();
   }
 
-  // --- Logic ---
+  // Logic
   getLeaveTypes() async {
     var response = await LeaveTypeService().get();
     leaveTypes.value = List<Map>.from(response);
@@ -45,7 +45,7 @@ class TimeOffFormController extends GetxController {
 
     Get.dialog(
       const Center(child: CircularProgressIndicator()),
-      barrierDismissible: false, // Mencegah dialog ditutup oleh user
+      barrierDismissible: false, 
     );
 
     try {

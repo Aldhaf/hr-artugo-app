@@ -10,7 +10,7 @@ class TimeOffHistoryListController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    // Mendaftarkan controller ini sebagai pengamat
+    // Mendaftarkan controller ini sebagai observer
     WidgetsBinding.instance.addObserver(this);
     // Memanggil fungsi untuk mengambil data saat controller pertama kali dibuat
     getTimeOffHistories();
@@ -18,7 +18,7 @@ class TimeOffHistoryListController extends GetxController
 
   @override
   void onClose() {
-    // Selalu hapus pengamat saat controller ditutup
+    // Selalu hapus observer saat controller ditutup
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
   }
@@ -29,7 +29,6 @@ class TimeOffHistoryListController extends GetxController
     super.didChangeAppLifecycleState(state);
     // Jika aplikasi kembali aktif/dibuka (dari background atau halaman lain)
     if (state == AppLifecycleState.resumed) {
-      
       // Panggil fungsi untuk mengambil data terbaru
       getTimeOffHistories();
     }

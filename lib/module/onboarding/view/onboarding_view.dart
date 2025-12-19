@@ -15,11 +15,11 @@ class OnboardingView extends StatelessWidget {
 
     return Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: Colors.white, // Latar belakang utama
+        backgroundColor: Colors.white,
         body: SizedBox.expand(
           child: Stack(
             children: [
-              // LAPISAN 1: GAMBAR LATAR BELAKANG YANG BISA DIGESER
+              // Lapisan 1 berupa PageView dengan gambar
               PageView.builder(
                 controller: controller.pageController,
                 onPageChanged: controller.onPageChanged,
@@ -29,22 +29,19 @@ class OnboardingView extends StatelessWidget {
                     alignment: Alignment.topCenter,
                     child: Image.asset(
                       controller.pages[index]["image"]!,
-                      // Tingkatkan tinggi sedikit agar lebih fleksibel di berbagai layar
                       height: MediaQuery.of(context).size.height * 0.8,
                       width: double.infinity,
-                      fit: BoxFit
-                          .cover, // BoxFit.cover akan memotong "ruang bernapas"
+                      fit: BoxFit.cover,
                     ),
                   );
                 },
               ),
 
-              // LAPISAN 2: PANEL KONTEN PUTIH DI BAGIAN BAWAH
+              // Lapisan 2 berupa panel bawah dengan teks dan tombol
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
-                  height: MediaQuery.of(context).size.height *
-                      0.45, // Panel mengisi 45% layar bawah
+                  height: MediaQuery.of(context).size.height * 0.45,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 24.0, vertical: 30.0),
                   decoration: const BoxDecoration(
@@ -66,11 +63,11 @@ class OnboardingView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // KONTEN TEKS
+                        // Konten teks (indikator halaman, judul, deskripsi)
                         Column(
                           children: [
                             const SizedBox(height: 10),
-                            // INDIKATOR HALAMAN
+                            // Indikator halaman
                             SmoothPageIndicator(
                               controller: controller.pageController,
                               count: controller.pages.length,
@@ -90,7 +87,7 @@ class OnboardingView extends StatelessWidget {
                                   ["title"]!,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontSize: 26, // Ukuran font lebih besar
+                                fontSize: 26,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
@@ -111,9 +108,9 @@ class OnboardingView extends StatelessWidget {
                           ],
                         ),
 
-                        // KONTEN NAVIGASI (INDIKATOR & TOMBOL)
+                        // Konten Navigasi (tombol Lanjut/Mulai)
                         SizedBox(
-                          width: double.infinity, // Tombol selebar layar
+                          width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(

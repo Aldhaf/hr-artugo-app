@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hr_artugo_app/core.dart' hide Get;
-import 'package:intl/intl.dart';
-import '../controller/attendance_history_list_controller.dart';
 
 class AttendanceHistoryListView extends StatelessWidget {
   const AttendanceHistoryListView({Key? key}) : super(key: key);
@@ -12,14 +10,14 @@ class AttendanceHistoryListView extends StatelessWidget {
     final controller = Get.find<AttendanceHistoryListController>();
     final primaryColor = Theme.of(context).primaryColor;
 
-    // Fungsi untuk memformat waktu sesuai desain baru (AM/PM)
+    // Fungsi untuk memformat waktu (AM/PM)
     String formatTime(dynamic timeValue) {
-      if (timeValue == null || timeValue == false) return "--:-- --";
+      if (timeValue == null || timeValue == false) return "--:--:--";
       DateTime date = DateTime.parse(timeValue.toString() + "Z").toLocal();
-      return DateFormat("hh:mm:ss").format(date);
+      return DateFormat("HH:mm:ss").format(date);
     }
 
-    // Fungsi untuk memformat tanggal sesuai desain baru
+    // Fungsi untuk memformat tanggal
     String formatDate(dynamic timeValue) {
       if (timeValue == null || timeValue == false) return 'history_no_date'.tr;
       DateTime date = DateTime.parse(timeValue.toString() + "Z").toLocal();

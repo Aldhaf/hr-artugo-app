@@ -39,8 +39,27 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Pastikan sama dengan warna native splash
       body: Center(
-        child: Lottie.asset('assets/animations/loading.json'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Tampilkan Logo (Gunakan file yang sama agar konsisten)
+            Image.asset(
+              'assets/icon/splash_icon.png',
+              width: 120,
+              height: 120,
+            ),
+            const SizedBox(height: 24),
+
+            // Animasi Loading Lottie
+            SizedBox(
+              width: 150,
+              height: 150,
+              child: Lottie.asset('assets/animations/loading.json'),
+            ),
+          ],
+        ),
       ),
     );
   }

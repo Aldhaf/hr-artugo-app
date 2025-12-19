@@ -25,7 +25,7 @@ class DashboardView extends StatelessWidget {
           // --- TAMPILKAN UI BERDASARKAN STATUS ---
           switch (controller.status.value) {
             case DashboardStatus.loading:
-              // Tampilkan skeleton hanya jika BUKAN loading data baru saat cache ada
+              // Tampilkan skeleton hanya jika loading data baru dan tidak ada data cache
               return controller.isShowingCachedData.value
                   ? _buildDashboardContent(context, controller,
                       isLoading: true) // Tampilkan konten + loading indicator
@@ -66,7 +66,7 @@ class DashboardView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             children: [
-              // --- BANNER OFFLINE/CACHE (JIKA PERLU) ---
+              // --- BANNER OFFLINE/CACHE ---
               if (controller.status.value == DashboardStatus.offline ||
                   controller.isShowingCachedData.value)
                 _buildOfflineCacheBanner(controller),
@@ -163,8 +163,8 @@ class DashboardView extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         TextButton(
-                          onPressed: () => _showDateRangePickerSheet(
-                              context, controller), // Panggil helper
+                          onPressed: () =>
+                              _showDateRangePickerSheet(context, controller),
                           child: Obx(() => Row(
                                 children: [
                                   Text(controller.chartDateRangeText.value,
@@ -192,7 +192,6 @@ class DashboardView extends StatelessWidget {
                           Obx(() {
                             // --- TAMPILKAN LOADING ATAU CHART ---
                             if (controller.isChartLoading.value) {
-                              // <-- Gunakan state loading baru
                               return const SizedBox(
                                 height: 200,
                                 child:
@@ -209,30 +208,32 @@ class DashboardView extends StatelessWidget {
                                 height: 200,
                                 child: SfCartesianChart(
                                   primaryXAxis: DateTimeAxis(
-                                    // Gunakan DateTimeAxis untuk sumbu X
+                                    // DateTimeAxis untuk sumbu X
                                     dateFormat: DateFormat(
                                         'd MMM'), // Format tanggal di sumbu X
                                     intervalType: DateTimeIntervalType.days,
                                     majorGridLines: const MajorGridLines(
-                                        width: 0), // Hilangkan grid vertikal
+                                        width:
+                                            0), // Menghilangkan grid vertikal
                                   ),
                                   primaryYAxis: const NumericAxis(
                                     majorTickLines: MajorTickLines(
-                                        size: 0), // Hilangkan tick di sumbu Y
+                                        size:
+                                            0), // Menghilangkan tick di sumbu Y
                                     labelFormat:
-                                        '{value}h', // Tambahkan 'h' setelah angka jam
+                                        '{value}h', // Menambahkan 'h' setelah angka jam
                                     minimum: 0, // Mulai dari 0 jam
                                   ),
                                   series: <CartesianSeries>[
-                                    // --- Gunakan ColumnSeries untuk grafik batang ---
+                                    // --- Menggunakan ColumnSeries untuk grafik batang ---
                                     ColumnSeries<DailyWorkHour, DateTime>(
                                       dataSource: controller.dailyHours
-                                          .toList(), // Ambil data dari controller
+                                          .toList(), // Mengambil data dari controller
                                       xValueMapper: (DailyWorkHour data, _) =>
                                           data.date,
                                       yValueMapper: (DailyWorkHour data, _) =>
                                           data.hours,
-                                      // Atur warna batang (opsional, bisa lebih kompleks)
+                                      // Mengatur warna batang
                                       pointColorMapper:
                                           (DailyWorkHour data, _) {
                                         if (data.status ==
@@ -263,7 +264,7 @@ class DashboardView extends StatelessWidget {
                                     'dashboard_total_hours'.tr,
                                     controller.totalHoursSummary.value,
                                     Theme.of(context)
-                                        .primaryColor, // Gunakan warna tema
+                                        .primaryColor, // Default color
                                   )),
                               Obx(() => _buildHourSummary(
                                     'dashboard_overtime'.tr,
@@ -282,10 +283,10 @@ class DashboardView extends StatelessWidget {
           ),
         ),
 
-        // --- Indikator Loading di Atas (jika sedang refresh tapi cache ada) ---
+        // --- Indikator Loading di Atas ---
         if (isLoading)
           Positioned(
-            top: 100, // Sesuaikan posisi
+            top: 100,
             left: 0,
             right: 0,
             child: Center(
@@ -361,7 +362,6 @@ class DashboardView extends StatelessWidget {
       backgroundColor = Colors.orange.shade700;
       icon = Icons.wifi_off;
     } else {
-      // Berarti isShowingCachedData == true tapi status bukan offline (misal: error)
       message = 'dashboard_cache_msg'.tr;
       backgroundColor = Colors.blueGrey.shade600;
       icon = Icons.cloud_off;

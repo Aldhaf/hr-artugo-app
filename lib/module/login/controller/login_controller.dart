@@ -80,8 +80,8 @@ class LoginController extends GetxController {
         // Pesan error jika autentikasi gagal dari server
         Get.dialog(
           AlertDialog(
-            title: Text("login_error_title".tr), // Judul lebih jelas
-            content: Text("login_error_msg".tr), // Pesan lebih jelas
+            title: Text("login_error_title".tr),
+            content: Text("login_error_msg".tr),
             actions: [
               TextButton(
                   onPressed: () => Get.back(), child: Text("login_btn_ok".tr)),
@@ -106,7 +106,7 @@ class LoginController extends GetxController {
 
       // Pengguna tidak perlu menunggu satu per satu selesai.
       await Future.wait([
-        // Simpan Kredensial (Lokal, Cepat)
+        // Simpan Kredensial (lokal dan cepat)
         rememberMe.value
             ? _storageService.saveCredentials(
                 emailController.text, passwordController.text)
@@ -121,7 +121,7 @@ class LoginController extends GetxController {
         // Ambil Notifikasi Awal (Network Call)
         // Bungkus dalam try-catch agar jika notifikasi gagal, login tetap berhasil
         Get.find<NotificationController>().fetchNotifications().catchError((e) {
-          return []; // Return list kosong agar Future.wait tidak crash
+          return;
         }),
       ]);
 

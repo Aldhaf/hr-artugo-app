@@ -23,7 +23,7 @@ class ProfileController extends GetxController {
 
   void getProfileFromService() {
     profileState.value = const DataLoading();
-    // Mengambil data dari service terpusat
+    // Mengambil data dari WorkProfileService
     final profile = Get.find<WorkProfileService>().workProfile;
 
     
@@ -41,7 +41,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // FUNGSI LOGOUT
+  // Fungsi logout
   Future<void> logout() async {
     FirebaseAnalytics.instance.logEvent(name: 'logout');
     // Hapus User ID saat logout

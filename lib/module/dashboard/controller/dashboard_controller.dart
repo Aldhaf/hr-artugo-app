@@ -80,14 +80,14 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     if (isOnline &&
         (status.value == DashboardStatus.offline ||
             status.value == DashboardStatus.error)) {
-      // Jika kembali online dan sebelumnya error/offline, coba muat ulang
+      // Jika kembali online dan sebelumnya error/offline, akan mencoba muat ulang
       refreshData();
     } else if (!isOnline) {
       // Jika menjadi offline
       status.value = DashboardStatus.offline;
       errorMessage.value = "Anda sedang offline.";
       isShowingCachedData.value = true; // Mencoba menampilkan cache
-      // Tidak perlu load cache di sini, loadInitialData/refreshData sudah menanganinya
+      // Tidak perlu load cache di sini, karena loadInitialData/refreshData sudah menanganinya
     }
   }
 
@@ -112,10 +112,10 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
 
     // Jika online, selalu coba refresh di latar belakang setelah cache (jika ada) tampil
     if (_connectivityService.isOnline.value) {
-      // Panggil refreshData TAPI jangan await, biarkan jalan di background
+      // Panggil refreshData tapi jangan await, biarkan jalan di background
       refreshData();
     } else if (cachedData == null) {
-      // Offline DAN tidak ada cache
+      // Offline dan tidak ada cache
       status.value = DashboardStatus.offline;
       errorMessage.value = "Anda sedang offline dan tidak ada data tersimpan.";
     } else {
@@ -159,16 +159,16 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       chartEndDate.value = picked.end ?? picked.start;
       _updateDateRangeText();
 
-      isChartLoading.value = true; // <-- Mulai loading
+      isChartLoading.value = true;
       errorMessage.value = null; // Hapus error lama (jika ada)
 
       fetchWorkingHoursChart().then((chartData) {
         _updateChartState(chartData);
-        isChartLoading.value = false; // <-- Selesai loading
+        isChartLoading.value = false;
       }).catchError((e) {
         Get.snackbar("Error", "Gagal memuat data jam kerja.");
         dailyHours.clear(); // Kosongkan data chart jika error
-        isChartLoading.value = false; // <-- Selesai loading (meskipun error)
+        isChartLoading.value = false;
       });
     }
     Get.back();
@@ -192,7 +192,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    // Hanya set loading jika BUKAN refresh saat cache sudah ada
+    // Hanya set loading jika bukan refresh saat cache sudah ada
     // Ini agar shimmer tidak muncul lagi saat refresh manual
     if (!isShowingCachedData.value) {
       status.value = DashboardStatus.loading;
@@ -200,9 +200,9 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     errorMessage.value = null;
     isShowingCachedData.value = false; // Data baru bukan dari cache
 
-    // Mulai panggil refreshLocation() secara terpisah (jangan ditunggu/await)
+    // Mulai panggil refreshLocation() secara terpisah (jangan await)
     // Biarkan state-nya sendiri yang diupdate (loading -> success/error)
-    refreshLocation(); // <-- Panggil refreshLocation di sini
+    refreshLocation();
 
     try {
       // Gunakan Map untuk menampung semua hasil API
@@ -213,7 +213,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
           freshData['profile'] = profile?.toJson(); // Simpan profile sbg Map
           userName.value = profile?.employeeName ?? "User";
           jobTitle.value = profile?.jobTitle ?? "";
-          _updateWorkPatternInfo(profile); // Fungsi helper
+          _updateWorkPatternInfo(profile);
         }),
         _attendanceService.getTodayAttendance().then((todayAttendance) {
           freshData['todayAttendance'] = todayAttendance; // Simpan sbg Map
@@ -234,21 +234,21 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         }),
       ]);
 
-      // --- SIMPAN DATA BARU KE CACHE ---
+      // SIMPAN DATA BARU KE CACHE
       await _cacheService.saveDashboardCache(freshData);
 
-      status.value = DashboardStatus.success; // Semua berhasil
+      status.value = DashboardStatus.success;
     } catch (e) {
       status.value = DashboardStatus.error;
-      isShowingCachedData.value = true; // Coba tampilkan cache jika ada error
+      isShowingCachedData.value = true;
 
-      // --- PESAN ERROR ---
+      // PESAN ERROR
       if (e is DioException) {
         if (e.error is SocketException) {
           errorMessage.value =
               "Tidak bisa terhubung ke server. Periksa koneksi Anda.";
           status.value =
-              DashboardStatus.offline; // Anggap offline jika socket error
+              DashboardStatus.offline; // anggap offline jika socket error
         } else if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.receiveTimeout) {
           errorMessage.value = "Koneksi ke server timeout.";
@@ -264,7 +264,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         errorMessage.value = "Terjadi kesalahan: ${e.toString()}";
       }
 
-      // Jika error, coba muat dari cache sebagai fallback
+      // jika error, coba muat dari cache sebagai fallback
       final cachedData = await _cacheService.getDashboardCache();
       if (cachedData != null) {
         try {
@@ -282,9 +282,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       // Pindahkan save cache dan set status success ke sini agar dieksekusi setelah try/catch
       if (status.value != DashboardStatus.error &&
           status.value != DashboardStatus.offline) {
-        // Jika tidak error/offline, simpan data (jika freshData ada) dan set sukses
-        // Anda mungkin perlu membuat freshData dapat diakses di sini atau merestruktur sedikit
-        // await _cacheService.saveDashboardCache(freshData); // Contoh
         status.value = DashboardStatus.success;
         isShowingCachedData.value = false; // Karena data baru saja dimuat
       }
@@ -309,7 +306,7 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       final profileData = data['profile'] as Map<String, dynamic>;
       userName.value = profileData['employee_name'] ?? "User";
       jobTitle.value = profileData['job_title'] ?? "";
-      // Buat WorkProfile dummy untuk update work pattern (atau parse lengkap jika perlu)
+      // Buat WorkProfile dummy untuk update work pattern
       final profile = WorkProfile.fromJson(profileData);
       _updateWorkPatternInfo(profile);
     }
@@ -479,12 +476,12 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
       // Kirim data Check-in ke server
       await _attendanceService.checkInWithGps(position);
 
-      // Tutup snackbar loading SEGERA
+      // Tutup snackbar loading
       if (Get.isSnackbarOpen) Get.back();
 
-      // UPDATE STATE UI LANGSUNG (Optimistic UI Update)
+      // update state setelah check-in berhasil
       isCurrentlyCheckedIn.value = true;
-      showThankYouMessage.value = false; // Pastikan pesan "Terima Kasih" hilang
+      showThankYouMessage.value = false; // pesan "Terima Kasih" hilang
 
       // Tampilkan Snackbar Sukses
       Get.snackbar("Berhasil", "Check-in telah berhasil dicatat.",
@@ -498,18 +495,15 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
         if (Get.isRegistered<AttendanceHistoryListController>()) {
           Get.find<AttendanceHistoryListController>().getAttendanceList();
         }
-      }).catchError((e) {
-        // Anda bisa menampilkan snackbar error di sini jika perlu
-      });
+      }).catchError((e) {});
     } catch (e) {
       // Tutup snackbar loading jika error
       if (Get.isSnackbarOpen) Get.back();
 
-      // TIDAK perlu rollback state UI di sini karena kita update setelah API berhasil
       Get.snackbar("Gagal Check-in", e.toString().replaceAll("Exception: ", ""),
           backgroundColor: Colors.red.shade600,
           colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM, // Pindahkan ke bawah
+          snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 5));
     }
   }
@@ -554,7 +548,6 @@ class DashboardController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       if (Get.isSnackbarOpen) Get.back(); // Tutup snackbar loading jika error
 
-      // Rollback tidak perlu jika UI optimis dihapus
       // checkOutTime.value = oldCheckOutTime;
 
       Get.snackbar(

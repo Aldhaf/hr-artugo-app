@@ -16,17 +16,16 @@ class MainNavigationBinding extends Bindings {
     Get.lazyPut<OdooApiService>(() => OdooApiService(), fenix: true);
     Get.lazyPut<AuthService>(() => AuthService(), fenix: true);
 
-    // GRUP 2 (Butuh Grup 1)
+    // GRUP 2 membutuhkan Grup 1
     Get.lazyPut<FirebaseService>(() => FirebaseService(), fenix: true);
     Get.lazyPut<LeaveTypeService>(() => LeaveTypeService(), fenix: true);
     Get.lazyPut<TimeOffService>(() => TimeOffService(), fenix: true);
     Get.lazyPut<MyScheduleService>(() => MyScheduleService(), fenix: true);
 
-    // GRUP 3 (Butuh Grup 2)
+    // GRUP 3 membutuhkan Grup 2
     Get.lazyPut<AttendanceService>(() => AttendanceService(), fenix: true);
 
-    // GRUP 4 (Controller Halaman Utama)
-    // controller ini juga lazyPut atau dibuat di binding masing-masing jika ada
+    // GRUP 4 membutuhkan Controller Halaman Utama)
     Get.lazyPut<DashboardController>(() => DashboardController());
     Get.lazyPut<AttendanceHistoryListController>(
         () => AttendanceHistoryListController());

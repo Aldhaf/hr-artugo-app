@@ -46,7 +46,7 @@ class CheckinDetailController extends GetxController {
 
   Future<void> getLocation() async {
     try {
-      //  Fungsi yang sudah ada di AttendanceService
+      //  Fungsi yang ada di AttendanceService
       address.value = await _attendanceService.getCurrentAddress();
     } catch (e) {
       address.value = "Gagal memuat alamat: ${e.toString()}";
@@ -80,10 +80,10 @@ class CheckinDetailController extends GetxController {
     );
 
     try {
-      // Alur absensi baru yang aman
+      // Alur absensi baru
       final Position validPosition =
-        await _attendanceService.validateAndGetPosition();
-        await _attendanceService.checkInWithGps(validPosition);
+          await _attendanceService.validateAndGetPosition();
+      await _attendanceService.checkInWithGps(validPosition);
 
       // Jika sukses, tutup dialog dan refresh state
       Get.back();
@@ -92,7 +92,7 @@ class CheckinDetailController extends GetxController {
       Get.snackbar("Berhasil", "Check-in telah berhasil dicatat.",
           backgroundColor: Colors.green, colorText: Colors.white);
 
-      // Refresh data di dasbor jika ada
+      // Refresh data di dasbor
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().refreshData();
       }

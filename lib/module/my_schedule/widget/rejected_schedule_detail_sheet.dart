@@ -87,7 +87,7 @@ class RejectedScheduleDetailSheet extends StatelessWidget {
                       : FontStyle.italic),
             ),
           ),
-          const SizedBox(height: 30), // Jarak di bawah
+          const SizedBox(height: 30),
         ],
       ),
     );

@@ -5,7 +5,7 @@ import 'package:hr_artugo_app/service/notification_service/notification_service.
 
 class NotificationController extends GetxController
     with WidgetsBindingObserver {
-  // --- VARIABEL STATE ---
+  // Variabel State
   var isLoading = true.obs;
   var notificationList = <NotificationModel>[].obs;
   var unreadCount = 0.obs;
@@ -22,7 +22,7 @@ class NotificationController extends GetxController
 
   @override
   void onClose() {
-    // Selalu hapus pengamat saat controller ditutup
+    // hapus observer saat controller ditutup
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
   }
@@ -38,7 +38,7 @@ class NotificationController extends GetxController
     }
   }
 
-  // --- FUNGSI UNTUK MENGAMBIL DATA ---
+  // Fungsi untuk mengambil data
   Future<void> fetchNotifications() async {
     try {
       isLoading(true);
@@ -55,20 +55,17 @@ class NotificationController extends GetxController
 
   // Fungsi ini khusus untuk menandai semua notifikasi sebagai sudah dibaca
   Future<void> markAllAsRead() async {
-    
     final unreadIds =
         notificationList.where((n) => !n.isRead).map((n) => n.id).toList();
 
     if (unreadIds.isNotEmpty) {
       await _notificationService.markAllAsRead(unreadIds);
-
-      // Setelah berhasil, panggil fetchNotifications lagi untuk refresh UI
       await fetchNotifications();
     }
   }
 
   Future<void> deleteNotification(int id) async {
-    // Pola Optimistic UI: Hapus dari list lokal terlebih dahulu
+    // Hapus dari list lokal terlebih dahulu
     final int index = notificationList.indexWhere((n) => n.id == id);
     if (index == -1) return; // Tidak ditemukan, keluar
 

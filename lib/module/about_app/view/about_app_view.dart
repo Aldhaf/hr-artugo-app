@@ -17,7 +17,7 @@ class AboutAppView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ganti dengan logo Anda
+            // logo
             const CircleAvatar(
               radius: 50,
               backgroundColor: Colors.deepPurple,

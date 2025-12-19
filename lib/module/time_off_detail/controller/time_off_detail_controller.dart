@@ -5,7 +5,7 @@ import 'package:hr_artugo_app/service/time_off_service/time_off_service.dart';
 class TimeOffDetailController extends GetxController {
   var isLoading = true.obs;
   var timeOffData = Rxn<Map<String, dynamic>>();
-  final String timeOffId = Get.arguments; // Ambil ID dari argumen navigasi
+  final String timeOffId = Get.arguments;
   final _timeOffService = Get.find<TimeOffService>();
 
   @override
@@ -17,7 +17,8 @@ class TimeOffDetailController extends GetxController {
   Future<void> fetchTimeOffDetail() async {
     try {
       isLoading(true);
-      final result = await _timeOffService.getTimeOffDetail(int.parse(timeOffId));
+      final result =
+          await _timeOffService.getTimeOffDetail(int.parse(timeOffId));
       if (result != null) {
         timeOffData.value = result;
       }

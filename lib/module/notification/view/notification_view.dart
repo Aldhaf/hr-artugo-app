@@ -49,7 +49,7 @@ class _NotificationViewState extends State<NotificationView> {
             itemBuilder: (context, index) {
               final notification = controller.notificationList[index];
 
-              // --- Bungkus NotificationTile dengan Dismissible ---
+              // Membungkus NotificationTile dengan Dismissible
               return Dismissible(
                 // Key wajib ada dan harus unik untuk setiap item
                 key: ValueKey(notification.id),
@@ -91,7 +91,7 @@ class _NotificationViewState extends State<NotificationView> {
                     .fadeIn(duration: 400.ms)
                     .slideX(begin: 0.9, end: 0.0),
 
-                // Widget utama Anda (NotificationTile)
+                // Widget utama (NotificationTile)
                 child: NotificationTile(notification: notification),
               );
             },

@@ -160,11 +160,10 @@ class MyScheduleController extends GetxController {
                     );
                   }).toList(),
                 )),
-            const SizedBox(height: 30), // Beri sedikit ruang di bawah
+            const SizedBox(height: 30),
           ],
         ),
       ),
-      // Atur properti bottom sheet lain jika perlu
       backgroundColor: Colors.transparent, // Latar diatur di Container
       // isScrollControlled: true, // Mungkin perlu jika daftar shift sangat panjang
     );
@@ -181,7 +180,7 @@ class MyScheduleController extends GetxController {
   // Getter untuk "Jadwal Terdekat" yang difilter
   List<Roster> get filteredApprovedSchedules {
     final now = DateTime.now();
-    // Tentukan tanggal akhir berdasarkan filter
+    // Menentukan tanggal akhir berdasarkan filter
     final endDate = now.add(Duration(days: upcomingFilterDays.value));
 
     return approvedSchedules.where((schedule) {
@@ -198,10 +197,10 @@ class MyScheduleController extends GetxController {
 
   // Getter untuk "Riwayat Pengajuan" yang difilter
   List<Roster> get filteredHistorySchedules {
-    // 1. Mulai dengan daftar lengkap
+    // Daftar lengkap
     List<Roster> filteredList = List.from(historySchedules);
 
-    // 2. Filter berdasarkan Bulan (jika dipilih)
+    // Filter berdasarkan Bulan (jika dipilih)
     if (historyMonthFilter.value != null) {
       final selectedMonth = historyMonthFilter.value!;
       filteredList = filteredList.where((roster) {
@@ -210,7 +209,7 @@ class MyScheduleController extends GetxController {
       }).toList();
     }
 
-    // 3. Filter berdasarkan Status (jika bukan "All")
+    // Filter berdasarkan Status (jika bukan "All")
     if (historyStatusFilter.value != 'All') {
       filteredList = filteredList.where((roster) {
         return roster.status.toLowerCase() ==
@@ -218,11 +217,10 @@ class MyScheduleController extends GetxController {
       }).toList();
     }
 
-    // 4. Filter berdasarkan Search Query (jika diisi)
+    // Filter berdasarkan Search Query (jika diisi)
     if (historySearchQuery.value.isNotEmpty) {
       String query = historySearchQuery.value.toLowerCase();
       filteredList = filteredList.where((roster) {
-        // Cari di nama shift, tanggal (format d MMM), atau status
         return roster.workPatternName.toLowerCase().contains(query) ||
             DateFormat('d MMM yyyy')
                 .format(roster.date)
@@ -232,7 +230,7 @@ class MyScheduleController extends GetxController {
       }).toList();
     }
 
-    return filteredList; // Kembalikan hasil filter
+    return filteredList;
   }
 
   // Helper untuk TableCalendar, menyediakan list event (WorkPattern)
@@ -240,7 +238,7 @@ class MyScheduleController extends GetxController {
   List<WorkPattern> getEventsForDay(DateTime day) {
     // Normalisasi 'day' ke tengah malam untuk pencocokan Map key
     DateTime normalizedDay = DateTime(day.year, day.month, day.day);
-    // Cari pattern yang dipilih untuk tanggal ini di map selectedShifts
+    // Mencari pattern yang dipilih untuk tanggal ini di map selectedShifts
     final pattern = selectedShifts[normalizedDay];
     // Kembalikan list berisi pattern jika ditemukan, atau list kosong jika tidak
     return pattern != null ? [pattern] : [];
@@ -250,12 +248,12 @@ class MyScheduleController extends GetxController {
   // untuk bulan yang sedang ditampilkan di kalender.
   Future<void> fetchBookedDatesForMonth(DateTime month) async {
     try {
-      // Tentukan hari pertama dan terakhir bulan yang diminta
+      // Menentukan hari pertama dan terakhir bulan yang diminta
       final firstDay = DateTime(month.year, month.month, 1);
       final lastDay = DateTime(month.year, month.month + 1, 0);
       final formatter = DateFormat('yyyy-MM-dd');
 
-      // Panggil service untuk mengambil data dari API Odoo
+      // Memanggil service untuk mengambil data dari API Odoo
       final results = await _myScheduleService.getBookedDates(
         formatter.format(firstDay),
         formatter.format(lastDay),
@@ -277,88 +275,98 @@ class MyScheduleController extends GetxController {
         } catch (e) {}
       }
 
-      // Update state hanya jika data baru berbeda dengan data lama
       if (!mapEquals(bookedDatesWithStatus.value, newBookedDates)) {
         bookedDatesWithStatus.value = newBookedDates;
-        calendarRebuildKey.value++; // Trigger rebuild TableCalendar di view
+        calendarRebuildKey.value++;
       }
     } catch (e) {
-      // Tampilkan error jika gagal mengambil data
+      // Menampilkan error jika gagal mengambil data
       Get.snackbar("Error", "Gagal memuat jadwal ter-booking: $e");
     }
   }
 
   // Mengirimkan jadwal shift yang telah dipilih pengguna ke server Odoo.
   Future<void> submitScheduleRequest() async {
+    // Validasi
     if (selectedShifts.isEmpty) {
-      Get.snackbar("Gagal",
-          "Harap pilih setidaknya satu tanggal dan shift untuk diajukan.");
+      Get.snackbar("Gagal", "Harap pilih setidaknya satu tanggal dan shift.");
       return;
     }
 
-    final normalizedShifts = selectedShifts.map((key, value) =>
-        MapEntry(DateTime(key.year, key.month, key.day), value));
+    // Urut tanggal yang dipilih (Start & End)
+    final sortedDates = selectedShifts.keys.toList()..sort();
+    final DateTime startDate = sortedDates.first;
+    final DateTime endDate = sortedDates.last;
 
-    final payload = normalizedShifts.entries.map((entry) {
-      final date = entry.key;
-      final pattern = entry.value;
+    // Membuat Nama Batch yang Dinamis
+    // Jika dalam bulan yang sama: "November 2025"
+    // Jika lintas bulan: "27 Nov - 04 Dec 2025"
+    String batchName;
+    if (startDate.year == endDate.year && startDate.month == endDate.month) {
+      // Satu bulan yang sama
+      batchName = DateFormat('MMMM yyyy', 'id_ID').format(startDate);
+    } else {
+      // Lintas bulan/tahun
+      String startStr = DateFormat('d MMM', 'id_ID').format(startDate);
+      String endStr = DateFormat('d MMM yyyy', 'id_ID').format(endDate);
+      batchName = "$startStr - $endStr";
+    }
+
+    // Menyiapkan Payload (Semua data dalam satu list)
+    final payload = selectedShifts.entries.map((entry) {
       return {
-        'date': DateFormat('yyyy-MM-dd').format(date), // Format YYYY-MM-DD
-        'work_pattern_id': pattern.id, // Kirim ID WorkPattern
+        'date': DateFormat('yyyy-MM-dd').format(entry.key),
+        'work_pattern_id': entry.value.id,
       };
     }).toList();
 
-    final String monthName =
-        DateFormat('MMMM yyyy', 'id_ID').format(focusedDay.value);
-
     try {
-      Get.snackbar("Memproses", "Mengirim pengajuan jadwal Anda...",
+      Get.snackbar("Memproses", "Mengirim pengajuan jadwal...",
           showProgressIndicator: true,
           dismissDirection: DismissDirection.horizontal);
 
-      await _myScheduleService.submitMonthlyRoster(
-          payload, monthName); // Asumsi endpoint ini dipakai
+      // Mengirim ke Odoo (Hanya satu kali panggilan)
+      await _myScheduleService.submitMonthlyRoster(payload, batchName);
 
       if (Get.isSnackbarOpen) Get.back();
+      Get.snackbar("Berhasil", "Pengajuan jadwal berhasil dikirim.");
 
-      Get.snackbar('success'.tr, 'success_request'.tr);
-
-      if (Get.isBottomSheetOpen ?? false) Get.back();
-
-      selectedRequests.clear();
+      // Reset & Refresh
+      selectedShifts.clear();
       calendarRebuildKey.value++;
-      await fetchMyRoster(); // Panggil fetchMyRoster agar grouping diperbarui
-      await fetchBookedDatesForMonth(DateTime.now());
+
+      await fetchMyRoster();
+      // Refresh booked dates untuk bulan yang sedang dilihat di kalender
+      await fetchBookedDatesForMonth(focusedDay.value);
 
       if (Get.isRegistered<DashboardController>()) {
         Get.find<DashboardController>().refreshData();
       }
     } catch (e) {
       if (Get.isSnackbarOpen) Get.back();
-      Get.snackbar('error'.tr, "Gagal mengirim pengajuan: $e");
+      Get.snackbar("Error", "Gagal mengirim pengajuan: ${e.toString()}");
     }
   }
 
   Future<void> cancelRequest(int rosterId) async {
     try {
-      // ✅ GUNAKAN Get.dialog DENGAN WIDGET KUSTOM
+      // Get.dialog dengan widget kustom
       await Get.dialog(
         CustomConfirmationDialog(
-          // Panggil widget kustom
+          // Memanggil widget kustom
           title: 'confirm'.tr,
           message: 'confirm_state'.tr,
           confirmText: 'confirm_cancel'.tr,
           cancelText: 'no'.tr,
           confirmButtonColor:
-              Colors.red, // Atur warna tombol konfirmasi jika perlu
+              Colors.red, // Mengatur warna tombol konfirmasi jika perlu
           onConfirm: () async {
-            Get.back(); // Tutup dialog secara manual setelah konfirmasi
+            Get.back(); // Menutup dialog secara manual setelah konfirmasi
             Get.snackbar('processing'.tr, 'processing_state'.tr);
             try {
-              // Tambahkan try-catch di dalam onConfirm
               await _myScheduleService.cancelShiftRequest(rosterId);
               Get.snackbar('success'.tr, 'success_state'.tr);
-              // Muat ulang data setelah batal
+              // Memuat ulang data setelah batal
               fetchMyRoster();
               fetchBookedDatesForMonth(focusedDay.value);
             } catch (e) {
@@ -366,7 +374,7 @@ class MyScheduleController extends GetxController {
             }
           },
         ),
-        barrierDismissible: true, // Izinkan menutup dengan klik di luar dialog
+        barrierDismissible: true,
       );
     } catch (e) {
       // Fallback ke snackbar jika dialog gagal
@@ -403,7 +411,7 @@ class MyScheduleController extends GetxController {
           .toList());
       approvedSchedules.sort((a, b) => a.date.compareTo(b.date));
 
-      // Urutkan riwayat berdasarkan tanggal TERBARU DULU
+      // Urutkan riwayat berdasarkan tanggal terbaru dahulu
       allRosters.sort((a, b) => b.date.compareTo(a.date));
       historySchedules.assignAll(allRosters);
       // daftar bulan yang tersedia untuk filter
@@ -419,7 +427,7 @@ class MyScheduleController extends GetxController {
     }
   }
 
-  // --- Metode untuk Update Filter "Jadwal Terdekat" ---
+  // Metode untuk Update Filter "Jadwal Terdekat"
   void setUpcomingFilter(int days) {
     upcomingFilterDays.value = days;
     // approvedSchedules.refresh(); // Tidak perlu, getter akan otomatis update
@@ -441,7 +449,7 @@ class MyScheduleController extends GetxController {
   void openScheduleRequestForm() {
     selectedRequests.clear(); // Reset list setiap kali form dibuka
     Get.bottomSheet(
-      const RequestScheduleBottomSheet(), // Tampilkan bottom sheet lama
+      const RequestScheduleBottomSheet(), // Menampilkan bottom sheet lama
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -460,14 +468,14 @@ class MyScheduleController extends GetxController {
   void updateSelectedPattern(int index, WorkPattern pattern) {
     if (index >= 0 && index < selectedRequests.length) {
       selectedRequests[index].selectedPattern = pattern;
-      selectedRequests.refresh(); // Update UI;
+      selectedRequests.refresh(); // Memastikan UI terupdate
     }
   }
 
   bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
     if (a == null) return b == null;
     if (b == null || a.length != b.length) return false;
-    // Lakukan normalisasi DateTime saat membandingkan
+    // Melakukan normalisasi DateTime saat membandingkan
     for (final aKey in a.keys) {
       dynamic normalizedAKey = aKey;
       if (aKey is DateTime) {

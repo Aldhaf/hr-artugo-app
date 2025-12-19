@@ -15,7 +15,6 @@ Aplikasi mobile internal **Human Resources (HR)** untuk PT Artugo, yang telah be
 | :---: | :---: | :---: | :---: |
 | <img src="assets/images/onboarding_1.png" width="200"> | <img src="assets/readme_images/dashboard.png" width="200"> | <img src="assets/readme_images/schedule_filter.png" width="200"> | <img src="assets/readme_images/rejection_detail.png" width="200"> |
 
-*(Catatan: Pastikan Anda memperbarui gambar di folder assets sesuai tampilan terbaru)*
 
 ---
 

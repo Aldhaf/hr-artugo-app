@@ -10,7 +10,6 @@ class TodayAttendanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<DashboardController>();
-    final primaryColor = Theme.of(context).primaryColor;
 
     return Card(
       elevation: 4,
@@ -56,7 +55,7 @@ class TodayAttendanceCard extends StatelessWidget {
                         textAlign: TextAlign.start,
                       )),
                   const SizedBox(height: 8),
-                  // LOKASI SAAT INI
+                  // Lokasi saat ini
                   Obx(() {
                     final state = controller.locationState.value;
                     if (state is DataSuccess<String>) {
@@ -91,16 +90,14 @@ class TodayAttendanceCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: Obx(() {
-                final primaryColor = Theme.of(context)
-                    .primaryColor; // Ambil warna primer di sini
+                final primaryColor = Theme.of(context).primaryColor;
 
-                // --- KONDISI 1: TAMPILKAN PESAN "TERIMA KASIH" ---
+                // TAMPILKAN PESAN "TERIMA KASIH"
                 if (controller.showThankYouMessage.value) {
-                  // ✅ Periksa showThankYouMessage
                   return ElevatedButton(
                     onPressed: null, // Tombol nonaktif
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade300, // Warna abu-abu
+                      backgroundColor: Colors.grey.shade300,
                       foregroundColor: Colors.grey.shade700,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -119,19 +116,16 @@ class TodayAttendanceCard extends StatelessWidget {
                     ),
                   );
                 }
-                // --- KONDISI 2: TAMPILKAN TOMBOL CHECK OUT ---
+                // TAMPILKAN TOMBOL CHECK OUT
                 else if (controller.isCurrentlyCheckedIn.value) {
-                  // ✅ Periksa isCurrentlyCheckedIn
                   return ElevatedButton(
                     onPressed: controller.doCheckOut, // Panggil doCheckOut
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
-                      padding:
-                          EdgeInsets.zero, // Biarkan Ink yang mengatur padding
+                      padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      backgroundColor:
-                          Colors.transparent, // Buat transparan untuk gradient
+                      backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
                     ),
                     child: Ink(
@@ -164,9 +158,9 @@ class TodayAttendanceCard extends StatelessWidget {
                     ),
                   );
                 }
-                // --- KONDISI 3: TAMPILKAN TOMBOL CHECK IN (DEFAULT) ---
+                // TAMPILKAN TOMBOL CHECK IN
                 else {
-                  // Cek apakah tombol Check In harus dinonaktifkan (belum ada jadwal)
+                  // Cek apakah tombol Check In harus dinonaktifkan
                   bool isCheckInDisabled =
                       !controller.hasApprovedScheduleToday.value;
 

@@ -134,19 +134,18 @@ class _RequestScheduleBottomSheetState
   }
 
   Widget _buildShiftDropdown(int index, List<WorkPattern> patterns) {
-    // batasan lebar pada DropdownButton
     return SizedBox(
-      width: 150, // Mengatur lebar yang sesuai, misalnya 150
+      width: 150,
       child: DropdownButton<WorkPattern>(
         value: controller.selectedRequests[index].selectedPattern,
         hint: Text('req_schedule_select_shift'.tr),
-        isExpanded: true, // Memastikan dropdown mengisi SizedBox
+        isExpanded: true,
         items: patterns.map((pattern) {
           return DropdownMenuItem<WorkPattern>(
             value: pattern,
             child: Text(
               pattern.name,
-              overflow: TextOverflow.ellipsis, // Mencegah teks panjang meluber
+              overflow: TextOverflow.ellipsis,
             ),
           );
         }).toList(),

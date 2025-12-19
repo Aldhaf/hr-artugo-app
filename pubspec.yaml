@@ -87,13 +87,13 @@ flutter_launcher_icons:
   
   # Konfigurasi khusus untuk Adaptive Icon Android
   adaptive_icon_background: "#FFFFFF" # Warna latar belakang (atau path gambar)
-  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png" # Path ke logo transparan Anda
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png" # Path ke logo transparan
 flutter_native_splash:
   # Warna latar belakang splash screen. Gunakan kode hex.
   # "#FFFFFF" untuk putih.
   color: "#FFFFFF"
 
-  # Path ke logo utama Anda yang akan ditampilkan di tengah.
+  # Path ke logo utama yang akan ditampilkan di tengah.
   # Pastikan path ini benar dan gambarnya ada.
   image: assets/icon/splash_icon.png
 
